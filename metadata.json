@@ -1,0 +1,6 @@
+{
+  "name": "Digital Invitation Studio",
+  "description": "Professional multi-tenant Online Digital Invitation Builder for invitation and card printing businesses with free canvas drag-and-drop editing, container masking, animations, admin management, and published mobile invitations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
