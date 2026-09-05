@@ -293,7 +293,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <label className="text-xs text-slate-700 font-medium block mb-1">Couple Names / Monogram</label>
                   <input
                     type="text"
-                    value={openingScreen.coupleNames}
+                    value={openingScreen?.coupleNames || ''}
                     onChange={(e) => onUpdate({
                       openingScreen: { ...openingScreen, coupleNames: e.target.value }
                     })}

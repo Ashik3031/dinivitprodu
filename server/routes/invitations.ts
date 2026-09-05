@@ -1,6 +1,6 @@
 import express from 'express';
 import { dbService } from '../db';
-import { INITIAL_TEMPLATES, createInvitationFromTemplate } from '../../src/data/initialTemplates';
+import { INITIAL_TEMPLATES, createInvitationFromTemplate, createBlankInvitation } from '../../src/data/initialTemplates';
 
 const router = express.Router();
 
@@ -79,7 +79,12 @@ router.post('/', (req, res) => {
 
     // Start from template
     if (templateId && templateId !== 'blank') {
-      const template = INITIAL_TEMPLATES.find(t => t.id === templateId) || INITIAL_TEMPLATES[0];
+      let template: any = null;
+      try {
+        template = dbService.getTemplateById(templateId);
+      } catch (err) {
+        template = INITIAL_TEMPLATES.find(t => t.id === templateId) || INITIAL_TEMPLATES[0];
+      }
       const newInv = createInvitationFromTemplate(template, businessId, title);
       const saved = dbService.createInvitation({
         ...newInv,
@@ -91,10 +96,10 @@ router.post('/', (req, res) => {
       return res.status(201).json({ success: true, invitation: saved });
     }
 
-    // Create custom blank invitation
+    // Create custom blank invitation (clean 1 blank page with 0 elements)
+    const blankBase = createBlankInvitation(businessId, title, assignedCategory);
     const newInv = dbService.createInvitation({
-      businessId,
-      title,
+      ...blankBase,
       customerName: customerName || '',
       eventDate: eventDate || '',
       category: assignedCategory,

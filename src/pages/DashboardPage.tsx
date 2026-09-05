@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { api } from '../services/api';
 import { Invitation, InvitationTemplate, RSVPResponse, GuestbookMessage, EventType } from '../types';
+import { ShareModal } from '../components/published/ShareModal';
+import { UserSettingsModal } from '../components/settings/UserSettingsModal';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   Plus,
   Search,
   SlidersHorizontal,
+  Sliders,
   Eye,
   Edit3,
   Copy,
@@ -50,6 +55,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenAdmin
 }) => {
   const { user, logout } = useAuth();
+  const toast = useToast();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [templates, setTemplates] = useState<InvitationTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +63,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [viewLayout, setViewLayout] = useState<'grid' | 'table'>('grid');
+
+  // User Settings Modal State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Deletion Confirmation Dialog State
+  const [invToDelete, setInvToDelete] = useState<Invitation | null>(null);
+  const [isDeletingInv, setIsDeletingInv] = useState(false);
 
   // Multi-step Creation Wizard State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -79,6 +92,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   // Quick Preview modal
   const [previewInv, setPreviewInv] = useState<Invitation | null>(null);
+
+  // Share & Publish modal from Dashboard
+  const [activeShareInv, setActiveShareInv] = useState<Invitation | null>(null);
 
   // RSVP / Guestbook Details Modal
   const [activeDetailsInv, setActiveDetailsInv] = useState<Invitation | null>(null);
@@ -189,7 +205,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       } else if (creationMode === 'duplicate' && selectedDuplicateId) {
         payload.duplicateFromId = selectedDuplicateId;
       } else {
-        payload.templateId = undefined; // blank
+        payload.templateId = 'blank'; // explicitly start with a clean blank canvas
       }
 
       const res = await api.createInvitation(payload);
@@ -212,8 +228,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     try {
       const res = await api.updateInvitation(inv.id, { status: newStatus });
       setInvitations(prev => prev.map(i => i.id === inv.id ? { ...i, status: newStatus } : i));
-    } catch (err) {
-      console.error(err);
+      if (newStatus === 'published') {
+        toast.success(`"${inv.title}" is now published and live!`);
+      } else {
+        toast.info(`"${inv.title}" moved to draft status.`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update invitation status');
     }
   };
 
@@ -224,21 +245,32 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       const res = await api.duplicateInvitation(inv.id);
       if (res.invitation) {
         setInvitations(prev => [res.invitation, ...prev]);
+        toast.success(`Created duplicate "${res.invitation.title}"`);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to duplicate invitation');
     }
   };
 
-  // Handle Delete
-  const handleDelete = async (id: string, e?: React.MouseEvent) => {
+  // Trigger Delete Confirmation
+  const handleDelete = (inv: Invitation, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!window.confirm('Are you sure you want to delete this invitation? This action cannot be undone.')) return;
+    setInvToDelete(inv);
+  };
+
+  // Confirm Delete Execution
+  const confirmDeleteInvitation = async () => {
+    if (!invToDelete) return;
+    setIsDeletingInv(true);
     try {
-      await api.deleteInvitation(id);
-      setInvitations(prev => prev.filter(i => i.id !== id));
-    } catch (e) {
-      console.error(e);
+      await api.deleteInvitation(invToDelete.id);
+      setInvitations(prev => prev.filter(i => i.id !== invToDelete.id));
+      toast.success(`Invitation "${invToDelete.title}" deleted`);
+      setInvToDelete(null);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete invitation');
+    } finally {
+      setIsDeletingInv(false);
     }
   };
 
@@ -319,6 +351,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
+          {/* User / Studio Settings */}
+          <button
+            id="btn-open-studio-settings"
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition-colors cursor-pointer"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Studio Settings</span>
+          </button>
+
           {user?.role === 'admin' && onOpenAdmin && (
             <button
               type="button"
@@ -590,6 +633,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                               <Eye className="w-3.5 h-3.5" />
                             </button>
 
+                            {/* Share & QR */}
+                            <button
+                              type="button"
+                              onClick={() => setActiveShareInv(inv)}
+                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors"
+                              title="Share & QR Code"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                            </button>
+
                             {/* Edit */}
                             <button
                               type="button"
@@ -614,7 +667,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                             {/* Delete */}
                             <button
                               type="button"
-                              onClick={(e) => handleDelete(inv.id, e)}
+                              onClick={(e) => handleDelete(inv, e)}
                               className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors"
                               title="Delete Invitation"
                             >
@@ -760,6 +813,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                           <Globe className="w-3.5 h-3.5" />
                         </button>
 
+                        {/* Share & QR Code */}
+                        <button
+                          type="button"
+                          title="Share & QR Code"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveShareInv(inv);
+                          }}
+                          className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors cursor-pointer"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                        </button>
+
                         <button
                           type="button"
                           title="Duplicate Invitation"
@@ -771,7 +837,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                         <button
                           type="button"
                           title="Delete"
-                          onClick={(e) => handleDelete(inv.id, e)}
+                          onClick={(e) => handleDelete(inv, e)}
                           className="p-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -1288,6 +1354,53 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* SHARE & PUBLISH MODAL */}
+      {activeShareInv && (
+        <ShareModal
+          invitation={activeShareInv}
+          isOpen={!!activeShareInv}
+          onClose={() => setActiveShareInv(null)}
+          onUpdateSlug={(newSlug) => {
+            setInvitations(prev =>
+              prev.map(i => (i.id === activeShareInv.id ? { ...i, slug: newSlug } : i))
+            );
+            setActiveShareInv(prev => (prev ? { ...prev, slug: newSlug } : null));
+          }}
+          onUpdateStatus={(newStatus) => {
+            setInvitations(prev =>
+              prev.map(i => (i.id === activeShareInv.id ? { ...i, status: newStatus } : i))
+            );
+            setActiveShareInv(prev => (prev ? { ...prev, status: newStatus } : null));
+          }}
+        />
+      )}
+      {/* USER SETTINGS MODAL */}
+      <UserSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+
+      {/* DELETE INVITATION CONFIRMATION DIALOG */}
+      <ConfirmDialog
+        isOpen={!!invToDelete}
+        title={`Delete Invitation "${invToDelete?.title}"?`}
+        message={
+          <div>
+            <p className="mb-1.5">
+              Are you sure you want to delete <strong className="text-slate-900">{invToDelete?.title}</strong>?
+            </p>
+            <p className="text-xs text-rose-600 font-medium">
+              This will permanently delete all {invToDelete?.pages.length || 0} pages, RSVP entries, and guestbook messages. This action cannot be undone.
+            </p>
+          </div>
+        }
+        confirmText="Delete Invitation"
+        confirmVariant="danger"
+        isLoading={isDeletingInv}
+        onConfirm={confirmDeleteInvitation}
+        onCancel={() => setInvToDelete(null)}
+      />
     </div>
   );
 };

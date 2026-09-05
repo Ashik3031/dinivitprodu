@@ -1,7 +1,29 @@
 import fs from 'fs';
 import path from 'path';
-import { User, Invitation, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset } from '../src/types';
-import { INITIAL_TEMPLATES, createInvitationFromTemplate } from '../src/data/initialTemplates';
+import bcrypt from 'bcryptjs';
+import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset } from '../src/types';
+import { INITIAL_TEMPLATES, createInvitationFromTemplate, createBlankInvitation } from '../src/data/initialTemplates';
+import { DEFAULT_PUBLIC_ASSETS } from '../src/data/stockFramesAndStickers';
+
+export function hashPassword(plainText: string): string {
+  if (!plainText) return '';
+  return bcrypt.hashSync(plainText.trim(), 10);
+}
+
+export function comparePassword(plainText: string, storedHash: string): boolean {
+  if (!plainText || !storedHash) return false;
+  const cleanPass = plainText.trim();
+  // If stored as bcrypt hash
+  if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$') || storedHash.startsWith('$2y$')) {
+    try {
+      return bcrypt.compareSync(cleanPass, storedHash);
+    } catch (e) {
+      return false;
+    }
+  }
+  // Plaintext match for initial seeds / demo
+  return cleanPass === storedHash;
+}
 
 interface DatabaseSchema {
   users: (User & { passwordHash: string })[];
@@ -79,11 +101,24 @@ function seedInitialData(): DatabaseSchema {
   const sampleInv1 = createInvitationFromTemplate(
     INITIAL_TEMPLATES[0],
     'usr-biz-royal',
-    'Alexander & Sophia Wedding Invitation'
+    'Rahul & Priya Wedding Celebration'
   );
-  sampleInv1.slug = 'alexander-sophia-wedding';
+  sampleInv1.slug = 'rahul-priya-wedding';
   sampleInv1.status = 'published';
-  sampleInv1.viewsCount = 142;
+  sampleInv1.viewsCount = 384;
+  sampleInv1.eventDate = 'December 2026';
+  sampleInv1.customerName = 'Rahul & Priya';
+  sampleInv1.openingScreen = {
+    enabled: true,
+    style: 'envelope',
+    title: 'Wedding Invitation',
+    coupleNames: 'Rahul & Priya',
+    subtitle: 'December 2026',
+    openButtonText: 'Open Invitation',
+    sealText: 'R&P',
+    envelopeColor: '#0e261d',
+    sealColor: '#d4af37'
+  };
 
   const sampleInv2 = createInvitationFromTemplate(
     INITIAL_TEMPLATES[1],
@@ -102,6 +137,15 @@ function seedInitialData(): DatabaseSchema {
   sampleInv3.slug = 'victoria-30th-birthday-gala';
   sampleInv3.status = 'published';
   sampleInv3.viewsCount = 56;
+
+  const sampleInv4 = createInvitationFromTemplate(
+    INITIAL_TEMPLATES[0],
+    'usr-biz-royal',
+    'Alexander & Sophia Grand Wedding'
+  );
+  sampleInv4.slug = 'alexander-sophia-wedding';
+  sampleInv4.status = 'published';
+  sampleInv4.viewsCount = 142;
 
   // Sample RSVPs
   const sampleRsvps: RSVPResponse[] = [
@@ -306,7 +350,7 @@ function seedInitialData(): DatabaseSchema {
 
   return {
     users: initialUsers,
-    invitations: [sampleInv1, sampleInv2, sampleInv3],
+    invitations: [sampleInv1, sampleInv2, sampleInv3, sampleInv4],
     templates: INITIAL_TEMPLATES,
     rsvps: sampleRsvps,
     guestbook: sampleGuestbook,
@@ -321,7 +365,46 @@ export function loadDatabase(): DatabaseSchema {
       db = JSON.parse(data);
       // Ensure templates are present
       if (!db.templates || db.templates.length === 0) {
-        db.templates = INITIAL_TEMPLATES;
+        db.templates = INITIAL_TEMPLATES.map(t => ({ ...t, isPublic: true }));
+      } else {
+        // Ensure every template has an explicit isPublic flag
+        db.templates = db.templates.map(t => ({
+          ...t,
+          isPublic: t.isPublic !== false
+        }));
+      }
+
+      // Ensure public assets (frames, stickers) exist in db.media
+      if (!db.media) db.media = [];
+      for (const asset of DEFAULT_PUBLIC_ASSETS) {
+        if (!db.media.some(m => m.id === asset.id)) {
+          db.media.push({
+            id: asset.id,
+            businessId: 'admin',
+            title: asset.title,
+            name: asset.name,
+            url: asset.url,
+            thumbnailUrl: asset.thumbnailUrl || asset.url,
+            type: asset.type as any,
+            format: 'svg',
+            size: 15000,
+            dimensions: asset.dimensions || { width: 400, height: 600 },
+            category: asset.category,
+            tags: asset.tags,
+            isPublic: true,
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
+
+      // Ensure rahul-priya-wedding exists
+      if (!db.invitations.some(i => i.slug === 'rahul-priya-wedding')) {
+        const seeded = seedInitialData();
+        const rahulPriya = seeded.invitations.find(i => i.slug === 'rahul-priya-wedding');
+        if (rahulPriya) {
+          db.invitations.unshift(rahulPriya);
+          saveDatabase();
+        }
       }
       return db;
     }
@@ -393,7 +476,7 @@ export const dbService = {
     const newUser: User & { passwordHash: string } = {
       id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       username: userData.username.trim(),
-      passwordHash: userData.password.trim(),
+      passwordHash: hashPassword(userData.password),
       businessName: userData.businessName,
       ownerName: userData.ownerName,
       email: userData.email,
@@ -422,7 +505,7 @@ export const dbService = {
     const updatedUser = {
       ...currentUser,
       ...otherUpdates,
-      ...(password ? { passwordHash: password } : {})
+      ...(password ? { passwordHash: hashPassword(password) } : {})
     };
 
     db.users[index] = updatedUser;
@@ -480,6 +563,20 @@ export const dbService = {
       if (counter > 10) break;
     }
 
+    const defaultBlankPage: InvitationPage = {
+      id: `page-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: 'Section 1',
+      order: 0,
+      heightMode: 'viewport',
+      height: 844,
+      isFullHeight: true,
+      background: {
+        type: 'color',
+        color: '#071912'
+      },
+      elements: []
+    };
+
     const newInv: Invitation = {
       id: `inv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       businessId: invitationData.businessId,
@@ -490,11 +587,35 @@ export const dbService = {
       slug: uniqueSlug,
       category: (invitationData.category || invitationData.eventType || 'wedding') as any,
       status: invitationData.status || 'draft',
-      thumbnail: invitationData.thumbnail,
-      theme: invitationData.theme || INITIAL_TEMPLATES[0].theme,
-      openingScreen: invitationData.openingScreen || INITIAL_TEMPLATES[0].openingScreen,
-      music: invitationData.music || INITIAL_TEMPLATES[0].music,
-      pages: invitationData.pages || INITIAL_TEMPLATES[0].pages,
+      thumbnail: invitationData.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+      theme: invitationData.theme || {
+        primaryColor: '#d4af37',
+        secondaryColor: '#0a3d2c',
+        accentColor: '#f9f6ee',
+        fontHeading: "'Cinzel', serif",
+        fontBody: "'Montserrat', sans-serif",
+        fontScript: "'Great Vibes', cursive",
+        backgroundColor: '#0c1b15'
+      },
+      openingScreen: invitationData.openingScreen || {
+        enabled: false,
+        style: 'envelope',
+        title: invitationData.title || 'Wedding Invitation',
+        openButtonText: 'Open Invitation',
+        envelopeColor: '#071811',
+        sealColor: '#d4af37',
+        musicAutoplayOnOpen: false
+      },
+      music: invitationData.music || {
+        enabled: false,
+        audioUrl: '',
+        title: 'No Music Selected',
+        artist: '',
+        autoPlay: false,
+        loop: true,
+        floatingBadge: false
+      },
+      pages: invitationData.pages && invitationData.pages.length > 0 ? invitationData.pages : [defaultBlankPage],
       settings: invitationData.settings || {
         enableAutoScroll: false,
         autoScrollSpeed: 30,
@@ -561,26 +682,224 @@ export const dbService = {
     return copy;
   },
 
-  // Templates
-  getTemplates: () => {
+  // Templates Management
+  getTemplates: (params: { category?: string; search?: string; all?: boolean } = {}) => {
     loadDatabase();
-    return db.templates;
+    let list = db.templates || [];
+
+    // Filter by publish status: if not requesting all (admin view), show only published templates
+    if (!params.all) {
+      list = list.filter(t => t.isPublic !== false);
+    }
+
+    // Filter by category
+    if (params.category && params.category !== 'all') {
+      const cat = params.category.toLowerCase().trim();
+      list = list.filter(t => (t.category || '').toLowerCase() === cat);
+    }
+
+    // Search query
+    if (params.search && params.search.trim()) {
+      const q = params.search.toLowerCase().trim();
+      list = list.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        (t.description && t.description.toLowerCase().includes(q)) ||
+        (t.category && t.category.toLowerCase().includes(q)) ||
+        (t.tags && t.tags.some(tag => tag.toLowerCase().includes(q)))
+      );
+    }
+
+    return list;
   },
-  saveAsTemplate: (invitationId: string, templateData: { title: string; category: string; description: string }) => {
+
+  getTemplateById: (id: string) => {
+    loadDatabase();
+    const template = (db.templates || []).find(t => t.id === id);
+    if (!template) throw new Error('Template not found');
+    return template;
+  },
+
+  createTemplate: (templateData: Partial<InvitationTemplate>) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+
+    const now = new Date().toISOString();
+    const newTemplate: InvitationTemplate = {
+      id: templateData.id || `tmpl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: templateData.title || 'Untitled Template',
+      category: templateData.category || 'wedding',
+      description: templateData.description || 'Custom crafted invitation template.',
+      thumbnail: templateData.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
+      isPremium: Boolean(templateData.isPremium),
+      isPublic: templateData.isPublic !== false, // default to published
+      tags: templateData.tags || [templateData.category || 'wedding', 'custom'],
+      theme: templateData.theme || {
+        primaryColor: '#d4af37',
+        secondaryColor: '#1a3628',
+        accentColor: '#f3e5ab',
+        fontHeading: "'Cinzel', serif",
+        fontBody: "'Montserrat', sans-serif",
+        fontScript: "'Great Vibes', cursive",
+        backgroundColor: '#071912'
+      },
+      openingScreen: templateData.openingScreen || {
+        enabled: true,
+        style: 'envelope',
+        title: 'Save the Date',
+        subtitle: 'Formal Invitation to Follow',
+        coupleNames: 'Sarah & William',
+        openButtonText: 'Open Invitation',
+        sealColor: '#d4af37',
+        envelopeColor: '#122e23',
+        musicAutoplayOnOpen: true
+      },
+      music: templateData.music || {
+        enabled: true,
+        audioUrl: 'https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3',
+        title: 'Romantic Strings Prelude',
+        artist: 'Studio Symphony',
+        autoPlay: true,
+        loop: true,
+        floatingBadge: true
+      },
+      pages: templateData.pages && templateData.pages.length > 0 ? templateData.pages : [
+        {
+          id: `page-${Date.now()}-1`,
+          name: 'Front Cover & Details',
+          order: 0,
+          height: 844,
+          isFullHeight: true,
+          background: {
+            type: 'color',
+            color: templateData.theme?.backgroundColor || '#071912'
+          },
+          elements: [
+            {
+              id: `el-hdr-${Date.now()}`,
+              type: 'heading',
+              name: 'Template Title',
+              style: {
+                x: 20,
+                y: 140,
+                width: 350,
+                height: 60,
+                fontFamily: templateData.theme?.fontHeading || "'Cinzel', serif",
+                fontSize: 28,
+                fontWeight: 700,
+                color: templateData.theme?.primaryColor || '#d4af37',
+                textAlign: 'center'
+              },
+              content: { text: templateData.title || 'Together With Our Families' }
+            },
+            {
+              id: `el-sub-${Date.now()}`,
+              type: 'text',
+              name: 'Subtitle',
+              style: {
+                x: 30,
+                y: 220,
+                width: 330,
+                height: 40,
+                fontFamily: templateData.theme?.fontBody || "'Montserrat', sans-serif",
+                fontSize: 14,
+                fontWeight: 400,
+                color: '#ffffffcc',
+                textAlign: 'center'
+              },
+              content: { text: 'Request the pleasure of your company at the celebration of their love' }
+            }
+          ]
+        }
+      ],
+      createdAt: now,
+      updatedAt: now
+    };
+
+    db.templates.push(newTemplate);
+    saveDatabase();
+    return newTemplate;
+  },
+
+  updateTemplate: (id: string, updates: Partial<InvitationTemplate>) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+    const index = db.templates.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Template not found');
+
+    const updated: InvitationTemplate = {
+      ...db.templates[index],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+
+    db.templates[index] = updated;
+    saveDatabase();
+    return updated;
+  },
+
+  deleteTemplate: (id: string) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+    const index = db.templates.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Template not found');
+
+    db.templates.splice(index, 1);
+    saveDatabase();
+    return { success: true, id };
+  },
+
+  toggleTemplatePublish: (id: string, isPublic: boolean) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+    const index = db.templates.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Template not found');
+
+    db.templates[index].isPublic = isPublic;
+    db.templates[index].updatedAt = new Date().toISOString();
+    saveDatabase();
+    return db.templates[index];
+  },
+
+  duplicateTemplate: (id: string) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+    const original = db.templates.find(t => t.id === id);
+    if (!original) throw new Error('Template not found');
+
+    const now = new Date().toISOString();
+    const copy: InvitationTemplate = {
+      ...JSON.parse(JSON.stringify(original)),
+      id: `tmpl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: `${original.title} (Copy)`,
+      isPublic: false, // Default copy to draft
+      createdAt: now,
+      updatedAt: now
+    };
+
+    db.templates.push(copy);
+    saveDatabase();
+    return copy;
+  },
+
+  saveAsTemplate: (invitationId: string, templateData: { title: string; category: string; description: string; isPublic?: boolean }) => {
     loadDatabase();
     const inv = db.invitations.find(i => i.id === invitationId);
     if (!inv) throw new Error('Invitation not found');
 
+    const now = new Date().toISOString();
     const newTemplate: InvitationTemplate = {
       id: `tmpl-${Date.now()}`,
       title: templateData.title,
       category: templateData.category || inv.category,
       description: templateData.description,
-      thumbnail: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
+      thumbnail: inv.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
+      isPublic: templateData.isPublic !== false,
       theme: JSON.parse(JSON.stringify(inv.theme)),
       openingScreen: JSON.parse(JSON.stringify(inv.openingScreen)),
       music: JSON.parse(JSON.stringify(inv.music)),
-      pages: JSON.parse(JSON.stringify(inv.pages))
+      pages: JSON.parse(JSON.stringify(inv.pages)),
+      createdAt: now,
+      updatedAt: now
     };
 
     db.templates.push(newTemplate);
@@ -637,15 +956,33 @@ export const dbService = {
   // Stats
   getSystemStats: () => {
     loadDatabase();
+    const businesses = db.users.filter(u => u.role !== 'admin');
+    const totalBusinesses = businesses.length;
+    const activeBusinesses = businesses.filter(u => u.isActive).length;
+    const inactiveBusinesses = totalBusinesses - activeBusinesses;
+    const totalInvitations = db.invitations.length;
+    const publishedInvitations = db.invitations.filter(i => i.status === 'published').length;
+    const draftInvitations = db.invitations.filter(i => i.status === 'draft').length;
+    const totalRSVPs = db.rsvps.length;
+    const totalGuestbookMessages = db.guestbook.length;
+    const totalViews = db.invitations.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0);
+    const totalMedia = db.media ? db.media.length : 0;
+    const storageUsedBytes = (db.media || []).reduce((acc, curr) => acc + (curr.size || 0), 0);
+
     return {
-      totalBusinesses: db.users.filter(u => u.role === 'business').length,
-      activeBusinesses: db.users.filter(u => u.role === 'business' && u.isActive).length,
-      totalInvitations: db.invitations.length,
-      publishedInvitations: db.invitations.filter(i => i.status === 'published').length,
-      totalRSVPs: db.rsvps.length,
-      totalGuestbookMessages: db.guestbook.length,
-      totalViews: db.invitations.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0),
-      totalMedia: db.media ? db.media.length : 0
+      totalBusinesses,
+      activeBusinesses,
+      inactiveBusinesses,
+      totalUsers: db.users.length,
+      activeUsers: db.users.filter(u => u.isActive).length,
+      totalInvitations,
+      publishedInvitations,
+      draftInvitations,
+      totalRSVPs,
+      totalGuestbookMessages,
+      totalViews,
+      totalMedia,
+      storageUsedBytes
     };
   },
 
@@ -655,26 +992,42 @@ export const dbService = {
     invitationId?: string;
     type?: string;
     search?: string;
+    category?: string;
+    isPublic?: boolean | string;
+    scope?: string;
   } = {}) => {
     loadDatabase();
     let list = db.media || [];
 
-    // Filter by business if provided
-    if (params.businessId) {
-      list = list.filter(m => m.businessId === params.businessId);
+    // Filter by public or business
+    if (params.isPublic === true || params.isPublic === 'true' || params.scope === 'public') {
+      list = list.filter(m => m.isPublic);
+    } else if (params.businessId && params.businessId !== 'all') {
+      if (params.scope === 'all') {
+        list = list.filter(m => m.businessId === params.businessId || m.isPublic);
+      } else {
+        list = list.filter(m => m.businessId === params.businessId);
+      }
     }
 
     // Filter by invitation if provided and not requested 'all'
-    if (params.invitationId && params.invitationId !== 'all') {
+    if (params.invitationId && params.invitationId !== 'all' && params.scope !== 'public') {
       list = list.filter(m => 
         m.invitationId === params.invitationId || 
-        (m.invitationIds && m.invitationIds.includes(params.invitationId!))
+        (m.invitationIds && m.invitationIds.includes(params.invitationId!)) ||
+        m.isPublic
       );
     }
 
     // Filter by media type
     if (params.type && params.type !== 'all') {
       list = list.filter(m => m.type === params.type);
+    }
+
+    // Filter by category
+    if (params.category && params.category !== 'all') {
+      const cat = params.category.toLowerCase().trim();
+      list = list.filter(m => (m.category || '').toLowerCase() === cat);
     }
 
     // Search query by title, name, or tags

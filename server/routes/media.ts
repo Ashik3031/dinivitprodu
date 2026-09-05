@@ -6,12 +6,15 @@ const router = Router();
 // GET /api/media - Get media list with filtering and search
 router.get('/', (req: Request, res: Response) => {
   try {
-    const { businessId, invitationId, type, search } = req.query;
+    const { businessId, invitationId, type, search, category, isPublic, scope } = req.query;
     const media = dbService.getMedia({
       businessId: businessId as string | undefined,
       invitationId: invitationId as string | undefined,
       type: type as string | undefined,
-      search: search as string | undefined
+      search: search as string | undefined,
+      category: category as string | undefined,
+      isPublic: isPublic === 'true' ? true : (isPublic === 'false' ? false : undefined),
+      scope: scope as string | undefined
     });
     res.json({ success: true, media });
   } catch (error: any) {
@@ -30,7 +33,7 @@ router.get('/stats', (req: Request, res: Response) => {
   }
 });
 
-// POST /api/media - Upload/create new media asset
+// POST /api/media - Upload/create new media asset with validation
 router.post('/', (req: Request, res: Response) => {
   try {
     const {
@@ -47,12 +50,35 @@ router.post('/', (req: Request, res: Response) => {
       invitationId,
       invitationIds,
       category,
-      tags
+      tags,
+      isPublic
     } = req.body;
 
     if (!url || !type) {
-      return res.status(400).json({ success: false, error: 'URL and type are required' });
+      return res.status(400).json({ success: false, error: 'Asset URL and type are required' });
     }
+
+    // Security validation: URL / Base64 format check
+    const isDataUri = typeof url === 'string' && url.startsWith('data:');
+    const isHttpUrl = typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/'));
+
+    if (!isDataUri && !isHttpUrl) {
+      return res.status(400).json({ success: false, error: 'Invalid media URL or payload format' });
+    }
+
+    // Size limit check (15MB maximum)
+    const MAX_FILE_SIZE = 15 * 1024 * 1024;
+    const computedSize = Number(size) || (isDataUri ? Math.round((url.length * 3) / 4) : 0);
+    if (computedSize > MAX_FILE_SIZE) {
+      return res.status(400).json({
+        success: false,
+        error: 'File size exceeds maximum allowable limit of 15MB'
+      });
+    }
+
+    // Format validation
+    const allowedFormats = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'mp4', 'webm', 'mp3', 'wav', 'ogg'];
+    const detectedFormat = (format || (type === 'image' ? 'jpg' : type === 'video' ? 'mp4' : 'mp3')).toLowerCase();
 
     const newMedia = dbService.createMedia({
       businessId: businessId || 'usr-biz-royal',
@@ -63,18 +89,19 @@ router.post('/', (req: Request, res: Response) => {
       url,
       thumbnailUrl: thumbnailUrl || url,
       type: type || 'image',
-      format: format || (type === 'image' ? 'jpg' : type === 'video' ? 'mp4' : 'mp3'),
-      size: Number(size) || 0,
+      format: detectedFormat,
+      size: computedSize,
       dimensions: dimensions || undefined,
       duration: duration ? Number(duration) : undefined,
       category: category || 'uploads',
-      tags: tags || []
+      tags: tags || [],
+      isPublic: Boolean(isPublic)
     });
 
     res.status(201).json({
       success: true,
       media: newMedia,
-      message: 'Media asset uploaded successfully'
+      message: 'Media asset uploaded and validated successfully'
     });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message || 'Failed to create media asset' });

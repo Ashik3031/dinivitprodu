@@ -11,6 +11,8 @@ interface AuthContextType {
   demoLogin: (roleOrType: 'admin' | 'business_owner' | 'business' | string) => Promise<boolean>;
   logout: () => void;
   setUserDirectly: (user: User | null) => void;
+  refreshUser: () => Promise<void>;
+  updateUserLocal: (partial: Partial<User>) => void;
   clearError: () => void;
 }
 
@@ -23,13 +25,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Check saved session
-    const saved = localStorage.getItem('dis_user_session');
+    const saved = localStorage.getItem('dis_user_session') || localStorage.getItem('dis_user');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setUser(parsed);
+        if (parsed.token) {
+          localStorage.setItem('dis_token', parsed.token);
+        }
       } catch (e) {
         localStorage.removeItem('dis_user_session');
+        localStorage.removeItem('dis_user');
       }
     }
     setIsLoading(false);
@@ -37,14 +43,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearError = () => setError(null);
 
+  const refreshUser = async () => {
+    try {
+      const res = await api.getCurrentUser();
+      if (res.user) {
+        setUser(prev => ({ ...prev, ...res.user }));
+        localStorage.setItem('dis_user_session', JSON.stringify({ ...user, ...res.user }));
+        localStorage.setItem('dis_user', JSON.stringify({ ...user, ...res.user }));
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const updateUserLocal = (partial: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, ...partial };
+      localStorage.setItem('dis_user_session', JSON.stringify(updated));
+      localStorage.setItem('dis_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const login = async (username: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     try {
       const res = await api.login({ username: username.trim(), password: password.trim() });
       if (res.user) {
-        setUser(res.user);
-        localStorage.setItem('dis_user_session', JSON.stringify(res.user));
+        const userData = { ...res.user, token: res.token || res.user.token };
+        setUser(userData);
+        localStorage.setItem('dis_user_session', JSON.stringify(userData));
+        localStorage.setItem('dis_user', JSON.stringify(userData));
+        if (res.token) {
+          localStorage.setItem('dis_token', res.token);
+        }
         setIsLoading(false);
         return true;
       }
@@ -72,14 +106,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setError(null);
     localStorage.removeItem('dis_user_session');
+    localStorage.removeItem('dis_user');
+    localStorage.removeItem('dis_token');
   };
 
   const setUserDirectly = (newUser: User | null) => {
     setUser(newUser);
     if (newUser) {
       localStorage.setItem('dis_user_session', JSON.stringify(newUser));
+      localStorage.setItem('dis_user', JSON.stringify(newUser));
+      if (newUser.token) {
+        localStorage.setItem('dis_token', newUser.token);
+      }
     } else {
       localStorage.removeItem('dis_user_session');
+      localStorage.removeItem('dis_user');
+      localStorage.removeItem('dis_token');
     }
   };
 
@@ -94,6 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         demoLogin,
         logout,
         setUserDirectly,
+        refreshUser,
+        updateUserLocal,
         clearError
       }}
     >

@@ -130,3 +130,45 @@ export function autoScaleElementForViewport(
     fontSize: newFontSize
   };
 }
+
+/**
+ * Returns framer-motion page transition variants for smooth vertical page transitions.
+ */
+export function getPageTransitionVariants(
+  type: 'fade' | 'slide-up' | 'slide-down' | 'zoom' | 'flip' | 'curtain' = 'fade',
+  duration: number = 0.6
+) {
+  switch (type) {
+    case 'slide-up':
+      return {
+        initial: { opacity: 0, y: 60 },
+        animate: { opacity: 1, y: 0, transition: { duration, ease: [0.25, 0.1, 0.25, 1] } }
+      };
+    case 'slide-down':
+      return {
+        initial: { opacity: 0, y: -60 },
+        animate: { opacity: 1, y: 0, transition: { duration, ease: [0.25, 0.1, 0.25, 1] } }
+      };
+    case 'zoom':
+      return {
+        initial: { opacity: 0, scale: 0.92 },
+        animate: { opacity: 1, scale: 1, transition: { duration, ease: [0.25, 0.1, 0.25, 1] } }
+      };
+    case 'flip':
+      return {
+        initial: { opacity: 0, rotateX: 20 },
+        animate: { opacity: 1, rotateX: 0, transition: { duration, ease: 'easeOut' } }
+      };
+    case 'curtain':
+      return {
+        initial: { opacity: 0, scaleY: 0.95 },
+        animate: { opacity: 1, scaleY: 1, transition: { duration, ease: 'easeInOut' } }
+      };
+    case 'fade':
+    default:
+      return {
+        initial: { opacity: 0 },
+        animate: { opacity: 1, transition: { duration, ease: 'easeInOut' } }
+      };
+  }
+}

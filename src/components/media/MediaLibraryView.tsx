@@ -65,7 +65,8 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
   const [uploadProgressText, setUploadProgressText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<'all' | 'image' | 'video' | 'audio'>('all');
-  const [scope, setScope] = useState<'current' | 'all' | 'stock'>('current');
+  const [scope, setScope] = useState<'current' | 'all' | 'public' | 'stock'>('current');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'size' | 'name'>('newest');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [stats, setStats] = useState<any>(null);
@@ -83,10 +84,12 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
     try {
       setIsLoading(true);
       const res = await api.getMedia({
-        businessId,
+        businessId: scope === 'public' ? undefined : businessId,
         invitationId: scope === 'current' ? currentInvitationId : undefined,
         type: selectedType === 'all' ? undefined : selectedType,
-        search: searchQuery
+        search: searchQuery,
+        scope: scope === 'public' ? 'public' : undefined,
+        category: selectedCategory === 'all' ? undefined : selectedCategory
       });
       setMediaList(res.media || []);
 
@@ -101,7 +104,7 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
 
   useEffect(() => {
     fetchMedia();
-  }, [businessId, currentInvitationId, selectedType, scope, searchQuery]);
+  }, [businessId, currentInvitationId, selectedType, scope, selectedCategory, searchQuery]);
 
   // Handle Multi-file Upload with Client-Side Optimization
   const handleFiles = async (files: FileList | null) => {
@@ -338,34 +341,46 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
         )}
       </div>
 
-      {/* Scope Selector: [Current Invitation] vs [All Workspace Media] vs [Stock Library] */}
-      <div className="flex bg-slate-100 p-0.5 rounded-lg text-xs font-medium">
+      {/* Scope Selector: [Current Invitation] vs [All Workspace Media] vs [Public Frames & Assets] vs [Stock Library] */}
+      <div className="flex bg-slate-100 p-0.5 rounded-lg text-[11px] font-medium overflow-x-auto no-scrollbar">
         <button
           type="button"
-          onClick={() => setScope('current')}
-          className={`flex-1 py-1 px-1.5 rounded-md transition-all truncate cursor-pointer ${
+          onClick={() => { setScope('current'); setSelectedCategory('all'); }}
+          className={`flex-1 py-1 px-2 rounded-md transition-all whitespace-nowrap cursor-pointer ${
             scope === 'current'
               ? 'bg-white text-slate-900 font-bold shadow-2xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          This Invitation
+          This Card
         </button>
         <button
           type="button"
-          onClick={() => setScope('all')}
-          className={`flex-1 py-1 px-1.5 rounded-md transition-all truncate cursor-pointer ${
+          onClick={() => { setScope('all'); setSelectedCategory('all'); }}
+          className={`flex-1 py-1 px-2 rounded-md transition-all whitespace-nowrap cursor-pointer ${
             scope === 'all'
               ? 'bg-white text-slate-900 font-bold shadow-2xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          All Workspace
+          My Workspace
         </button>
         <button
           type="button"
-          onClick={() => setScope('stock')}
-          className={`flex-1 py-1 px-1.5 rounded-md transition-all truncate cursor-pointer ${
+          onClick={() => { setScope('public'); setSelectedCategory('all'); }}
+          className={`flex-1 py-1 px-2 rounded-md transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1 ${
+            scope === 'public'
+              ? 'bg-amber-500 text-slate-950 font-bold shadow-2xs'
+              : 'text-amber-700 hover:text-amber-900'
+          }`}
+        >
+          <Sparkles className="w-3 h-3" />
+          <span>Frames & Assets</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => { setScope('stock'); setSelectedCategory('all'); }}
+          className={`flex-1 py-1 px-2 rounded-md transition-all whitespace-nowrap cursor-pointer ${
             scope === 'stock'
               ? 'bg-white text-slate-900 font-bold shadow-2xs'
               : 'text-slate-600 hover:text-slate-900'
@@ -374,6 +389,35 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
           Stock Library
         </button>
       </div>
+
+      {/* Public Assets Categories */}
+      {scope === 'public' && (
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 text-[11px]">
+          {[
+            { id: 'all', label: 'All Assets' },
+            { id: 'frames', label: 'Frames' },
+            { id: 'borders', label: 'Borders' },
+            { id: 'floral', label: 'Floral' },
+            { id: 'monograms', label: 'Monograms' },
+            { id: 'badges', label: 'Badges & Seals' },
+            { id: 'stickers', label: 'Stickers' },
+            { id: 'backgrounds', label: 'Backgrounds' },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-2.5 py-1 rounded-full whitespace-nowrap font-medium transition-colors cursor-pointer ${
+                selectedCategory === cat.id
+                  ? 'bg-slate-900 text-white font-bold'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Search & Media Type Filter Bar */}
       {scope !== 'stock' ? (

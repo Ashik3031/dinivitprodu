@@ -66,6 +66,9 @@ interface LeftSidebarProps {
   onUpdateElement?: (id: string, updates: Partial<CanvasElement>) => void;
   onSetAsBackground?: (url: string, type: 'image' | 'video') => void;
   onSetAsMusic?: (audioUrl: string, title: string) => void;
+  openingScreen?: any;
+  onSelectOpeningScreen?: () => void;
+  onToggleOpeningScreen?: (enabled: boolean) => void;
 }
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
@@ -89,7 +92,10 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   businessId,
   onUpdateElement,
   onSetAsBackground,
-  onSetAsMusic
+  onSetAsMusic,
+  openingScreen,
+  onSelectOpeningScreen,
+  onToggleOpeningScreen
 }) => {
   const [activeTab, setActiveTab] = useState<'pages' | 'elements' | 'blocks' | 'templates' | 'media' | 'ai'>('pages');
   const [targetContainerOnly, setTargetContainerOnly] = useState(false);
@@ -209,6 +215,9 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
             onDeletePage={onDeletePage}
             onRenamePage={onRenamePage}
             onReorderPages={onReorderPages}
+            openingScreen={openingScreen}
+            onSelectOpeningScreen={onSelectOpeningScreen}
+            onToggleOpeningScreen={onToggleOpeningScreen}
           />
         )}
 

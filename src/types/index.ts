@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'business';
+export type UserRole = 'admin' | 'business' | 'business_owner';
 
 export interface User {
   id: string;
@@ -12,9 +12,44 @@ export interface User {
   createdAt: string;
   lastLogin?: string;
   invitationCount?: number;
+  publishedCount?: number;
+  draftCount?: number;
+  maxInvitations?: number;
   customDomain?: string;
   logoUrl?: string;
   brandColor?: string;
+  secondaryColor?: string;
+  defaultFontHeading?: string;
+  defaultFontBody?: string;
+  defaultFooterText?: string;
+  defaultWatermark?: boolean;
+  token?: string;
+}
+
+export interface AdminStats {
+  totalBusinesses: number;
+  activeBusinesses: number;
+  inactiveBusinesses?: number;
+  totalUsers?: number;
+  activeUsers?: number;
+  totalInvitations: number;
+  publishedInvitations: number;
+  draftInvitations?: number;
+  totalRSVPs: number;
+  totalGuestbookMessages: number;
+  totalViews: number;
+  totalMedia: number;
+  storageUsedBytes?: number;
+}
+
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+export interface ToastItem {
+  id: string;
+  type: ToastType;
+  title?: string;
+  message: string;
+  duration?: number;
 }
 
 export type ContainerShape = 
@@ -148,6 +183,7 @@ export interface ElementStyle {
   fontWeight?: number | string;
   color?: string;
   textAlign?: 'left' | 'center' | 'right' | 'justify';
+  verticalAlign?: 'top' | 'middle' | 'bottom';
   lineHeight?: number;
   letterSpacing?: number;
   textShadow?: string;
@@ -268,7 +304,7 @@ export interface ElementContent {
   
   buttonText?: string;
   buttonLink?: string;
-  buttonAction?: 'link' | 'rsvp' | 'guestbook' | 'maps' | 'whatsapp' | 'calendar' | 'music-toggle' | 'next-page' | 'previous-page';
+  buttonAction?: 'link' | 'rsvp' | 'guestbook' | 'maps' | 'whatsapp' | 'calendar' | 'music-toggle' | 'next-page' | 'previous-page' | 'open-invitation';
   buttonShape?: 'pill' | 'rounded' | 'square' | 'soft';
   
   whatsappPhone?: string;
@@ -373,14 +409,6 @@ export interface PageTemplate {
   page: Omit<InvitationPage, 'id'>;
 }
 
-export interface AdminStats {
-  totalUsers: number;
-  activeUsers: number;
-  totalInvitations: number;
-  totalRSVPs: number;
-  totalMessages: number;
-}
-
 export interface InvitationTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -393,15 +421,17 @@ export interface InvitationTheme {
 
 export interface OpeningScreenConfig {
   enabled: boolean;
-  style: 'envelope' | 'wax-seal' | 'curtain' | 'card-flip' | 'monogram-glow' | 'minimal-button';
+  style: 'envelope' | 'wax-seal' | 'curtain' | 'card-flip' | 'monogram-glow' | 'minimal-button' | 'video-cover' | 'custom-page';
   title?: string;
   subtitle?: string;
   coupleNames?: string;
   openButtonText?: string;
   sealColor?: string;
+  sealText?: string;
   envelopeColor?: string;
   background?: BackgroundConfig;
   musicAutoplayOnOpen?: boolean;
+  page?: InvitationPage;
 }
 
 export interface MusicConfig {
@@ -507,7 +537,13 @@ export interface InvitationTemplate {
   music: MusicConfig;
   pages: InvitationPage[];
   isPremium?: boolean;
+  isPublic?: boolean;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
+
+export type MediaAssetType = 'image' | 'video' | 'audio' | 'pattern' | 'texture' | 'frame' | 'sticker' | 'decoration';
 
 export interface MediaAsset {
   id: string;
@@ -518,7 +554,7 @@ export interface MediaAsset {
   name?: string;
   url: string;
   thumbnailUrl?: string;
-  type: 'image' | 'video' | 'audio' | 'pattern' | 'texture';
+  type: MediaAssetType;
   format?: 'jpg' | 'png' | 'webp' | 'mp4' | 'mp3' | 'wav' | 'svg' | string;
   size?: number; // In bytes
   dimensions?: {
@@ -528,6 +564,7 @@ export interface MediaAsset {
   duration?: number; // In seconds for video/audio
   category?: string;
   tags?: string[];
+  isPublic?: boolean;
   createdAt: string;
   updatedAt?: string;
 }

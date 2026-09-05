@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { InvitationPage, PageTemplate } from '../../types';
+import { InvitationPage, PageTemplate, OpeningScreenConfig } from '../../types';
 import {
   GripVertical,
   Plus,
@@ -18,7 +18,10 @@ import {
   Video as VideoIcon,
   Maximize2,
   ChevronRight,
-  MoreVertical
+  MoreVertical,
+  Mail,
+  MailOpen,
+  Power
 } from 'lucide-react';
 
 interface PagesTabProps {
@@ -31,6 +34,9 @@ interface PagesTabProps {
   onDeletePage: (index: number) => void;
   onRenamePage: (index: number, newName: string) => void;
   onReorderPages: (fromIndex: number, toIndex: number) => void;
+  openingScreen?: OpeningScreenConfig;
+  onSelectOpeningScreen?: () => void;
+  onToggleOpeningScreen?: (enabled: boolean) => void;
 }
 
 export const PagesTab: React.FC<PagesTabProps> = ({
@@ -42,7 +48,10 @@ export const PagesTab: React.FC<PagesTabProps> = ({
   onDuplicatePage,
   onDeletePage,
   onRenamePage,
-  onReorderPages
+  onReorderPages,
+  openingScreen,
+  onSelectOpeningScreen,
+  onToggleOpeningScreen
 }) => {
   // Drag and drop state
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -148,8 +157,82 @@ export const PagesTab: React.FC<PagesTabProps> = ({
     return `${page.height || 844}px`;
   };
 
+  const isOpeningActive = activePageIndex === -1;
+  const isOpeningEnabled = openingScreen?.enabled !== false;
+  const openingBg = openingScreen?.page?.background || openingScreen?.background;
+
   return (
     <div className="space-y-4">
+      {/* Opening / Cover Screen Section */}
+      <div className="space-y-1.5 pb-3 border-b border-slate-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <MailOpen className="w-3.5 h-3.5 text-amber-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">
+              Opening / Cover Screen
+            </span>
+          </div>
+          {onToggleOpeningScreen && (
+            <label className="relative inline-flex items-center cursor-pointer" title="Enable or disable opening envelope/cover screen">
+              <input
+                type="checkbox"
+                checked={isOpeningEnabled}
+                onChange={(e) => onToggleOpeningScreen(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-7 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-600" />
+            </label>
+          )}
+        </div>
+
+        {/* Opening Screen Card */}
+        <div
+          onClick={() => onSelectOpeningScreen && onSelectOpeningScreen()}
+          className={`relative rounded-xl border p-2.5 transition-all cursor-pointer group flex items-center justify-between gap-2.5 ${
+            isOpeningActive
+              ? 'bg-amber-50/90 border-amber-500 text-slate-900 shadow-xs ring-1 ring-amber-500'
+              : 'bg-white border-slate-200 hover:bg-slate-50/80 text-slate-700 hover:border-slate-300'
+          } ${!isOpeningEnabled ? 'opacity-60 bg-slate-50' : ''}`}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
+                isOpeningActive
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : isOpeningEnabled
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-slate-100 text-slate-400'
+              }`}
+            >
+              <Mail className="w-4 h-4" />
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-900 truncate">
+                  {openingScreen?.title || 'Opening Screen'}
+                </span>
+                {isOpeningActive && (
+                  <span className="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[9px] font-bold">
+                    Editing
+                  </span>
+                )}
+              </div>
+              <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                <span>{isOpeningEnabled ? 'Interactive Cover Canvas' : 'Disabled'}</span>
+                <span>•</span>
+                <span className="capitalize">{openingBg?.type || 'gradient'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {getBackgroundIcon(openingBg)}
+            <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isOpeningActive ? 'text-amber-600 translate-x-0.5' : 'text-slate-400 group-hover:text-slate-600'}`} />
+          </div>
+        </div>
+      </div>
+
       {/* Top Header & Page Count */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-200">
         <div className="flex items-center gap-2">

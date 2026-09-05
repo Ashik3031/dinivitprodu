@@ -67,7 +67,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
   forceAnimate = false
 }) => {
   const { type, content, animation } = element;
-  const { style, isHidden } = resolveElementForViewport(element, viewportMode);
+  const currentViewport: ViewportMode = (viewportMode as ViewportMode) || 'mobile';
+  const { style, isHidden } = resolveElementForViewport(element, currentViewport);
 
   // If hidden on current device and not in editor mode, don't render
   if (isHidden && !isEditor) {
@@ -187,31 +188,50 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'heading':
       case 'text':
       case 'paragraph': {
+        const vAlign =
+          style.verticalAlign === 'top'
+            ? 'flex-start'
+            : style.verticalAlign === 'bottom'
+            ? 'flex-end'
+            : 'center';
+
         return (
           <div
-            className="w-full h-full flex items-center"
+            className="w-full h-full flex"
             style={{
-              fontFamily: style.fontFamily,
-              fontSize: style.fontSize ? `${style.fontSize}px` : undefined,
-              fontWeight: style.fontWeight,
-              color: style.color,
-              textAlign: style.textAlign || 'left',
-              lineHeight: style.lineHeight,
-              letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
-              textShadow: getTextShadow(style),
-              textTransform: style.textTransform,
-              fontStyle: style.fontStyle,
-              textDecoration: style.textDecoration,
+              alignItems: vAlign,
               justifyContent:
                 style.textAlign === 'center'
                   ? 'center'
                   : style.textAlign === 'right'
                   ? 'flex-end'
+                  : style.textAlign === 'justify'
+                  ? 'stretch'
                   : 'flex-start',
-              whiteSpace: 'pre-wrap'
+              padding: style.padding ? `${style.padding}px` : undefined
             }}
           >
-            {content.text || 'Sample Text'}
+            <div
+              className="w-full"
+              style={{
+                fontFamily: style.fontFamily,
+                fontSize: style.fontSize ? `${style.fontSize}px` : undefined,
+                fontWeight: style.fontWeight,
+                color: style.color,
+                textAlign: style.textAlign || 'left',
+                lineHeight: style.lineHeight,
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+                textShadow: getTextShadow(style),
+                textTransform: style.textTransform,
+                fontStyle: style.fontStyle,
+                textDecoration: style.textDecoration,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word'
+              }}
+            >
+              {content.text || 'Sample Text'}
+            </div>
           </div>
         );
       }
@@ -598,6 +618,9 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
 
               {childElements.map(child => {
                 const isChildSelected = selectedElementId === child.id;
+                const { style: childStyle, isHidden: isChildHidden } = resolveElementForViewport(child, currentViewport);
+                if (isChildHidden && !isEditor) return null;
+
                 return (
                   <div
                     key={child.id}
@@ -610,12 +633,12 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                     }`}
                     style={{
                       position: 'absolute',
-                      left: `${child.style.x}px`,
-                      top: `${child.style.y}px`,
-                      width: `${child.style.width}px`,
-                      height: `${child.style.height}px`,
-                      transform: child.style.rotation ? `rotate(${child.style.rotation}deg)` : undefined,
-                      zIndex: isChildSelected ? 99 : child.style.zIndex || 1
+                      left: `${childStyle.x}px`,
+                      top: `${childStyle.y}px`,
+                      width: `${childStyle.width}px`,
+                      height: `${childStyle.height}px`,
+                      transform: childStyle.rotation ? `rotate(${childStyle.rotation}deg)` : undefined,
+                      zIndex: isChildSelected ? 99 : childStyle.zIndex || 1
                     }}
                     onClick={(e) => {
                       if (isEditor && onSelectElement) {
@@ -627,6 +650,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                     <ElementRenderer
                       element={child}
                       isEditor={isEditor}
+                      viewportMode={currentViewport}
                       onActionClick={onActionClick}
                       onOpenRSVP={onOpenRSVP}
                       onOpenGuestbook={onOpenGuestbook}

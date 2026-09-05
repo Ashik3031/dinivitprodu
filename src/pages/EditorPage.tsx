@@ -4,9 +4,12 @@ import {
   InvitationPage,
   CanvasElement,
   ElementType,
-  InvitationTemplate
+  InvitationTemplate,
+  OpeningScreenConfig
 } from '../types';
 import { api } from '../services/api';
+import { useToast } from '../context/ToastContext';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { LeftSidebar } from '../components/editor/LeftSidebar';
 import { RightSidebar } from '../components/editor/RightSidebar';
 import { VisualCanvas } from '../components/canvas/VisualCanvas';
@@ -17,22 +20,40 @@ import { PageTemplatesModal } from '../components/editor/PageTemplatesModal';
 import { PublishedInvitationView } from '../components/published/PublishedInvitationView';
 import { createBlankPage } from '../data/pageTemplates';
 import { instantiateTemplatePage, instantiatePrebuiltBlock } from '../utils/templateUtils';
+import { getOrCreateOpeningScreenPage, syncOpeningScreenWithPage } from '../utils/openingScreenUtils';
 import { PageTemplate, PrebuiltBlock } from '../types';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Save } from 'lucide-react';
 
 interface EditorPageProps {
-  invitationId: string;
+  invitationId?: string;
+  templateId?: string;
+  isTemplateMode?: boolean;
   onBackToDashboard: () => void;
+  onBackToAdmin?: () => void;
 }
 
 export const EditorPage: React.FC<EditorPageProps> = ({
   invitationId,
-  onBackToDashboard
+  templateId,
+  isTemplateMode = false,
+  onBackToDashboard,
+  onBackToAdmin
 }) => {
+  const toast = useToast();
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [templates, setTemplates] = useState<InvitationTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [isExitWarningOpen, setIsExitWarningOpen] = useState(false);
+  const [isSavingAndExiting, setIsSavingAndExiting] = useState(false);
+
+  // Template editing mode detection
+  const isEditingTemplate = isTemplateMode || Boolean(templateId) || (invitationId ? invitationId.startsWith('tmpl-') : false);
+  const effectiveTemplateId = templateId || (invitationId?.startsWith('tmpl-') ? invitationId : undefined);
+  const effectiveInvitationId = !isEditingTemplate ? invitationId : undefined;
+
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
   const [clipboard, setClipboard] = useState<CanvasElement[]>([]);
@@ -53,32 +74,137 @@ export const EditorPage: React.FC<EditorPageProps> = ({
   // Undo / Redo history stacks
   const [history, setHistory] = useState<Invitation[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load invitation & templates
+  // Load invitation OR template data & templates
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [invData, tmplData] = await Promise.all([
-          api.getInvitation(invitationId),
-          api.getTemplates()
-        ]);
-        setInvitation(invData);
-        setTemplates(tmplData.templates || []);
-        setHistory([invData]);
-        setHistoryIndex(0);
-      } catch (err) {
-        console.error('Failed to load invitation:', err);
+
+        if (isEditingTemplate && effectiveTemplateId) {
+          // Load template directly to edit it in visual canvas
+          const [tmplRes, tmplListRes] = await Promise.all([
+            api.getTemplateById(effectiveTemplateId),
+            api.getTemplates({ all: true })
+          ]);
+          const tmpl = tmplRes.template;
+
+          const defaultTheme = {
+            primaryColor: '#c5a059',
+            secondaryColor: '#1e293b',
+            accentColor: '#c5a059',
+            backgroundColor: '#0f172a',
+            fontHeading: "'Cinzel', serif",
+            fontBody: "'Plus Jakarta Sans', sans-serif",
+            fontScript: "'Parisienne', cursive"
+          };
+
+          const defaultOpening = {
+            enabled: true,
+            style: 'envelope' as const,
+            title: tmpl.title || 'Formal Invitation',
+            subtitle: 'You are cordially invited',
+            coupleNames: tmpl.title || 'Couple Names',
+            openButtonText: 'Open Invitation',
+            sealColor: '#c5a059',
+            envelopeColor: '#1e293b',
+            musicAutoplayOnOpen: true
+          };
+
+          const defaultMusic = {
+            enabled: false,
+            audioUrl: '',
+            title: '',
+            artist: '',
+            autoPlay: false,
+            loop: true,
+            floatingBadge: true
+          };
+
+          const tmplAsInvitation: Invitation = {
+            id: tmpl.id,
+            businessId: 'admin',
+            title: tmpl.title || 'Untitled Template',
+            slug: `template-${tmpl.id}`,
+            category: (tmpl.category as any) || 'wedding',
+            status: tmpl.isPublic !== false ? 'published' : 'draft',
+            thumbnail: tmpl.thumbnail || '',
+            theme: tmpl.theme ? { ...defaultTheme, ...tmpl.theme } : defaultTheme,
+            openingScreen: tmpl.openingScreen ? { ...defaultOpening, ...tmpl.openingScreen } : defaultOpening,
+            music: tmpl.music ? { ...defaultMusic, ...tmpl.music } : defaultMusic,
+            pages: tmpl.pages && tmpl.pages.length > 0 ? tmpl.pages : [
+              {
+                id: `p-${Date.now()}-1`,
+                name: 'Page 1',
+                order: 0,
+                height: 844,
+                isFullHeight: true,
+                background: { type: 'color', color: '#0f172a' },
+                elements: []
+              }
+            ],
+            settings: {
+              enableAutoScroll: false,
+              autoScrollSpeed: 30,
+              showPageNavDots: true,
+              allowGuestComments: true,
+              allowRSVP: true,
+              enableConfettiOnOpen: true,
+              pageTransition: 'fade'
+            },
+            viewsCount: 0,
+            createdAt: tmpl.createdAt || new Date().toISOString(),
+            updatedAt: tmpl.updatedAt || new Date().toISOString()
+          };
+
+          (tmplAsInvitation as any).tags = tmpl.tags || [];
+          (tmplAsInvitation as any).description = tmpl.description || '';
+          (tmplAsInvitation as any).isPremium = Boolean(tmpl.isPremium);
+
+          setInvitation(tmplAsInvitation);
+          setTemplates(tmplListRes.templates || []);
+          setHistory([tmplAsInvitation]);
+          setHistoryIndex(0);
+          setHasUnsavedChanges(false);
+        } else if (effectiveInvitationId) {
+          const [invData, tmplData] = await Promise.all([
+            api.getInvitation(effectiveInvitationId),
+            api.getTemplates()
+          ]);
+          setInvitation(invData);
+          setTemplates(tmplData.templates || []);
+          setHistory([invData]);
+          setHistoryIndex(0);
+          setHasUnsavedChanges(false);
+        }
+      } catch (err: any) {
+        toast.error(err?.message || 'Failed to load editor data');
       } finally {
         setIsLoading(false);
       }
     };
     loadData();
-  }, [invitationId]);
+  }, [invitationId, templateId, isEditingTemplate, effectiveTemplateId, effectiveInvitationId]);
+
+  // Window beforeunload browser guard
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Push new state to history stack
   const updateInvitationState = useCallback((newInv: Invitation) => {
     setInvitation(newInv);
+    setHasUnsavedChanges(true);
     setHistory(prev => {
       const next = prev.slice(0, historyIndex + 1);
       return [...next, newInv];
@@ -92,6 +218,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       const targetState = history[historyIndex - 1];
       setInvitation(targetState);
       setHistoryIndex(historyIndex - 1);
+      setHasUnsavedChanges(true);
     }
   }, [history, historyIndex]);
 
@@ -101,6 +228,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       const targetState = history[historyIndex + 1];
       setInvitation(targetState);
       setHistoryIndex(historyIndex + 1);
+      setHasUnsavedChanges(true);
     }
   }, [history, historyIndex]);
 
@@ -115,24 +243,135 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     setPreviewAnimationKey(Date.now());
   }, []);
 
-  // Save changes to backend
-  const handleSave = async () => {
+  // Save changes to backend (Invitation OR Master Template)
+  const handleSave = useCallback(async (isManual = true) => {
     if (!invitation) return;
     setIsSaving(true);
     try {
-      await api.updateInvitation(invitation.id, invitation);
-    } catch (err) {
-      console.error('Failed to save invitation:', err);
+      if (isEditingTemplate) {
+        const idToSave = effectiveTemplateId || invitation.id;
+        await api.updateTemplate(idToSave, {
+          title: invitation.title,
+          category: invitation.category,
+          theme: invitation.theme,
+          openingScreen: invitation.openingScreen,
+          music: invitation.music,
+          pages: invitation.pages,
+          isPublic: invitation.status === 'published',
+          thumbnail: invitation.thumbnail,
+          tags: (invitation as any).tags,
+          description: (invitation as any).description,
+          isPremium: (invitation as any).isPremium
+        });
+        setHasUnsavedChanges(false);
+        setLastSavedAt(new Date());
+        if (isManual) {
+          toast.success(`Template "${invitation.title}" saved! Changes are published live.`);
+        }
+      } else {
+        await api.updateInvitation(invitation.id, invitation);
+        setHasUnsavedChanges(false);
+        setLastSavedAt(new Date());
+        if (isManual) {
+          toast.success(`Draft saved (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`);
+        }
+      }
+    } catch (err: any) {
+      if (isManual) {
+        toast.error(err?.message || 'Failed to save changes');
+      }
     } finally {
       setIsSaving(false);
     }
+  }, [invitation, isEditingTemplate, effectiveTemplateId, toast]);
+
+  // Debounced Auto-save
+  useEffect(() => {
+    if (!hasUnsavedChanges || !invitation) return;
+
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(() => {
+      handleSave(false);
+    }, 3000);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [invitation, hasUnsavedChanges, handleSave]);
+
+  // Unified Back Navigation
+  const navigateBack = useCallback(() => {
+    if (isEditingTemplate && onBackToAdmin) {
+      onBackToAdmin();
+    } else {
+      onBackToDashboard();
+    }
+  }, [isEditingTemplate, onBackToAdmin, onBackToDashboard]);
+
+  // Back with Unsaved Changes Guard
+  const handleBackToDashboardAttempt = () => {
+    if (hasUnsavedChanges) {
+      setIsExitWarningOpen(true);
+    } else {
+      navigateBack();
+    }
   };
 
-  const activePage: InvitationPage = invitation?.pages?.[selectedPageIndex] || invitation?.pages?.[0] || {
-    id: 'temp-page',
-    pageNumber: 1,
-    elements: []
+  // Exit actions
+  const handleSaveAndExit = async () => {
+    if (!invitation) return;
+    setIsSavingAndExiting(true);
+    try {
+      if (isEditingTemplate) {
+        const idToSave = effectiveTemplateId || invitation.id;
+        await api.updateTemplate(idToSave, {
+          title: invitation.title,
+          category: invitation.category,
+          theme: invitation.theme,
+          openingScreen: invitation.openingScreen,
+          music: invitation.music,
+          pages: invitation.pages,
+          isPublic: invitation.status === 'published',
+          thumbnail: invitation.thumbnail,
+          tags: (invitation as any).tags,
+          description: (invitation as any).description,
+          isPremium: (invitation as any).isPremium
+        });
+      } else {
+        await api.updateInvitation(invitation.id, invitation);
+      }
+      setHasUnsavedChanges(false);
+      setIsExitWarningOpen(false);
+      toast.success(isEditingTemplate ? 'Template saved. Returning to templates...' : 'Changes saved. Returning to dashboard...');
+      navigateBack();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save before exiting');
+    } finally {
+      setIsSavingAndExiting(false);
+    }
   };
+
+  const handleDiscardAndExit = () => {
+    setHasUnsavedChanges(false);
+    setIsExitWarningOpen(false);
+    navigateBack();
+  };
+
+  const isOpeningScreenSelected = selectedPageIndex === -1;
+
+  const activePage: InvitationPage = isOpeningScreenSelected
+    ? getOrCreateOpeningScreenPage(invitation || {})
+    : (invitation?.pages?.[selectedPageIndex] || invitation?.pages?.[0] || {
+        id: 'temp-page',
+        pageNumber: 1,
+        elements: []
+      });
+
   const selectedElements = activePage?.elements?.filter(el => selectedElementIds.includes(el.id)) || [];
   const selectedElement = selectedElements[0] || null;
 
@@ -154,6 +393,27 @@ export const EditorPage: React.FC<EditorPageProps> = ({
   const handleSelectMultipleElements = useCallback((ids: string[]) => {
     setSelectedElementIds(ids);
   }, []);
+
+  // Helper to update elements on active page (Regular page or Opening Screen)
+  const updateActivePageElements = (updater: (prevElements: CanvasElement[]) => CanvasElement[]) => {
+    if (!invitation) return;
+    if (selectedPageIndex === -1) {
+      const currentOpeningPage = getOrCreateOpeningScreenPage(invitation);
+      const nextElements = updater(currentOpeningPage.elements || []);
+      const updatedOpeningPage: InvitationPage = { ...currentOpeningPage, elements: nextElements };
+      const updatedOpeningScreen = syncOpeningScreenWithPage(invitation.openingScreen, updatedOpeningPage);
+      updateInvitationState({ ...invitation, openingScreen: updatedOpeningScreen });
+    } else {
+      const updatedPages = invitation.pages.map((p, i) => {
+        if (i !== selectedPageIndex) return p;
+        return {
+          ...p,
+          elements: updater(p.elements || [])
+        };
+      });
+      updateInvitationState({ ...invitation, pages: updatedPages });
+    }
+  };
 
   // PAGE OPERATIONS
   const handleSelectPage = (index: number) => {
@@ -185,14 +445,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
   const handleInsertBlock = (block: PrebuiltBlock) => {
     if (!invitation) return;
     const newElements = instantiatePrebuiltBlock(block);
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: [...p.elements, ...newElements]
-      };
-    });
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements => [...elements, ...newElements]);
     setSelectedElementIds(newElements.map(el => el.id));
   };
 
@@ -250,10 +503,43 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
   const handleUpdatePage = (updates: Partial<InvitationPage>) => {
     if (!invitation) return;
-    const newPages = invitation.pages.map((p, i) =>
-      i === selectedPageIndex ? { ...p, ...updates } : p
-    );
-    updateInvitationState({ ...invitation, pages: newPages });
+    if (selectedPageIndex === -1) {
+      const currentOpeningPage = getOrCreateOpeningScreenPage(invitation);
+      const updatedOpeningPage: InvitationPage = { ...currentOpeningPage, ...updates };
+      const updatedOpeningScreen = syncOpeningScreenWithPage(invitation.openingScreen, updatedOpeningPage);
+      updateInvitationState({ ...invitation, openingScreen: updatedOpeningScreen });
+    } else {
+      const newPages = invitation.pages.map((p, i) =>
+        i === selectedPageIndex ? { ...p, ...updates } : p
+      );
+      updateInvitationState({ ...invitation, pages: newPages });
+    }
+  };
+
+  const handleToggleOpeningScreen = (enabled: boolean) => {
+    if (!invitation) return;
+    const nextConfig: OpeningScreenConfig = {
+      ...(invitation.openingScreen || {
+        enabled: true,
+        style: 'envelope',
+        title: invitation.title || 'Wedding Invitation'
+      }),
+      enabled
+    };
+    updateInvitationState({ ...invitation, openingScreen: nextConfig });
+  };
+
+  const handleUpdateOpeningScreen = (updates: Partial<OpeningScreenConfig>) => {
+    if (!invitation) return;
+    const nextConfig: OpeningScreenConfig = {
+      ...(invitation.openingScreen || {
+        enabled: true,
+        style: 'envelope',
+        title: invitation.title || 'Wedding Invitation'
+      }),
+      ...updates
+    };
+    updateInvitationState({ ...invitation, openingScreen: nextConfig });
   };
 
   // ELEMENT OPERATIONS
@@ -289,11 +575,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       ...customProps
     };
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-
-      let elementsList = [...p.elements, newElement];
-
+    updateActivePageElements(elements => {
+      let elementsList = [...elements, newElement];
       if (effectiveParentId) {
         elementsList = elementsList.map(el => {
           if (el.id === effectiveParentId) {
@@ -305,42 +588,23 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           return el;
         });
       }
-
-      return {
-        ...p,
-        elements: elementsList
-      };
+      return elementsList;
     });
 
-    updateInvitationState({ ...invitation, pages: updatedPages });
     setSelectedElementIds([newElement.id]);
   };
 
   const handleUpdateElement = (id: string, updates: Partial<CanvasElement>) => {
-    if (!invitation) return;
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements.map(el => el.id === id ? { ...el, ...updates } : el)
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements =>
+      elements.map(el => el.id === id ? { ...el, ...updates } : el)
+    );
   };
 
   // Bulk update multiple elements
   const handleUpdateMultipleElements = (updatesMap: Record<string, Partial<CanvasElement>>) => {
-    if (!invitation) return;
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements.map(el => updatesMap[el.id] ? { ...el, ...updatesMap[el.id] } : el)
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements =>
+      elements.map(el => updatesMap[el.id] ? { ...el, ...updatesMap[el.id] } : el)
+    );
   };
 
   // Recursively find all descendant element IDs for a container
@@ -368,25 +632,20 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       descendantIds.forEach(dId => allIdsToDelete.add(dId));
     });
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements
-          .filter(el => !allIdsToDelete.has(el.id))
-          .map(el => {
-            if (el.children && el.children.some(cId => allIdsToDelete.has(cId))) {
-              return {
-                ...el,
-                children: el.children.filter(cId => !allIdsToDelete.has(cId))
-              };
-            }
-            return el;
-          })
-      };
-    });
+    updateActivePageElements(elements =>
+      elements
+        .filter(el => !allIdsToDelete.has(el.id))
+        .map(el => {
+          if (el.children && el.children.some(cId => allIdsToDelete.has(cId))) {
+            return {
+              ...el,
+              children: el.children.filter(cId => !allIdsToDelete.has(cId))
+            };
+          }
+          return el;
+        })
+    );
 
-    updateInvitationState({ ...invitation, pages: updatedPages });
     setSelectedElementIds([]);
   };
 
@@ -442,15 +701,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       });
     });
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: [...p.elements, ...newRoots, ...newDescendants]
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements => [...elements, ...newRoots, ...newDescendants]);
     setSelectedElementIds(createdRootIds);
   };
 
@@ -459,21 +710,15 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     const targetIds = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
     if (targetIds.length === 0) return;
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements.map(el => {
-          if (targetIds.includes(el.id)) {
-            const nextLock = forceLock !== undefined ? forceLock : !el.isLocked;
-            return { ...el, isLocked: nextLock };
-          }
-          return el;
-        })
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements =>
+      elements.map(el => {
+        if (targetIds.includes(el.id)) {
+          const nextLock = forceLock !== undefined ? forceLock : !el.isLocked;
+          return { ...el, isLocked: nextLock };
+        }
+        return el;
+      })
+    );
   };
 
   // Hide / Unhide Element(s)
@@ -481,21 +726,15 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     const targetIds = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
     if (targetIds.length === 0) return;
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements.map(el => {
-          if (targetIds.includes(el.id)) {
-            const nextHide = forceHide !== undefined ? forceHide : !el.isHidden;
-            return { ...el, isHidden: nextHide };
-          }
-          return el;
-        })
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements =>
+      elements.map(el => {
+        if (targetIds.includes(el.id)) {
+          const nextHide = forceHide !== undefined ? forceHide : !el.isHidden;
+          return { ...el, isHidden: nextHide };
+        }
+        return el;
+      })
+    );
   };
 
   // Detach child from parent container
@@ -509,35 +748,29 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     const absoluteX = (parent?.style.x || 0) + target.style.x;
     const absoluteY = (parent?.style.y || 0) + target.style.y;
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements.map(el => {
-          if (el.id === id) {
-            return {
-              ...el,
-              parentContainerId: null,
-              parentId: null,
-              style: {
-                ...el.style,
-                x: absoluteX,
-                y: absoluteY
-              }
-            };
-          }
-          if (el.id === parentId && el.children) {
-            return {
-              ...el,
-              children: el.children.filter(cId => cId !== id)
-            };
-          }
-          return el;
-        })
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements =>
+      elements.map(el => {
+        if (el.id === id) {
+          return {
+            ...el,
+            parentContainerId: null,
+            parentId: null,
+            style: {
+              ...el.style,
+              x: absoluteX,
+              y: absoluteY
+            }
+          };
+        }
+        if (el.id === parentId && el.children) {
+          return {
+            ...el,
+            children: el.children.filter(cId => cId !== id)
+          };
+        }
+        return el;
+      })
+    );
   };
 
   // LAYER ORDERING
@@ -555,8 +788,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     elements.forEach((el, idx) => {
       el.style = { ...el.style, zIndex: idx + 1 };
     });
-    const updatedPages = invitation.pages.map((p, i) => i === selectedPageIndex ? { ...p, elements } : p);
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(() => elements);
   };
 
   const handleSendBackward = (idOrIds?: string | string[]) => {
@@ -573,8 +805,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     elements.forEach((el, idx) => {
       el.style = { ...el.style, zIndex: idx + 1 };
     });
-    const updatedPages = invitation.pages.map((p, i) => i === selectedPageIndex ? { ...p, elements } : p);
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(() => elements);
   };
 
   const handleBringToFront = (idOrIds?: string | string[]) => {
@@ -586,8 +817,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     elements.forEach((el, idx) => {
       el.style = { ...el.style, zIndex: idx + 1 };
     });
-    const updatedPages = invitation.pages.map((p, i) => i === selectedPageIndex ? { ...p, elements } : p);
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(() => elements);
   };
 
   const handleSendToBack = (idOrIds?: string | string[]) => {
@@ -599,8 +829,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     elements.forEach((el, idx) => {
       el.style = { ...el.style, zIndex: idx + 1 };
     });
-    const updatedPages = invitation.pages.map((p, i) => i === selectedPageIndex ? { ...p, elements } : p);
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(() => elements);
   };
 
   // GROUPING
@@ -643,9 +872,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       children: targetIds
     };
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      const elements = p.elements.map(el => {
+    updateActivePageElements(elements => {
+      const updated = elements.map(el => {
         if (targetIds.includes(el.id)) {
           return {
             ...el,
@@ -660,13 +888,9 @@ export const EditorPage: React.FC<EditorPageProps> = ({
         }
         return el;
       });
-      return {
-        ...p,
-        elements: [...elements, containerElement]
-      };
+      return [...updated, containerElement];
     });
 
-    updateInvitationState({ ...invitation, pages: updatedPages });
     setSelectedElementIds([containerId]);
   };
 
@@ -682,31 +906,26 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
     const childIds = children.map(c => c.id);
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: p.elements
-          .filter(el => el.id !== container.id)
-          .map(el => {
-            if (childIds.includes(el.id)) {
-              return {
-                ...el,
-                parentContainerId: null,
-                parentId: null,
-                style: {
-                  ...el.style,
-                  x: (container.style.x || 0) + el.style.x,
-                  y: (container.style.y || 0) + el.style.y
-                }
-              };
-            }
-            return el;
-          })
-      };
-    });
+    updateActivePageElements(elements =>
+      elements
+        .filter(el => el.id !== container.id)
+        .map(el => {
+          if (childIds.includes(el.id)) {
+            return {
+              ...el,
+              parentContainerId: null,
+              parentId: null,
+              style: {
+                ...el.style,
+                x: (container.style.x || 0) + el.style.x,
+                y: (container.style.y || 0) + el.style.y
+              }
+            };
+          }
+          return el;
+        })
+    );
 
-    updateInvitationState({ ...invitation, pages: updatedPages });
     setSelectedElementIds(childIds);
   };
 
@@ -760,15 +979,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       .filter(el => !el.parentContainerId && !el.parentId)
       .map(el => idMap[el.id]);
 
-    const updatedPages = invitation.pages.map((p, i) => {
-      if (i !== selectedPageIndex) return p;
-      return {
-        ...p,
-        elements: [...p.elements, ...pasted]
-      };
-    });
-
-    updateInvitationState({ ...invitation, pages: updatedPages });
+    updateActivePageElements(elements => [...elements, ...pasted]);
     setSelectedElementIds(rootIds);
   };
 
@@ -1048,13 +1259,17 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           canRedo={historyIndex < history.length - 1}
           onUndo={handleUndo}
           onRedo={handleRedo}
-          onSave={handleSave}
+          onSave={() => handleSave(true)}
           isSaving={isSaving}
+          hasUnsavedChanges={hasUnsavedChanges}
+          lastSavedAt={lastSavedAt}
           isPreview={isPreview}
           onTogglePreview={() => setIsPreview(false)}
           onOpenShareModal={() => setIsShareModalOpen(true)}
           onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
-          onBackToDashboard={onBackToDashboard}
+          onBackToDashboard={handleBackToDashboardAttempt}
+          isTemplateMode={isEditingTemplate}
+          onBackToAdmin={onBackToAdmin}
         />
         <div className="flex-1 overflow-y-auto">
           <PublishedInvitationView
@@ -1085,13 +1300,17 @@ export const EditorPage: React.FC<EditorPageProps> = ({
         canRedo={historyIndex < history.length - 1}
         onUndo={handleUndo}
         onRedo={handleRedo}
-        onSave={handleSave}
+        onSave={() => handleSave(true)}
         isSaving={isSaving}
+        hasUnsavedChanges={hasUnsavedChanges}
+        lastSavedAt={lastSavedAt}
         isPreview={isPreview}
         onTogglePreview={() => setIsPreview(true)}
         onOpenShareModal={() => setIsShareModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
-        onBackToDashboard={onBackToDashboard}
+        onBackToDashboard={handleBackToDashboardAttempt}
+        isTemplateMode={isEditingTemplate}
+        onBackToAdmin={onBackToAdmin}
       />
 
       {/* Main Studio Work Area */}
@@ -1137,6 +1356,12 @@ export const EditorPage: React.FC<EditorPageProps> = ({
               title
             }
           })}
+          openingScreen={invitation.openingScreen}
+          onSelectOpeningScreen={() => {
+            setSelectedPageIndex(-1);
+            setSelectedElementIds([]);
+          }}
+          onToggleOpeningScreen={handleToggleOpeningScreen}
         />
 
         {/* Center Free Visual Canvas */}
@@ -1176,6 +1401,9 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           selectedElements={selectedElements}
           selectedElement={selectedElement}
           page={activePage}
+          isOpeningScreen={selectedPageIndex === -1}
+          openingScreenConfig={invitation.openingScreen}
+          onUpdateOpeningScreen={handleUpdateOpeningScreen}
           onUpdateElement={handleUpdateElement}
           onUpdateMultipleElements={handleUpdateMultipleElements}
           onUpdatePage={handleUpdatePage}
@@ -1231,6 +1459,28 @@ export const EditorPage: React.FC<EditorPageProps> = ({
         onClose={() => setIsPageTemplatesModalOpen(false)}
         onSelectTemplate={handleSelectPageTemplate}
         onAddBlankPage={handleAddBlankPage}
+      />
+
+      {/* UNSAVED CHANGES EXIT CONFIRMATION */}
+      <ConfirmDialog
+        isOpen={isExitWarningOpen}
+        title="Unsaved Changes Detected"
+        message={
+          <div>
+            <p className="mb-2">
+              You have unsaved changes in this {isEditingTemplate ? 'template' : 'invitation'}. If you leave without saving, any edits made since the last save will be discarded.
+            </p>
+            <p className="text-xs text-slate-500">
+              Would you like to save your changes before exiting?
+            </p>
+          </div>
+        }
+        confirmText={isEditingTemplate ? "Save & Return to Admin" : "Save & Return to Dashboard"}
+        cancelText="Discard Changes"
+        confirmVariant="primary"
+        isLoading={isSavingAndExiting}
+        onConfirm={handleSaveAndExit}
+        onCancel={handleDiscardAndExit}
       />
     </div>
   );

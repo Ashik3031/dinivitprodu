@@ -6,7 +6,8 @@ import {
   AnimationType,
   BackgroundType,
   InvitationTheme,
-  ElementType
+  ElementType,
+  OpeningScreenConfig
 } from '../../types';
 import { GOOGLE_FONTS_LIST } from '../../data/stockAssets';
 import { ContainerInspector } from './ContainerInspector';
@@ -50,7 +51,9 @@ import {
   AlignRight,
   AlignJustify,
   Lock,
-  Unlock
+  Unlock,
+  Mail,
+  MailOpen
 } from 'lucide-react';
 
 interface RightSidebarProps {
@@ -83,6 +86,9 @@ interface RightSidebarProps {
   onPreviewPageAnimations?: () => void;
   viewportMode?: 'mobile' | 'tablet' | 'desktop';
   onChangeViewport?: (mode: 'mobile' | 'tablet' | 'desktop') => void;
+  isOpeningScreen?: boolean;
+  openingScreenConfig?: OpeningScreenConfig;
+  onUpdateOpeningScreen?: (updates: Partial<OpeningScreenConfig>) => void;
 }
 
 export const RightSidebar: React.FC<RightSidebarProps> = ({
@@ -114,7 +120,10 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   onPreviewAnimation,
   onPreviewPageAnimations,
   viewportMode = 'mobile',
-  onChangeViewport
+  onChangeViewport,
+  isOpeningScreen = false,
+  openingScreenConfig,
+  onUpdateOpeningScreen
 }) => {
   const [activeTab, setActiveTab] = useState<'style' | 'responsive' | 'content' | 'animation' | 'container'>('style');
 
@@ -451,21 +460,32 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   }
 
   if (!selectedElement) {
-    // Page & Global Settings Inspector
+    // Page & Global Settings Inspector (or Opening Screen Inspector)
     return (
       <div className="w-80 bg-white border-l border-slate-200 flex flex-col h-full select-none text-slate-800">
         <div className="p-4 border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layout className="w-4 h-4 text-slate-900" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-900">Page & Theme Settings</span>
+            {isOpeningScreen ? (
+              <MailOpen className="w-4 h-4 text-amber-600" />
+            ) : (
+              <Layout className="w-4 h-4 text-slate-900" />
+            )}
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-900">
+              {isOpeningScreen ? 'Opening Screen & Theme' : 'Page & Theme Settings'}
+            </span>
           </div>
+          {isOpeningScreen && (
+            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-[10px] font-bold text-amber-800 border border-amber-200">
+              Cover Page
+            </span>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-5">
-          {/* Page Info */}
+          {/* Page / Cover Title */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block">
-              Page Title
+              {isOpeningScreen ? 'Opening Screen Title' : 'Page Title'}
             </label>
             <input
               type="text"
@@ -475,105 +495,180 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             />
           </div>
 
-          {/* Page Height Configuration */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-xs">
-              <span className="font-semibold text-slate-700 uppercase tracking-wider">Page Height Mode</span>
-              <span className="text-slate-900 font-mono font-medium text-[11px]">
-                {page.heightMode === 'viewport' || page.isFullHeight
-                  ? 'Viewport (100vh)'
-                  : page.heightMode === 'auto'
-                  ? 'Auto Height'
-                  : `${page.height || 844}px`}
-              </span>
-            </div>
+          {/* Opening Screen Envelope & Animation Configuration */}
+          {isOpeningScreen && openingScreenConfig && onUpdateOpeningScreen && (
+            <div className="space-y-3 p-3 bg-amber-50/50 border border-amber-200/70 rounded-xl">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
+                  Cover Style & Behavior
+                </span>
+                <span className="text-[10px] font-medium text-amber-800 capitalize">
+                  {openingScreenConfig.style || 'envelope'}
+                </span>
+              </div>
 
-            {/* Height Mode Selector */}
-            <div className="grid grid-cols-3 gap-1 text-[11px]">
-              <button
-                type="button"
-                onClick={() => onUpdatePage({ heightMode: 'viewport', isFullHeight: true, height: 844 })}
-                className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                  page.heightMode === 'viewport' || page.isFullHeight
-                    ? 'bg-slate-900 text-white font-bold'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                Viewport
-              </button>
-              <button
-                type="button"
-                onClick={() => onUpdatePage({ heightMode: 'auto', isFullHeight: false })}
-                className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                  page.heightMode === 'auto'
-                    ? 'bg-slate-900 text-white font-bold'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                Auto
-              </button>
-              <button
-                type="button"
-                onClick={() => onUpdatePage({ heightMode: 'custom', isFullHeight: false, height: page.height || 844 })}
-                className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                  page.heightMode === 'custom' || (!page.heightMode && !page.isFullHeight)
-                    ? 'bg-slate-900 text-white font-bold'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                Custom Px
-              </button>
-            </div>
+              {/* Style Selector */}
+              <div>
+                <label className="text-[10px] text-slate-600 block mb-1">Interactive Style</label>
+                <select
+                  value={openingScreenConfig.style || 'envelope'}
+                  onChange={(e) => onUpdateOpeningScreen({ style: e.target.value as any })}
+                  className="w-full text-xs bg-white border border-amber-300 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-amber-600 cursor-pointer"
+                >
+                  <option value="envelope">Envelope Unfold</option>
+                  <option value="wax-seal">Wax Seal Monogram</option>
+                  <option value="video-cover">Video Ambient Cover</option>
+                  <option value="card-flip">Modern 3D Card Flip</option>
+                  <option value="curtain">Curtain Reveal</option>
+                  <option value="monogram-glow">Monogram Glow</option>
+                  <option value="minimal-button">Minimal Clean Button</option>
+                  <option value="custom-page">Full Custom Page</option>
+                </select>
+              </div>
 
-            {/* Custom Height Slider & Presets if custom */}
-            {(page.heightMode === 'custom' || (!page.heightMode && !page.isFullHeight)) && (
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min="400"
-                    max="2000"
-                    step="20"
-                    value={page.height || 844}
-                    onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom' })}
-                    className="flex-1 accent-slate-900"
-                  />
-                  <input
-                    type="number"
-                    min="400"
-                    max="3000"
-                    value={page.height || 844}
-                    onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom' })}
-                    className="w-16 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-center"
-                  />
+              {/* Envelope Color & Seal Color */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div>
+                  <label className="text-[10px] text-slate-600 block mb-1">Envelope Card</label>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="color"
+                      value={openingScreenConfig.envelopeColor || '#0e261d'}
+                      onChange={(e) => onUpdateOpeningScreen({ envelopeColor: e.target.value })}
+                      className="w-6 h-6 rounded border border-slate-300 cursor-pointer bg-transparent"
+                    />
+                    <span className="text-[11px] font-mono text-slate-700">{openingScreenConfig.envelopeColor || '#0e261d'}</span>
+                  </div>
                 </div>
 
-                <div className="flex gap-1.5 text-[10px]">
-                  <button
-                    type="button"
-                    onClick={() => onUpdatePage({ height: 844, heightMode: 'custom' })}
-                    className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
-                  >
-                    Mobile (844px)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onUpdatePage({ height: 1100, heightMode: 'custom' })}
-                    className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
-                  >
-                    Medium (1100px)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onUpdatePage({ height: 1500, heightMode: 'custom' })}
-                    className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
-                  >
-                    Long (1500px)
-                  </button>
+                <div>
+                  <label className="text-[10px] text-slate-600 block mb-1">Wax Seal / Accent</label>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="color"
+                      value={openingScreenConfig.sealColor || '#d4af37'}
+                      onChange={(e) => onUpdateOpeningScreen({ sealColor: e.target.value })}
+                      className="w-6 h-6 rounded border border-slate-300 cursor-pointer bg-transparent"
+                    />
+                    <span className="text-[11px] font-mono text-slate-700">{openingScreenConfig.sealColor || '#d4af37'}</span>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Music Autoplay On Open */}
+              <div className="pt-2 border-t border-amber-200/50 flex items-center justify-between">
+                <span className="text-[11px] text-amber-950 font-medium">Autoplay Music On Open</span>
+                <input
+                  type="checkbox"
+                  checked={openingScreenConfig.musicAutoplayOnOpen !== false}
+                  onChange={(e) => onUpdateOpeningScreen({ musicAutoplayOnOpen: e.target.checked })}
+                  className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Page Height Configuration (Standard pages or Opening) */}
+          {!isOpeningScreen && (
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-semibold text-slate-700 uppercase tracking-wider">Page Height Mode</span>
+                <span className="text-slate-900 font-mono font-medium text-[11px]">
+                  {page.heightMode === 'viewport' || page.isFullHeight
+                    ? 'Viewport (100vh)'
+                    : page.heightMode === 'auto'
+                    ? 'Auto Height'
+                    : `${page.height || 844}px`}
+                </span>
+              </div>
+
+              {/* Height Mode Selector */}
+              <div className="grid grid-cols-3 gap-1 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => onUpdatePage({ heightMode: 'viewport', isFullHeight: true, height: 844 })}
+                  className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
+                    page.heightMode === 'viewport' || page.isFullHeight
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Viewport
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdatePage({ heightMode: 'auto', isFullHeight: false })}
+                  className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
+                    page.heightMode === 'auto'
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Auto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdatePage({ heightMode: 'custom', isFullHeight: false, height: page.height || 844 })}
+                  className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
+                    page.heightMode === 'custom' || (!page.heightMode && !page.isFullHeight)
+                      ? 'bg-slate-900 text-white font-bold'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  Custom Px
+                </button>
+              </div>
+
+              {/* Custom Height Slider & Presets if custom */}
+              {(page.heightMode === 'custom' || (!page.heightMode && !page.isFullHeight)) && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min="400"
+                      max="2000"
+                      step="20"
+                      value={page.height || 844}
+                      onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom' })}
+                      className="flex-1 accent-slate-900"
+                    />
+                    <input
+                      type="number"
+                      min="400"
+                      max="3000"
+                      value={page.height || 844}
+                      onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom' })}
+                      className="w-16 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-center"
+                    />
+                  </div>
+
+                  <div className="flex gap-1.5 text-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => onUpdatePage({ height: 844, heightMode: 'custom' })}
+                      className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                    >
+                      Mobile (844px)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onUpdatePage({ height: 1100, heightMode: 'custom' })}
+                      className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                    >
+                      Medium (1100px)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onUpdatePage({ height: 1500, heightMode: 'custom' })}
+                      className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                    >
+                      Long (1500px)
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Page Background */}
           <div className="space-y-3 pt-3 border-t border-slate-200">

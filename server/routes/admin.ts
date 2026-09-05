@@ -1,18 +1,29 @@
 import express from 'express';
 import { dbService } from '../db';
+import { authMiddleware, requireAdmin, optionalAuthMiddleware } from '../middleware/auth';
 
 const router = express.Router();
 
-// List all business accounts (Admin only)
+// List all business accounts with comprehensive invitation breakdown
 router.get('/users', (req, res) => {
   try {
     const users = dbService.getUsers();
-    // Attach invitation count for each business
+    // Attach invitation count and metrics for each business
     const invitations = dbService.getInvitations(undefined, 'admin');
-    const usersWithCount = users.map(u => ({
-      ...u,
-      invitationCount: invitations.filter(i => i.businessId === u.id).length
-    }));
+    const usersWithCount = users.map(u => {
+      const userInvs = invitations.filter(i => i.businessId === u.id);
+      const publishedCount = userInvs.filter(i => i.status === 'published').length;
+      const draftCount = userInvs.filter(i => i.status === 'draft').length;
+      const totalViews = userInvs.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0);
+
+      return {
+        ...u,
+        invitationCount: userInvs.length,
+        publishedCount,
+        draftCount,
+        totalViews
+      };
+    });
     return res.json({ users: usersWithCount });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -22,7 +33,7 @@ router.get('/users', (req, res) => {
 // Create new business account (Admin only - No public signup)
 router.post('/users', (req, res) => {
   try {
-    const { username, password, businessName, ownerName, email, phone, role } = req.body;
+    const { username, password, businessName, ownerName, email, phone, role, maxInvitations, brandColor, customDomain } = req.body;
 
     if (!username || !password || !businessName || !ownerName || !email) {
       return res.status(400).json({
@@ -38,15 +49,24 @@ router.post('/users', (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 5 characters long.' });
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+
     const newUser = dbService.createUser({
-      username,
-      password,
-      businessName,
-      ownerName,
-      email,
-      phone: phone || '',
-      role: role || 'business',
-      isActive: true
+      username: username.trim(),
+      password: password.trim(),
+      businessName: businessName.trim(),
+      ownerName: ownerName.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone ? phone.trim() : '',
+      role: role === 'admin' ? 'admin' : 'business',
+      isActive: true,
+      maxInvitations: maxInvitations ? Number(maxInvitations) : 50,
+      brandColor: brandColor || '#1e293b',
+      customDomain: customDomain ? customDomain.trim() : undefined
     });
 
     return res.status(201).json({
@@ -64,8 +84,38 @@ router.put('/users/:id', (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
+
+    if (updates.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(updates.email)) {
+        return res.status(400).json({ error: 'Please enter a valid email address.' });
+      }
+    }
+
     const updated = dbService.updateUser(id, updates);
     return res.json({ success: true, user: updated, message: 'Account updated successfully.' });
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+// Toggle activate/deactivate user
+router.put('/users/:id/status', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    const target = dbService.getUserById(id);
+    if (!target) return res.status(404).json({ error: 'User not found' });
+    if (target.role === 'admin' && !isActive) {
+      return res.status(400).json({ error: 'Cannot deactivate the super administrator account.' });
+    }
+
+    const updated = dbService.updateUser(id, { isActive: Boolean(isActive) });
+    return res.json({
+      success: true,
+      user: updated,
+      message: `Account for "${updated.businessName}" is now ${updated.isActive ? 'Active' : 'Deactivated'}.`
+    });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
@@ -83,7 +133,7 @@ router.post('/users/:id/reset-password', (req, res) => {
     const updated = dbService.updateUser(id, { password: newPassword });
     return res.json({
       success: true,
-      message: `Password reset successfully for ${updated.businessName}. Give the new password to the business owner.`
+      message: `Password reset successfully for ${updated.businessName} (${updated.username}).`
     });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
@@ -112,3 +162,4 @@ router.get('/stats', (req, res) => {
 });
 
 export default router;
+
