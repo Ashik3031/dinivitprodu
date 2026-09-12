@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CanvasElement, InvitationPage, ViewportMode } from '../../types';
 import { ElementRenderer } from './ElementRenderer';
-import { resolveElementForViewport, setElementResponsiveOverride } from '../../utils/responsiveUtils';
+import { resolveElementForViewport, setElementResponsiveOverride, getPageCalculatedHeight } from '../../utils/responsiveUtils';
 import {
   Lock,
   Unlock,
@@ -23,7 +23,9 @@ import {
   AlignJustify,
   Maximize2,
   Play,
-  Sparkles
+  Sparkles,
+  Palette,
+  Type
 } from 'lucide-react';
 
 interface VisualCanvasProps {
@@ -105,6 +107,18 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   const isSingleSelection = selectedElements.length === 1;
   const singleElement = isSingleSelection ? selectedElements[0] : null;
 
+  const [windowHeight, setWindowHeight] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerHeight : 844
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Viewport dimensions
   const getCanvasWidth = () => {
     switch (viewportMode) {
@@ -113,14 +127,14 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
       case 'tablet':
         return 768;
       case 'desktop':
-        return 960;
+        return 768; // Desktop width matches tablet (768px)
       default:
         return 390;
     }
   };
 
   const canvasWidth = getCanvasWidth();
-  const canvasHeight = page.height || 844;
+  const canvasHeight = getPageCalculatedHeight(page, viewportMode, windowHeight);
 
   // Page background style
   const getPageBgStyle = () => {
@@ -486,10 +500,11 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   // Calculate collective multi-selection bounding box
   const multiSelectionBounds = (() => {
     if (selectedElements.length <= 1) return null;
-    const minX = Math.min(...selectedElements.map(e => e.style.x));
-    const minY = Math.min(...selectedElements.map(e => e.style.y));
-    const maxX = Math.max(...selectedElements.map(e => e.style.x + e.style.width));
-    const maxY = Math.max(...selectedElements.map(e => e.style.y + e.style.height));
+    const resolvedBoxes = selectedElements.map(e => resolveElementForViewport(e, viewportMode).style);
+    const minX = Math.min(...resolvedBoxes.map(s => s.x));
+    const minY = Math.min(...resolvedBoxes.map(s => s.y));
+    const maxX = Math.max(...resolvedBoxes.map(s => s.x + s.width));
+    const maxY = Math.max(...resolvedBoxes.map(s => s.y + s.height));
 
     return {
       x: minX,
@@ -501,14 +516,14 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
 
   return (
     <div
-      className="relative flex items-center justify-center p-8 min-h-full overflow-auto select-none"
+      className="relative flex items-center justify-center p-8 min-h-full min-w-full overflow-auto select-none w-full"
       onClick={() => onSelectElement(null)}
     >
       {/* Design Canvas Board */}
       <div
         ref={canvasRef}
         onMouseDown={handleCanvasMouseDown}
-        className="canvas-background relative bg-white border border-slate-200 shadow-2xl rounded-2xl transition-all duration-150 origin-top overflow-hidden"
+        className="canvas-background relative m-auto bg-white border border-slate-200 shadow-2xl rounded-2xl transition-all duration-150 origin-top overflow-hidden shrink-0"
         style={{
           width: `${canvasWidth}px`,
           height: `${canvasHeight}px`,
@@ -531,12 +546,24 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
         {/* Video Background */}
         {page.background?.type === 'video' && page.background.videoUrl && (
           <video
+            key={page.background.videoUrl}
             src={page.background.videoUrl}
             autoPlay
             loop
             muted
             playsInline
             className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+          />
+        )}
+
+        {/* Background Overlay if specified */}
+        {page.background?.overlayOpacity !== undefined && page.background.overlayOpacity > 0 && (
+          <div
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              backgroundColor: page.background.overlayColor || '#000000',
+              opacity: page.background.overlayOpacity
+            }}
           />
         )}
 
@@ -606,6 +633,54 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 <div className="absolute inset-0 border-2 border-slate-900 pointer-events-none rounded-[2px] shadow-sm">
                   {/* Floating Action Toolbar */}
                   <div className="absolute -top-11 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-1 shadow-lg pointer-events-auto z-50 whitespace-nowrap">
+                    {/* Quick Color & Font Size for text and invitation elements */}
+                    {['heading', 'text', 'paragraph', 'button', 'whatsapp-button', 'directions-button', 'contact-button', 'event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code'].includes(element.type) && (
+                      <div className="flex items-center gap-1 pr-1 border-r border-slate-200">
+                        {/* Color Picker */}
+                        <div className="relative flex items-center" title="Quick Color">
+                          <input
+                            type="color"
+                            value={element.style?.color || '#d4af37'}
+                            onChange={e => {
+                              e.stopPropagation();
+                              onUpdateElement(element.id, {
+                                style: { ...element.style, color: e.target.value }
+                              });
+                            }}
+                            className="w-4 h-4 rounded-full border border-slate-300 cursor-pointer p-0 bg-transparent shrink-0"
+                          />
+                        </div>
+                        {/* Font size down */}
+                        <button
+                          type="button"
+                          title="Decrease Font Size"
+                          onClick={e => {
+                            e.stopPropagation();
+                            onUpdateElement(element.id, {
+                              style: { ...element.style, fontSize: Math.max(8, (Number(element.style?.fontSize) || 16) - 2) }
+                            });
+                          }}
+                          className="px-1 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                        >
+                          A-
+                        </button>
+                        {/* Font size up */}
+                        <button
+                          type="button"
+                          title="Increase Font Size"
+                          onClick={e => {
+                            e.stopPropagation();
+                            onUpdateElement(element.id, {
+                              style: { ...element.style, fontSize: (Number(element.style?.fontSize) || 16) + 2 }
+                            });
+                          }}
+                          className="px-1 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                        >
+                          A+
+                        </button>
+                      </div>
+                    )}
+
                     {/* Quick Test Animation Trigger if element has animation */}
                     {element.animation && element.animation.type !== 'none' && onPreviewAnimation && (
                       <button

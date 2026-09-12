@@ -52,7 +52,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
       case 'tablet':
         return 768;
       case 'desktop':
-        return 960;
+        return 768;
     }
   };
 
@@ -119,7 +119,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                 className={`p-1.5 rounded-md transition-all ${
                   viewportMode === 'desktop' ? 'bg-amber-500 text-slate-950 font-semibold shadow' : 'text-slate-400 hover:text-white'
                 }`}
-                title="Desktop Viewport (960px)"
+                title="Desktop Viewport (768px)"
               >
                 <Monitor className="w-4 h-4" />
               </button>

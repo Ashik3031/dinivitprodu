@@ -41,9 +41,15 @@ export const MapElement: React.FC<MapElementProps> = ({
 
   return (
     <div
-      className="w-full h-full relative rounded-2xl overflow-hidden border border-white/15 bg-slate-950 shadow-xl flex flex-col select-none group"
+      className="w-full h-full relative overflow-hidden flex flex-col select-none group transition-all"
       style={{
-        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+        fontFamily: style.fontFamily || "'Playfair Display', serif",
+        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+        borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
+        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.15)',
+        borderStyle: style.borderStyle || 'solid',
+        boxShadow: style.boxShadow || '0 10px 25px -5px rgba(0,0,0,0.3)',
+        backgroundColor: style.backgroundColor || '#020617'
       }}
     >
       {/* Google Maps Iframe */}
@@ -56,8 +62,11 @@ export const MapElement: React.FC<MapElementProps> = ({
         />
 
         {/* Floating Pin / Venue Badge */}
-        <div className="absolute top-2.5 left-2.5 bg-slate-950/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-white shadow-lg flex items-center gap-1.5 max-w-[85%]">
-          <MapPin className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+        <div
+          className="absolute top-2.5 left-2.5 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-white shadow-lg flex items-center gap-1.5 max-w-[85%]"
+          style={{ backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}f0` : 'rgba(2, 6, 23, 0.9)' }}
+        >
+          <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: primaryColor }} />
           <div className="truncate">
             <span className="text-[11px] font-bold block truncate">{venueName}</span>
           </div>
@@ -65,7 +74,10 @@ export const MapElement: React.FC<MapElementProps> = ({
       </div>
 
       {/* Footer Info & Directions Button */}
-      <div className="p-3 bg-slate-950/95 backdrop-blur-md border-t border-white/10 flex items-center justify-between gap-2">
+      <div
+        className="p-3 backdrop-blur-md border-t border-white/10 flex items-center justify-between gap-2"
+        style={{ backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}fa` : 'rgba(2, 6, 23, 0.95)' }}
+      >
         <div className="flex-1 min-w-0 pr-1">
           <div className="text-[11px] text-slate-300 truncate font-medium">
             {venueAddress}
@@ -87,7 +99,8 @@ export const MapElement: React.FC<MapElementProps> = ({
           <button
             type="button"
             onClick={handleDirectionsClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer font-sans"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer font-sans"
+            style={{ backgroundColor: primaryColor }}
           >
             <Navigation className="w-3.5 h-3.5 fill-slate-950" />
             <span>Directions</span>

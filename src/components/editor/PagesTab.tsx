@@ -204,13 +204,19 @@ export const PagesTab: React.FC<PagesTabProps> = ({
                   : 'bg-slate-100 text-slate-400'
               }`}
             >
-              <Mail className="w-4 h-4" />
+              {openingScreen?.coverType === 'video' ? (
+                <VideoIcon className="w-4 h-4 text-purple-600" />
+              ) : openingScreen?.coverType === 'image' ? (
+                <ImageIcon className="w-4 h-4 text-blue-600" />
+              ) : (
+                <Mail className="w-4 h-4" />
+              )}
             </div>
 
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-slate-900 truncate">
-                  {openingScreen?.title || 'Opening Screen'}
+                  {openingScreen?.coupleNames || openingScreen?.title || 'Opening Screen'}
                 </span>
                 {isOpeningActive && (
                   <span className="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[9px] font-bold">
@@ -219,9 +225,17 @@ export const PagesTab: React.FC<PagesTabProps> = ({
                 )}
               </div>
               <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
-                <span>{isOpeningEnabled ? 'Interactive Cover Canvas' : 'Disabled'}</span>
-                <span>•</span>
-                <span className="capitalize">{openingBg?.type || 'gradient'}</span>
+                <span>
+                  {isOpeningEnabled
+                    ? openingScreen?.coverType === 'video'
+                      ? `Video (${openingScreen?.videoPlayMode || 'autoplay'})`
+                      : openingScreen?.coverType === 'image'
+                      ? `Photo (${openingScreen?.imageTransitionEffect || 'zoom-fade'})`
+                      : openingScreen?.coverType === 'custom-page'
+                      ? 'Custom Canvas'
+                      : 'Classic Envelope'
+                    : 'Disabled'}
+                </span>
               </div>
             </div>
           </div>

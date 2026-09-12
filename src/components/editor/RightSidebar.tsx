@@ -7,7 +7,8 @@ import {
   BackgroundType,
   InvitationTheme,
   ElementType,
-  OpeningScreenConfig
+  OpeningScreenConfig,
+  ViewportMode
 } from '../../types';
 import { GOOGLE_FONTS_LIST } from '../../data/stockAssets';
 import { ContainerInspector } from './ContainerInspector';
@@ -19,8 +20,11 @@ import { ButtonInspector } from './inspectors/ButtonInspector';
 import { AudioInspector } from './inspectors/AudioInspector';
 import { IconShapeDividerInspector } from './inspectors/IconShapeDividerInspector';
 import { InvitationElementsInspector } from './inspectors/InvitationElementsInspector';
+import { InvitationStyleInspector } from './inspectors/InvitationStyleInspector';
+import { OpeningScreenInspector } from './inspectors/OpeningScreenInspector';
 import { AnimationInspector } from './inspectors/AnimationInspector';
 import { PAGE_TRANSITIONS } from '../../utils/animationUtils';
+import { getPageCalculatedHeight } from '../../utils/responsiveUtils';
 import {
   Sliders,
   Type,
@@ -53,7 +57,9 @@ import {
   Lock,
   Unlock,
   Mail,
-  MailOpen
+  MailOpen,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface RightSidebarProps {
@@ -84,11 +90,12 @@ interface RightSidebarProps {
   businessId?: string;
   onPreviewAnimation?: (elementId: string) => void;
   onPreviewPageAnimations?: () => void;
-  viewportMode?: 'mobile' | 'tablet' | 'desktop';
-  onChangeViewport?: (mode: 'mobile' | 'tablet' | 'desktop') => void;
+  viewportMode?: ViewportMode;
+  onChangeViewport?: (mode: ViewportMode) => void;
   isOpeningScreen?: boolean;
   openingScreenConfig?: OpeningScreenConfig;
   onUpdateOpeningScreen?: (updates: Partial<OpeningScreenConfig>) => void;
+  onTestOpeningScreen?: () => void;
 }
 
 export const RightSidebar: React.FC<RightSidebarProps> = ({
@@ -119,11 +126,12 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   businessId,
   onPreviewAnimation,
   onPreviewPageAnimations,
-  viewportMode = 'mobile',
+  viewportMode = 'mobile' as ViewportMode,
   onChangeViewport,
   isOpeningScreen = false,
   openingScreenConfig,
-  onUpdateOpeningScreen
+  onUpdateOpeningScreen,
+  onTestOpeningScreen
 }) => {
   const [activeTab, setActiveTab] = useState<'style' | 'responsive' | 'content' | 'animation' | 'container'>('style');
 
@@ -495,90 +503,26 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             />
           </div>
 
-          {/* Opening Screen Envelope & Animation Configuration */}
+          {/* Opening Screen Comprehensive Customizer */}
           {isOpeningScreen && openingScreenConfig && onUpdateOpeningScreen && (
-            <div className="space-y-3 p-3 bg-amber-50/50 border border-amber-200/70 rounded-xl">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-900">
-                  Cover Style & Behavior
-                </span>
-                <span className="text-[10px] font-medium text-amber-800 capitalize">
-                  {openingScreenConfig.style || 'envelope'}
-                </span>
-              </div>
-
-              {/* Style Selector */}
-              <div>
-                <label className="text-[10px] text-slate-600 block mb-1">Interactive Style</label>
-                <select
-                  value={openingScreenConfig.style || 'envelope'}
-                  onChange={(e) => onUpdateOpeningScreen({ style: e.target.value as any })}
-                  className="w-full text-xs bg-white border border-amber-300 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-amber-600 cursor-pointer"
-                >
-                  <option value="envelope">Envelope Unfold</option>
-                  <option value="wax-seal">Wax Seal Monogram</option>
-                  <option value="video-cover">Video Ambient Cover</option>
-                  <option value="card-flip">Modern 3D Card Flip</option>
-                  <option value="curtain">Curtain Reveal</option>
-                  <option value="monogram-glow">Monogram Glow</option>
-                  <option value="minimal-button">Minimal Clean Button</option>
-                  <option value="custom-page">Full Custom Page</option>
-                </select>
-              </div>
-
-              {/* Envelope Color & Seal Color */}
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <div>
-                  <label className="text-[10px] text-slate-600 block mb-1">Envelope Card</label>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={openingScreenConfig.envelopeColor || '#0e261d'}
-                      onChange={(e) => onUpdateOpeningScreen({ envelopeColor: e.target.value })}
-                      className="w-6 h-6 rounded border border-slate-300 cursor-pointer bg-transparent"
-                    />
-                    <span className="text-[11px] font-mono text-slate-700">{openingScreenConfig.envelopeColor || '#0e261d'}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-slate-600 block mb-1">Wax Seal / Accent</label>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="color"
-                      value={openingScreenConfig.sealColor || '#d4af37'}
-                      onChange={(e) => onUpdateOpeningScreen({ sealColor: e.target.value })}
-                      className="w-6 h-6 rounded border border-slate-300 cursor-pointer bg-transparent"
-                    />
-                    <span className="text-[11px] font-mono text-slate-700">{openingScreenConfig.sealColor || '#d4af37'}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Music Autoplay On Open */}
-              <div className="pt-2 border-t border-amber-200/50 flex items-center justify-between">
-                <span className="text-[11px] text-amber-950 font-medium">Autoplay Music On Open</span>
-                <input
-                  type="checkbox"
-                  checked={openingScreenConfig.musicAutoplayOnOpen !== false}
-                  onChange={(e) => onUpdateOpeningScreen({ musicAutoplayOnOpen: e.target.checked })}
-                  className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
-                />
-              </div>
-            </div>
+            <OpeningScreenInspector
+              config={openingScreenConfig}
+              onUpdate={onUpdateOpeningScreen}
+              onTestOpeningScreen={onTestOpeningScreen}
+            />
           )}
 
           {/* Page Height Configuration (Standard pages or Opening) */}
           {!isOpeningScreen && (
             <div className="space-y-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-700 uppercase tracking-wider">Page Height Mode</span>
-                <span className="text-slate-900 font-mono font-medium text-[11px]">
-                  {page.heightMode === 'viewport' || page.isFullHeight
-                    ? 'Viewport (100vh)'
+                <span className="font-semibold text-slate-700 uppercase tracking-wider">Page Height</span>
+                <span className="text-slate-900 font-mono font-medium text-[11px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {page.heightMode === 'viewport' || (page.isFullHeight && page.heightMode !== 'custom' && page.heightMode !== 'auto')
+                    ? `Viewport (${getPageCalculatedHeight(page, viewportMode)}px)`
                     : page.heightMode === 'auto'
-                    ? 'Auto Height'
-                    : `${page.height || 844}px`}
+                    ? `Auto (${getPageCalculatedHeight(page, viewportMode)}px)`
+                    : `Custom (${page.height || 844}px)`}
                 </span>
               </div>
 
@@ -586,12 +530,17 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               <div className="grid grid-cols-3 gap-1 text-[11px]">
                 <button
                   type="button"
-                  onClick={() => onUpdatePage({ heightMode: 'viewport', isFullHeight: true, height: 844 })}
+                  onClick={() => onUpdatePage({
+                    heightMode: 'viewport',
+                    isFullHeight: true,
+                    height: typeof window !== 'undefined' ? window.innerHeight : 844
+                  })}
                   className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                    page.heightMode === 'viewport' || page.isFullHeight
+                    page.heightMode === 'viewport' || (page.isFullHeight && page.heightMode !== 'custom' && page.heightMode !== 'auto')
                       ? 'bg-slate-900 text-white font-bold'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
+                  title="Fills viewport window height — matches preview exactly"
                 >
                   Viewport
                 </button>
@@ -603,24 +552,30 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                       ? 'bg-slate-900 text-white font-bold'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
+                  title="Auto-expands to fit all elements with comfortable breathing room"
                 >
                   Auto
                 </button>
                 <button
                   type="button"
-                  onClick={() => onUpdatePage({ heightMode: 'custom', isFullHeight: false, height: page.height || 844 })}
+                  onClick={() => onUpdatePage({
+                    heightMode: 'custom',
+                    isFullHeight: false,
+                    height: page.height || 844
+                  })}
                   className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                    page.heightMode === 'custom' || (!page.heightMode && !page.isFullHeight)
+                    page.heightMode === 'custom'
                       ? 'bg-slate-900 text-white font-bold'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
+                  title="Set exact pixel height with slider or presets"
                 >
                   Custom Px
                 </button>
               </div>
 
               {/* Custom Height Slider & Presets if custom */}
-              {(page.heightMode === 'custom' || (!page.heightMode && !page.isFullHeight)) && (
+              {page.heightMode === 'custom' && (
                 <div className="space-y-2 pt-1">
                   <div className="flex items-center gap-2">
                     <input
@@ -629,7 +584,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                       max="2000"
                       step="20"
                       value={page.height || 844}
-                      onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom' })}
+                      onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom', isFullHeight: false })}
                       className="flex-1 accent-slate-900"
                     />
                     <input
@@ -637,29 +592,41 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                       min="400"
                       max="3000"
                       value={page.height || 844}
-                      onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom' })}
+                      onChange={(e) => onUpdatePage({ height: Number(e.target.value), heightMode: 'custom', isFullHeight: false })}
                       className="w-16 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-center"
                     />
                   </div>
 
-                  <div className="flex gap-1.5 text-[10px]">
+                  <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                     <button
                       type="button"
-                      onClick={() => onUpdatePage({ height: 844, heightMode: 'custom' })}
-                      className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                      onClick={() => onUpdatePage({
+                        height: typeof window !== 'undefined' ? window.innerHeight : 720,
+                        heightMode: 'custom',
+                        isFullHeight: false
+                      })}
+                      className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer truncate"
+                      title="Set to current screen height"
                     >
-                      Mobile (844px)
+                      Fit Screen ({typeof window !== 'undefined' ? window.innerHeight : 720}px)
                     </button>
                     <button
                       type="button"
-                      onClick={() => onUpdatePage({ height: 1100, heightMode: 'custom' })}
+                      onClick={() => onUpdatePage({ height: 844, heightMode: 'custom', isFullHeight: false })}
+                      className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                    >
+                      iPhone (844px)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onUpdatePage({ height: 1100, heightMode: 'custom', isFullHeight: false })}
                       className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
                     >
                       Medium (1100px)
                     </button>
                     <button
                       type="button"
-                      onClick={() => onUpdatePage({ height: 1500, heightMode: 'custom' })}
+                      onClick={() => onUpdatePage({ height: 1500, heightMode: 'custom', isFullHeight: false })}
                       className="px-2 py-1 bg-slate-100 rounded border border-slate-200 text-slate-700 hover:bg-slate-200 cursor-pointer"
                     >
                       Long (1500px)
@@ -841,6 +808,86 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Background Position Alignment */}
+                <div className="space-y-1 pt-1">
+                  <label className="text-[11px] text-slate-600 block font-medium">Image Position / Alignment</label>
+                  <div className="grid grid-cols-4 gap-1 text-[10px]">
+                    {[
+                      { label: 'Center', value: 'center' },
+                      { label: 'Top', value: 'top center' },
+                      { label: 'Bottom', value: 'bottom center' },
+                      { label: 'Custom', value: 'center 40%' }
+                    ].map((pos) => (
+                      <button
+                        key={pos.label}
+                        type="button"
+                        onClick={() => onUpdatePage({
+                          background: { ...page.background, position: pos.value }
+                        })}
+                        className={`p-1.5 rounded border text-center cursor-pointer transition-colors ${
+                          (page.background?.position || 'center') === pos.value
+                            ? 'bg-slate-900 text-white font-semibold border-slate-900'
+                            : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {pos.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Background Size / Fit */}
+                <div className="space-y-1 pt-1">
+                  <label className="text-[11px] text-slate-600 block font-medium">Image Fit</label>
+                  <div className="grid grid-cols-3 gap-1 text-[10px]">
+                    {[
+                      { label: 'Cover (Fill)', value: 'cover' },
+                      { label: 'Contain (Fit)', value: 'contain' },
+                      { label: 'Auto (Original)', value: 'auto' }
+                    ].map((size) => (
+                      <button
+                        key={size.label}
+                        type="button"
+                        onClick={() => onUpdatePage({
+                          background: { ...page.background, size: size.value as 'cover' | 'contain' | 'auto' }
+                        })}
+                        className={`p-1.5 rounded border text-center cursor-pointer transition-colors ${
+                          (page.background?.size || 'cover') === size.value
+                            ? 'bg-slate-900 text-white font-semibold border-slate-900'
+                            : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {size.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Background Overlay / Dimmer */}
+                <div className="space-y-1.5 pt-2 border-t border-slate-200">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="font-medium text-slate-600">Dim Overlay (Text Contrast)</span>
+                    <span className="font-mono text-slate-700">
+                      {Math.round((page.background?.overlayOpacity || 0) * 100)}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.9"
+                    step="0.05"
+                    value={page.background?.overlayOpacity || 0}
+                    onChange={(e) => onUpdatePage({
+                      background: {
+                        ...page.background,
+                        overlayOpacity: Number(e.target.value),
+                        overlayColor: page.background?.overlayColor || '#000000'
+                      }
+                    })}
+                    className="w-full accent-slate-900 cursor-pointer"
+                  />
                 </div>
               </div>
             )}
@@ -1074,6 +1121,25 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         </div>
       </div>
 
+      {/* Opening Screen Notice */}
+      {isOpeningScreen && (
+        <div className="px-3 py-2 bg-amber-50/80 border-b border-amber-200/70 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-medium">
+            <MailOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>Opening Screen Element</span>
+          </div>
+          {onSelectElement && (
+            <button
+              type="button"
+              onClick={() => onSelectElement(null as any)}
+              className="text-[10px] text-amber-800 hover:text-amber-950 font-bold underline cursor-pointer"
+            >
+              Cover Settings
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Parent Container Breadcrumb Banner */}
       {parentElement && (
         <div className="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between text-indigo-950 text-[11px]">
@@ -1104,6 +1170,62 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                 Detach
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Font & Color Bar for text-bearing and invitation elements */}
+      {['heading', 'text', 'paragraph', 'button', 'whatsapp-button', 'directions-button', 'contact-button', 'event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code'].includes(selectedElement.type) && (
+        <div className="px-3 py-2 bg-amber-50/70 border-b border-amber-200/70 space-y-1.5">
+          <div className="flex items-center justify-between text-[10px] font-bold text-slate-800">
+            <span className="flex items-center gap-1">
+              <Palette className="w-3 h-3 text-amber-600" />
+              <span>Quick Font & Color</span>
+            </span>
+            <span className="text-[9px] font-mono text-slate-500 capitalize">{selectedElement.type.replace('-', ' ')}</span>
+          </div>
+          <div className="grid grid-cols-12 gap-1.5 items-center">
+            {/* Font Family Selector */}
+            <div className="col-span-6">
+              <select
+                value={style.fontFamily || "'Playfair Display', serif"}
+                onChange={(e) => onUpdateElement(selectedElement.id, {
+                  style: { ...style, fontFamily: e.target.value }
+                })}
+                className="w-full text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 text-slate-800 font-medium focus:outline-none focus:border-slate-900 cursor-pointer truncate"
+              >
+                {GOOGLE_FONTS_LIST.map((f) => (
+                  <option key={f.name} value={f.family} style={{ fontFamily: f.family }}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Color Swatch & Picker */}
+            <div className="col-span-4 flex items-center gap-1">
+              <input
+                type="color"
+                value={style.color || '#d4af37'}
+                onChange={(e) => onUpdateElement(selectedElement.id, {
+                  style: { ...style, color: e.target.value }
+                })}
+                className="w-6 h-6 rounded border border-slate-200 cursor-pointer bg-transparent shrink-0"
+                title="Pick Element Color"
+              />
+              <span className="text-[10px] font-mono text-slate-600 truncate">{style.color || '#d4af37'}</span>
+            </div>
+            {/* Font Size */}
+            <div className="col-span-2">
+              <input
+                type="number"
+                value={style.fontSize || 16}
+                onChange={(e) => onUpdateElement(selectedElement.id, {
+                  style: { ...style, fontSize: Number(e.target.value) }
+                })}
+                className="w-full text-[11px] bg-white border border-slate-200 rounded px-1 py-1 text-center font-medium text-slate-800 focus:outline-none focus:border-slate-900"
+                title="Font Size (px)"
+              />
+            </div>
           </div>
         </div>
       )}
@@ -1160,152 +1282,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
         {/* STYLE TAB */}
         {activeTab === 'style' && (
           <div className="space-y-4">
-            {/* Position & Size */}
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
-                Transform & Bounds
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <label className="text-[10px] text-slate-500 block">X Pos</label>
-                  <input
-                    type="number"
-                    value={style.x}
-                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                      style: { ...style, x: Number(e.target.value) }
-                    })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 block">Y Pos</label>
-                  <input
-                    type="number"
-                    value={style.y}
-                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                      style: { ...style, y: Number(e.target.value) }
-                    })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 block">Width</label>
-                  <input
-                    type="number"
-                    value={style.width}
-                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                      style: { ...style, width: Math.max(10, Number(e.target.value)) }
-                    })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 block">Height</label>
-                  <input
-                    type="number"
-                    value={style.height}
-                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                      style: { ...style, height: Math.max(10, Number(e.target.value)) }
-                    })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 block">Rotation (°)</label>
-                  <input
-                    type="number"
-                    value={style.rotation || 0}
-                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                      style: { ...style, rotation: Number(e.target.value) }
-                    })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-500 block">Opacity</label>
-                  <input
-                    type="number"
-                    step="0.05"
-                    min="0"
-                    max="1"
-                    value={style.opacity ?? 1}
-                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                      style: { ...style, opacity: Number(e.target.value) }
-                    })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                  />
-                </div>
-              </div>
-
-              {/* Layer Ordering Buttons */}
-              {(onBringForward || onSendBackward || onBringToFront || onSendToBack) && (
-                <div className="space-y-1.5 pt-2">
-                  <span className="text-[10px] font-semibold text-slate-600 block">Layer Ordering</span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {onBringToFront && (
-                      <button
-                        type="button"
-                        onClick={() => onBringToFront(selectedElement.id)}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                        title="Bring to Front (Ctrl+Shift+])"
-                      >
-                        <ArrowUpToLine className="w-3 h-3" />
-                        <span>Bring to Front</span>
-                      </button>
-                    )}
-                    {onBringForward && (
-                      <button
-                        type="button"
-                        onClick={() => onBringForward(selectedElement.id)}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                        title="Bring Forward (Ctrl+])"
-                      >
-                        <ArrowUp className="w-3 h-3" />
-                        <span>Forward</span>
-                      </button>
-                    )}
-                    {onSendBackward && (
-                      <button
-                        type="button"
-                        onClick={() => onSendBackward(selectedElement.id)}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                        title="Send Backward (Ctrl+[)"
-                      >
-                        <ArrowDown className="w-3 h-3" />
-                        <span>Backward</span>
-                      </button>
-                    )}
-                    {onSendToBack && (
-                      <button
-                        type="button"
-                        onClick={() => onSendToBack(selectedElement.id)}
-                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                        title="Send to Back (Ctrl+Shift+[)"
-                      >
-                        <ArrowDownToLine className="w-3 h-3" />
-                        <span>Send to Back</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Ungroup Container button if type is container */}
-              {selectedElement.type === 'container' && onUngroup && (
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => onUngroup(selectedElement.id)}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-amber-900 text-xs font-semibold transition-colors cursor-pointer"
-                  >
-                    <Ungroup className="w-3.5 h-3.5" />
-                    <span>Ungroup Container (Release Elements)</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* TYPE-SPECIFIC STYLING */}
+            {/* TYPE-SPECIFIC STYLING FIRST (Colors, Fonts, Themes, Specific Controls) */}
             {['heading', 'text', 'paragraph'].includes(selectedElement.type) && (
               <TextInspector element={selectedElement} onUpdateElement={onUpdateElement} />
             )}
@@ -1318,7 +1295,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               <VideoInspector element={selectedElement} onUpdateElement={onUpdateElement} />
             )}
 
-            {selectedElement.type === 'button' && (
+            {['button', 'whatsapp-button'].includes(selectedElement.type) && (
               <ButtonInspector element={selectedElement} onUpdateElement={onUpdateElement} />
             )}
 
@@ -1330,9 +1307,164 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               <IconShapeDividerInspector element={selectedElement} onUpdateElement={onUpdateElement} />
             )}
 
-            {['event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'whatsapp-button', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names'].includes(selectedElement.type) && (
-              <InvitationElementsInspector element={selectedElement} onUpdateElement={onUpdateElement} />
+            {['event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'whatsapp-button', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code', 'directions-button', 'contact-button'].includes(selectedElement.type) && (
+              <InvitationStyleInspector
+                element={selectedElement}
+                onUpdateElement={onUpdateElement}
+                onSwitchTab={(tab) => setActiveTab(tab)}
+              />
             )}
+
+            {/* Position, Size & Layer Ordering - Collapsible below Style */}
+            <details className="group border border-slate-200 rounded-xl bg-slate-50/50 overflow-hidden" open={['image', 'video', 'container'].includes(selectedElement.type)}>
+              <summary className="px-3 py-2 flex items-center justify-between text-[11px] font-bold text-slate-700 cursor-pointer select-none hover:bg-slate-100/80 transition-colors">
+                <div className="flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Position, Bounds & Layers</span>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform" />
+              </summary>
+              <div className="p-3 pt-2 space-y-3 bg-white border-t border-slate-200">
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">X Pos</label>
+                    <input
+                      type="number"
+                      value={style.x}
+                      onChange={(e) => onUpdateElement(selectedElement.id, {
+                        style: { ...style, x: Number(e.target.value) }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Y Pos</label>
+                    <input
+                      type="number"
+                      value={style.y}
+                      onChange={(e) => onUpdateElement(selectedElement.id, {
+                        style: { ...style, y: Number(e.target.value) }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Width</label>
+                    <input
+                      type="number"
+                      value={style.width}
+                      onChange={(e) => onUpdateElement(selectedElement.id, {
+                        style: { ...style, width: Math.max(10, Number(e.target.value)) }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Height</label>
+                    <input
+                      type="number"
+                      value={style.height}
+                      onChange={(e) => onUpdateElement(selectedElement.id, {
+                        style: { ...style, height: Math.max(10, Number(e.target.value)) }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Rotation (°)</label>
+                    <input
+                      type="number"
+                      value={style.rotation || 0}
+                      onChange={(e) => onUpdateElement(selectedElement.id, {
+                        style: { ...style, rotation: Number(e.target.value) }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Opacity</label>
+                    <input
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      value={style.opacity ?? 1}
+                      onChange={(e) => onUpdateElement(selectedElement.id, {
+                        style: { ...style, opacity: Number(e.target.value) }
+                      })}
+                      className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                    />
+                  </div>
+                </div>
+
+                {/* Layer Ordering Buttons */}
+                {(onBringForward || onSendBackward || onBringToFront || onSendToBack) && (
+                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    <span className="text-[10px] font-semibold text-slate-600 block">Layer Ordering</span>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {onBringToFront && (
+                        <button
+                          type="button"
+                          onClick={() => onBringToFront(selectedElement.id)}
+                          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                          title="Bring to Front (Ctrl+Shift+])"
+                        >
+                          <ArrowUpToLine className="w-3 h-3" />
+                          <span>Bring to Front</span>
+                        </button>
+                      )}
+                      {onBringForward && (
+                        <button
+                          type="button"
+                          onClick={() => onBringForward(selectedElement.id)}
+                          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                          title="Bring Forward (Ctrl+])"
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                          <span>Forward</span>
+                        </button>
+                      )}
+                      {onSendBackward && (
+                        <button
+                          type="button"
+                          onClick={() => onSendBackward(selectedElement.id)}
+                          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                          title="Send Backward (Ctrl+[)"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                          <span>Backward</span>
+                        </button>
+                      )}
+                      {onSendToBack && (
+                        <button
+                          type="button"
+                          onClick={() => onSendToBack(selectedElement.id)}
+                          className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                          title="Send to Back (Ctrl+Shift+[)"
+                        >
+                          <ArrowDownToLine className="w-3 h-3" />
+                          <span>Send to Back</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ungroup Container button if type is container */}
+                {selectedElement.type === 'container' && onUngroup && (
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => onUngroup(selectedElement.id)}
+                      className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-amber-900 text-xs font-semibold transition-colors cursor-pointer"
+                    >
+                      <Ungroup className="w-3.5 h-3.5" />
+                      <span>Ungroup Container (Release Elements)</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </details>
 
             {/* Container Shape Properties */}
             {selectedElement.type === 'container' && (
@@ -1477,8 +1609,12 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               <IconShapeDividerInspector element={selectedElement} onUpdateElement={onUpdateElement} />
             )}
 
-            {['event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'whatsapp-button', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names'].includes(selectedElement.type) && (
-              <InvitationElementsInspector element={selectedElement} onUpdateElement={onUpdateElement} />
+            {['event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'whatsapp-button', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code', 'directions-button', 'contact-button'].includes(selectedElement.type) && (
+              <InvitationElementsInspector
+                element={selectedElement}
+                onUpdateElement={onUpdateElement}
+                onSwitchTab={(tab) => setActiveTab(tab)}
+              />
             )}
           </div>
         )}

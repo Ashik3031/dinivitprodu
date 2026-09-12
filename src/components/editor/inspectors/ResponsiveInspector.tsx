@@ -160,7 +160,7 @@ export const ResponsiveInspector: React.FC<ResponsiveInspectorProps> = ({
         </label>
         <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
           {[
-            { id: 'desktop' as ViewportMode, label: 'Desktop', icon: Monitor, res: '960px' },
+            { id: 'desktop' as ViewportMode, label: 'Desktop', icon: Monitor, res: '768px' },
             { id: 'tablet' as ViewportMode, label: 'Tablet', icon: Tablet, res: '768px' },
             { id: 'mobile' as ViewportMode, label: 'Mobile', icon: Smartphone, res: '390px' }
           ].map((dev) => {
@@ -393,9 +393,9 @@ export const ResponsiveInspector: React.FC<ResponsiveInspectorProps> = ({
 
         <div className="space-y-1.5">
           {[
-            { key: 'hideOnDesktop' as const, label: 'Desktop Visibility', icon: Monitor, hint: '≥960px' },
-            { key: 'hideOnTablet' as const, label: 'Tablet Visibility', icon: Tablet, hint: '768px - 959px' },
-            { key: 'hideOnMobile' as const, label: 'Mobile Visibility', icon: Smartphone, hint: '≤767px (WhatsApp)' }
+            { key: 'hideOnDesktop' as const, label: 'Desktop Visibility', icon: Monitor, hint: '≥768px (Desktop)' },
+            { key: 'hideOnTablet' as const, label: 'Tablet Visibility', icon: Tablet, hint: '768px (Tablet)' },
+            { key: 'hideOnMobile' as const, label: 'Mobile Visibility', icon: Smartphone, hint: '≤767px (Mobile)' }
           ].map((item) => {
             const Icon = item.icon;
             const isHiddenOnDevice = !!visibility[item.key];

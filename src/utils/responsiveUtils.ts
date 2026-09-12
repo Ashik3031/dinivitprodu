@@ -1,4 +1,4 @@
-import { CanvasElement, ElementStyle, ViewportMode, ResponsiveStyleOverride, ResponsiveVisibility } from '../types';
+import { CanvasElement, ElementStyle, ViewportMode, ResponsiveStyleOverride, ResponsiveVisibility, InvitationPage } from '../types';
 
 export const CANVAS_BREAKPOINTS: Record<ViewportMode, { width: number; height: number; label: string; name: string }> = {
   mobile: {
@@ -14,10 +14,10 @@ export const CANVAS_BREAKPOINTS: Record<ViewportMode, { width: number; height: n
     name: 'iPad / Tablet (768px)'
   },
   desktop: {
-    width: 960,
+    width: 768,
     height: 900,
     label: 'Desktop',
-    name: 'Desktop Display (960px)'
+    name: 'Desktop Display (768px)'
   }
 };
 
@@ -44,10 +44,19 @@ export function resolveElementForViewport(
     isHidden = override.isHidden;
   }
 
+  // Calculate default horizontal center offset for tablet/desktop when no explicit x override is provided.
+  // Base canvas design is 390px (mobile-first). On wider viewports (tablet and desktop at 768px),
+  // top-level content automatically centers by default: (targetWidth - 390) / 2.
+  const targetWidth = CANVAS_BREAKPOINTS[mode]?.width || 390;
+  const defaultHorizontalOffset =
+    !element.parentContainerId && targetWidth > 390
+      ? Math.round((targetWidth - 390) / 2)
+      : 0;
+
   // Merge override properties into base style
   const mergedStyle: ElementStyle = {
     ...baseStyle,
-    x: override?.x !== undefined ? override.x : baseStyle.x,
+    x: override?.x !== undefined ? override.x : baseStyle.x + defaultHorizontalOffset,
     y: override?.y !== undefined ? override.y : baseStyle.y,
     width: override?.width !== undefined ? override.width : baseStyle.width,
     height: override?.height !== undefined ? override.height : baseStyle.height,
@@ -171,4 +180,46 @@ export function getPageTransitionVariants(
         animate: { opacity: 1, transition: { duration, ease: 'easeInOut' } }
       };
   }
+}
+
+/**
+ * Unified calculation of page height across Editor Canvas and Published/Preview View.
+ * Guarantees 100% pixel-perfect height parity so background images, relative spacing,
+ * and element alignments match exactly between editing canvas and preview.
+ */
+export function getPageCalculatedHeight(
+  page: InvitationPage,
+  mode: ViewportMode = 'mobile',
+  currentWindowHeight?: number
+): number {
+  const winHeight =
+    currentWindowHeight !== undefined
+      ? currentWindowHeight
+      : typeof window !== 'undefined'
+      ? window.innerHeight
+      : 844;
+
+  // 1. Explicit Viewport Mode (or isFullHeight flag when not custom/auto)
+  if (
+    page.heightMode === 'viewport' ||
+    (page.isFullHeight && page.heightMode !== 'custom' && page.heightMode !== 'auto')
+  ) {
+    // In viewport mode, use the window inner height so it fills the screen cleanly
+    return winHeight > 0 ? winHeight : 844;
+  }
+
+  // 2. Auto Height Mode (fits content bounds snugly with breathing room)
+  if (page.heightMode === 'auto') {
+    const maxBottom = (page.elements || []).reduce((max, el) => {
+      if (el.parentContainerId || el.isHidden) return max;
+      const { style: s, isHidden } = resolveElementForViewport(el, mode);
+      if (isHidden) return max;
+      return Math.max(max, (s.y || 0) + (s.height || 40));
+    }, 0);
+    // Auto wraps with 60px bottom padding, minimum 480px
+    return Math.max(480, maxBottom + 60);
+  }
+
+  // 3. Custom Height Mode
+  return page.height || 844;
 }

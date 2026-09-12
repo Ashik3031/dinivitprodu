@@ -80,24 +80,41 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-start p-4 rounded-2xl select-none backdrop-blur-md border border-white/10 shadow-lg text-slate-100 overflow-y-auto"
+      className="w-full h-full flex flex-col justify-start select-none backdrop-blur-md shadow-lg text-slate-100 overflow-y-auto transition-all"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
-        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+        borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
+        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.1)',
+        borderStyle: style.borderStyle || 'solid',
+        boxShadow: style.boxShadow,
+        padding: style.padding ? `${style.padding}px` : '16px'
       }}
     >
       {/* Optional Title */}
       <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4" style={{ color: primaryColor }} />
-          <span className="font-bold text-sm tracking-wider uppercase font-serif">
+          <Clock className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+          <span
+            className="font-bold tracking-wider uppercase transition-colors"
+            style={{
+              fontFamily: style.fontFamily || "'Playfair Display', serif",
+              color: primaryColor,
+              fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
+              letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+            }}
+          >
             {content.text || 'Order of Events'}
           </span>
         </div>
         <span
-          className="text-[10px] font-sans px-2 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold"
-          style={{ color: primaryColor }}
+          className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold transition-colors"
+          style={{
+            color: primaryColor,
+            borderColor: `${primaryColor}40`,
+            fontFamily: style.fontFamily
+          }}
         >
           Timeline
         </span>
@@ -112,7 +129,7 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center border shadow-md transition-transform group-hover:scale-110"
                 style={{
-                  backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                  backgroundColor: bgColor,
                   borderColor: primaryColor,
                   color: primaryColor
                 }}
@@ -135,11 +152,17 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
               >
                 {event.time}
               </div>
-              <div className="text-xs font-bold text-slate-100 mt-0.5 font-serif">
+              <div
+                className="text-xs font-bold text-slate-100 mt-0.5 transition-colors"
+                style={{ fontFamily: style.fontFamily }}
+              >
                 {event.title}
               </div>
               {event.description && (
-                <div className="text-[11px] text-slate-300 font-sans mt-0.5 leading-relaxed opacity-85">
+                <div
+                  className="text-[11px] text-slate-300 mt-0.5 leading-relaxed opacity-85 transition-colors"
+                  style={{ fontFamily: style.fontFamily }}
+                >
                   {event.description}
                 </div>
               )}

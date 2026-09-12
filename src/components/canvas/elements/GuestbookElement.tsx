@@ -76,26 +76,43 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-between p-4 rounded-2xl select-none backdrop-blur-md border border-white/10 shadow-xl text-slate-100 overflow-y-auto"
+      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-md shadow-xl text-slate-100 overflow-y-auto transition-all"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
-        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+        borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
+        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.1)',
+        borderStyle: style.borderStyle || 'solid',
+        boxShadow: style.boxShadow,
+        padding: style.padding ? `${style.padding}px` : '16px'
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4" style={{ color: primaryColor }} />
-          <span className="font-bold text-sm tracking-wider uppercase font-serif">
+          <MessageSquare className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+          <span
+            className="font-bold tracking-wider uppercase transition-colors"
+            style={{
+              fontFamily: style.fontFamily || "'Playfair Display', serif",
+              color: primaryColor,
+              fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
+              letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+            }}
+          >
             {content.text || 'Wishes & Guestbook'}
           </span>
         </div>
         <button
           type="button"
           onClick={isEditor ? undefined : onOpenModal}
-          className="text-[10px] font-sans px-2.5 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold hover:bg-white/10 transition-colors cursor-pointer"
-          style={{ color: primaryColor }}
+          className="text-[10px] px-2.5 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold hover:bg-white/10 transition-colors cursor-pointer"
+          style={{
+            color: primaryColor,
+            borderColor: `${primaryColor}40`,
+            fontFamily: style.fontFamily
+          }}
         >
           View All ({messages.length})
         </button>

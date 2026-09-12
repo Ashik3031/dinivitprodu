@@ -74,11 +74,16 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
   if (cdStyle === 'minimal') {
     return (
       <div
-        className="w-full h-full flex flex-col items-center justify-center p-2 select-none"
+        className="w-full h-full flex flex-col items-center justify-center select-none transition-all"
         style={{
           fontFamily,
           borderRadius: style.borderRadius ? `${style.borderRadius}px` : '12px',
-          backgroundColor: style.backgroundColor || 'transparent'
+          backgroundColor: style.backgroundColor || 'transparent',
+          borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+          borderColor: style.borderColor,
+          borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+          boxShadow: style.boxShadow,
+          padding: style.padding ? `${style.padding}px` : '8px'
         }}
       >
         <div className="flex items-center justify-center gap-2 sm:gap-4">
@@ -87,11 +92,22 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
               <div className="flex flex-col items-center">
                 <span
                   className="font-bold tabular-nums tracking-wider leading-none"
-                  style={{ color: primaryColor, fontSize: numFontSize }}
+                  style={{
+                    color: primaryColor,
+                    fontSize: numFontSize,
+                    fontWeight: style.fontWeight || 'bold',
+                    letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+                  }}
                 >
                   {String(unit.value).padStart(2, '0')}
                 </span>
-                <span className="text-[9px] uppercase tracking-widest text-slate-400 font-sans mt-1">
+                <span
+                  className="text-[9px] uppercase tracking-widest text-slate-400 mt-1 transition-colors"
+                  style={{
+                    color: style.color ? `${style.color}99` : undefined,
+                    fontFamily
+                  }}
+                >
                   {unit.label}
                 </span>
               </div>
@@ -107,7 +123,10 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
           ))}
         </div>
         {timeLeft.isPast && (
-          <div className="mt-1.5 text-[10px] uppercase tracking-widest text-amber-400 font-sans font-semibold flex items-center gap-1">
+          <div
+            className="mt-1.5 text-[10px] uppercase tracking-widest font-sans font-semibold flex items-center gap-1"
+            style={{ color: primaryColor }}
+          >
             <Sparkles className="w-3 h-3" />
             <span>The Special Day is Here!</span>
           </div>
@@ -120,10 +139,16 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
   if (cdStyle === 'circles') {
     return (
       <div
-        className="w-full h-full flex items-center justify-around gap-1.5 p-2 select-none"
+        className="w-full h-full flex items-center justify-around gap-1.5 select-none transition-all"
         style={{
           fontFamily,
-          borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+          borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+          backgroundColor: style.backgroundColor || 'transparent',
+          borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+          borderColor: style.borderColor,
+          borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+          boxShadow: style.boxShadow,
+          padding: style.padding ? `${style.padding}px` : '8px'
         }}
       >
         {units.map((unit, idx) => (
@@ -131,16 +156,28 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
             key={idx}
             className="flex-1 aspect-square max-w-[72px] flex flex-col items-center justify-center rounded-full border border-white/20 bg-slate-950/60 backdrop-blur-md shadow-md p-1"
             style={{
-              borderColor: `${primaryColor}40`
+              borderColor: style.borderColor || `${primaryColor}40`,
+              backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}` : undefined
             }}
           >
             <span
               className="font-bold tabular-nums leading-none"
-              style={{ color: primaryColor, fontSize: numFontSize }}
+              style={{
+                color: primaryColor,
+                fontSize: numFontSize,
+                fontWeight: style.fontWeight || 'bold',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+              }}
             >
               {String(unit.value).padStart(2, '0')}
             </span>
-            <span className="text-[8px] uppercase tracking-wider text-slate-300 font-sans mt-0.5">
+            <span
+              className="text-[8px] uppercase tracking-wider text-slate-300 mt-0.5 transition-colors"
+              style={{
+                color: style.color ? `${style.color}cc` : undefined,
+                fontFamily
+              }}
+            >
               {unit.label.substring(0, 4)}
             </span>
           </div>
@@ -152,27 +189,46 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
   // 3. FROSTED GLASS / BOXES STYLE (DEFAULT)
   return (
     <div
-      className="w-full h-full flex items-center justify-around gap-2 p-2 select-none"
+      className="w-full h-full flex items-center justify-around gap-2 select-none transition-all"
       style={{
         fontFamily,
-        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+        backgroundColor: style.backgroundColor || 'transparent',
+        borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+        borderColor: style.borderColor,
+        borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+        boxShadow: style.boxShadow,
+        padding: style.padding ? `${style.padding}px` : '8px'
       }}
     >
       {units.map((unit, idx) => (
         <div
           key={idx}
-          className="flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl border border-white/10 bg-slate-950/50 backdrop-blur-md shadow-md hover:border-amber-400/40 transition-colors"
+          className="flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl border border-white/10 bg-slate-950/50 backdrop-blur-md shadow-md transition-colors"
           style={{
-            borderRadius: style.borderRadius ? `${Math.max(6, Number(style.borderRadius) - 4)}px` : '12px'
+            borderRadius: style.borderRadius ? `${Math.max(6, Number(style.borderRadius) - 4)}px` : '12px',
+            borderColor: style.borderColor ? `${style.borderColor}60` : undefined,
+            backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}ee` : undefined
           }}
         >
           <span
             className="font-bold tabular-nums tracking-wider leading-none"
-            style={{ color: primaryColor, fontSize: numFontSize }}
+            style={{
+              color: primaryColor,
+              fontSize: numFontSize,
+              fontWeight: style.fontWeight || 'bold',
+              letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+            }}
           >
             {String(unit.value).padStart(2, '0')}
           </span>
-          <span className="text-[9px] uppercase tracking-widest text-slate-300 font-sans font-semibold mt-1">
+          <span
+            className="text-[9px] uppercase tracking-widest text-slate-300 font-semibold mt-1 transition-colors"
+            style={{
+              color: style.color ? `${style.color}bb` : undefined,
+              fontFamily
+            }}
+          >
             {unit.label}
           </span>
         </div>

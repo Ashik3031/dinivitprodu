@@ -20,7 +20,7 @@ import { PageTemplatesModal } from '../components/editor/PageTemplatesModal';
 import { PublishedInvitationView } from '../components/published/PublishedInvitationView';
 import { createBlankPage } from '../data/pageTemplates';
 import { instantiateTemplatePage, instantiatePrebuiltBlock } from '../utils/templateUtils';
-import { getOrCreateOpeningScreenPage, syncOpeningScreenWithPage } from '../utils/openingScreenUtils';
+import { getOrCreateOpeningScreenPage, syncOpeningScreenWithPage, syncPageWithOpeningConfig } from '../utils/openingScreenUtils';
 import { PageTemplate, PrebuiltBlock } from '../types';
 import { Loader2, AlertCircle, Save } from 'lucide-react';
 
@@ -531,15 +531,32 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
   const handleUpdateOpeningScreen = (updates: Partial<OpeningScreenConfig>) => {
     if (!invitation) return;
+    const currentOpening = invitation.openingScreen || {
+      enabled: true,
+      style: 'envelope',
+      title: invitation.title || 'Wedding Invitation'
+    };
     const nextConfig: OpeningScreenConfig = {
-      ...(invitation.openingScreen || {
-        enabled: true,
-        style: 'envelope',
-        title: invitation.title || 'Wedding Invitation'
-      }),
+      ...currentOpening,
       ...updates
     };
-    updateInvitationState({ ...invitation, openingScreen: nextConfig });
+
+    const prevPage = invitation.openingScreen?.page || getOrCreateOpeningScreenPage(invitation);
+    const updatedPage = syncPageWithOpeningConfig(
+      nextConfig,
+      invitation.theme,
+      prevPage,
+      invitation.title,
+      invitation.eventDate
+    );
+
+    const finalizedOpening: OpeningScreenConfig = {
+      ...nextConfig,
+      background: updatedPage.background,
+      page: updatedPage
+    };
+
+    updateInvitationState({ ...invitation, openingScreen: finalizedOpening });
   };
 
   // ELEMENT OPERATIONS
@@ -1404,6 +1421,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           isOpeningScreen={selectedPageIndex === -1}
           openingScreenConfig={invitation.openingScreen}
           onUpdateOpeningScreen={handleUpdateOpeningScreen}
+          onTestOpeningScreen={() => setIsPreview(true)}
           onUpdateElement={handleUpdateElement}
           onUpdateMultipleElements={handleUpdateMultipleElements}
           onUpdatePage={handleUpdatePage}

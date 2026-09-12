@@ -1,20 +1,204 @@
 import React from 'react';
-import { CanvasElement } from '../../../types';
-import { Plus, Trash2, Calendar, Clock, MapPin, MessageCircle, QrCode, Heart, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { CanvasElement, ElementStyle } from '../../../types';
+import { GOOGLE_FONTS_LIST } from '../../../data/stockAssets';
+import { Plus, Trash2, Calendar, Clock, MapPin, MessageCircle, QrCode, Heart, Sparkles, Image as ImageIcon, Palette, Type } from 'lucide-react';
 
 interface InvitationElementsInspectorProps {
   element: CanvasElement;
   onUpdateElement: (id: string, updates: Partial<CanvasElement>) => void;
+  onSwitchTab?: (tab: 'style' | 'content') => void;
 }
 
 export const InvitationElementsInspector: React.FC<InvitationElementsInspectorProps> = ({
   element,
-  onUpdateElement
+  onUpdateElement,
+  onSwitchTab
 }) => {
   const { type, content, style } = element;
 
-  // 1. EVENT DATE
-  if (type === 'event-date') {
+  const updateStyle = (updates: Partial<ElementStyle>) => {
+    onUpdateElement(element.id, {
+      style: { ...style, ...updates }
+    });
+  };
+
+  const LUXURY_PRESETS = [
+    { name: 'Royal Gold', color: '#d4af37', bg: '#0f172a', border: '#d4af37', font: "'Cinzel', serif" },
+    { name: 'Rose Romance', color: '#e11d48', bg: '#fff1f2', border: '#fecdd3', font: "'Great Vibes', cursive" },
+    { name: 'Emerald Luxe', color: '#10b981', bg: '#022c22', border: '#059669', font: "'Cormorant Garamond', serif" },
+    { name: 'Midnight', color: '#f8fafc', bg: '#090d16', border: '#334155', font: "'Playfair Display', serif" },
+    { name: 'Champagne', color: '#b45309', bg: '#fefce8', border: '#fde68a', font: "'Playfair Display', serif" },
+    { name: 'Modern Light', color: '#0f172a', bg: '#ffffff', border: '#e2e8f0', font: "'Montserrat', sans-serif" }
+  ];
+
+  const SWATCH_COLORS = ['#d4af37', '#e11d48', '#059669', '#0f172a', '#334155', '#7c3aed', '#b45309', '#ffffff', '#000000'];
+
+  const renderQuickStyleBanner = () => (
+    <div className="mb-3 space-y-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+          <Palette className="w-3.5 h-3.5 text-amber-600" />
+          <span>Color, Font & Style Presets</span>
+        </div>
+        {onSwitchTab && (
+          <button
+            type="button"
+            onClick={() => onSwitchTab('style')}
+            className="text-[10px] font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 px-2 py-0.5 rounded transition-colors cursor-pointer"
+          >
+            All Styles →
+          </button>
+        )}
+      </div>
+
+      {/* 1-Click Luxury Theme Presets */}
+      <div>
+        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+          1-Click Luxury Presets
+        </span>
+        <div className="grid grid-cols-3 gap-1">
+          {LUXURY_PRESETS.map((p) => (
+            <button
+              key={p.name}
+              type="button"
+              onClick={() => updateStyle({
+                color: p.color,
+                backgroundColor: p.bg,
+                borderColor: p.border,
+                fontFamily: p.font,
+                borderWidth: style.borderWidth || 1,
+                borderStyle: 'solid'
+              })}
+              className="py-1 px-1.5 rounded border border-slate-200 hover:border-amber-400 bg-white text-slate-800 text-[10px] font-medium transition-colors flex items-center gap-1 cursor-pointer truncate shadow-xs"
+              title={`${p.name} preset`}
+            >
+              <span className="w-2 h-2 rounded-full shrink-0 border border-black/10" style={{ backgroundColor: p.color }} />
+              <span className="truncate">{p.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2 pt-1 border-t border-slate-200">
+        {/* Font Family */}
+        <div>
+          <label className="text-[10px] font-semibold text-slate-600 block mb-1">Font Family</label>
+          <select
+            value={style.fontFamily || "'Playfair Display', serif"}
+            onChange={(e) => updateStyle({ fontFamily: e.target.value })}
+            className="w-full text-xs bg-white border border-slate-200 rounded-lg p-1.5 text-slate-800 font-medium focus:outline-none focus:border-slate-900"
+          >
+            {GOOGLE_FONTS_LIST.map((f) => (
+              <option key={f.name} value={f.family} style={{ fontFamily: f.family }}>
+                {f.name} ({f.category})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Font Size & Weight */}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] font-semibold text-slate-600 block mb-0.5">Font Size (px)</label>
+            <input
+              type="number"
+              value={style.fontSize || 16}
+              onChange={(e) => updateStyle({ fontSize: Number(e.target.value) })}
+              className="w-full text-xs bg-white border border-slate-200 rounded p-1.5 text-slate-800 font-medium focus:outline-none focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] font-semibold text-slate-600 block mb-0.5">Font Weight</label>
+            <select
+              value={style.fontWeight || 400}
+              onChange={(e) => updateStyle({ fontWeight: Number(e.target.value) })}
+              className="w-full text-xs bg-white border border-slate-200 rounded p-1.5 text-slate-800 font-medium focus:outline-none focus:border-slate-900"
+            >
+              <option value={300}>300 Light</option>
+              <option value={400}>400 Regular</option>
+              <option value={500}>500 Medium</option>
+              <option value={600}>600 SemiBold</option>
+              <option value={700}>700 Bold</option>
+              <option value={800}>800 ExtraBold</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Accent / Text Color & Swatches */}
+        <div>
+          <div className="flex items-center justify-between text-[10px] font-semibold text-slate-600 mb-1">
+            <span>Text / Accent Color</span>
+            <span className="font-mono text-[9px] text-slate-400">{style.color || '#d4af37'}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <input
+              type="color"
+              value={style.color || '#d4af37'}
+              onChange={(e) => updateStyle({ color: e.target.value })}
+              className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
+            />
+            <input
+              type="text"
+              value={style.color || '#d4af37'}
+              onChange={(e) => updateStyle({ color: e.target.value })}
+              className="flex-1 text-[11px] bg-white border border-slate-200 rounded p-1 font-mono text-slate-800"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            {SWATCH_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => updateStyle({ color: c })}
+                className={`w-4 h-4 rounded-full border cursor-pointer hover:scale-110 transition-transform ${
+                  style.color === c ? 'ring-2 ring-slate-900 ring-offset-1 border-white' : 'border-slate-300'
+                }`}
+                style={{ backgroundColor: c }}
+                title={c}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Card Background Color */}
+        <div>
+          <div className="flex items-center justify-between text-[10px] font-semibold text-slate-600 mb-1">
+            <span>Card Background Color</span>
+            <button
+              type="button"
+              onClick={() => updateStyle({ backgroundColor: 'transparent' })}
+              className={`text-[9px] px-1.5 py-0.5 rounded cursor-pointer font-bold ${
+                !style.backgroundColor || style.backgroundColor === 'transparent'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+              }`}
+            >
+              Transparent
+            </button>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <input
+              type="color"
+              value={style.backgroundColor && style.backgroundColor !== 'transparent' ? style.backgroundColor : '#0f172a'}
+              onChange={(e) => updateStyle({ backgroundColor: e.target.value })}
+              className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
+            />
+            <input
+              type="text"
+              value={style.backgroundColor || 'transparent'}
+              onChange={(e) => updateStyle({ backgroundColor: e.target.value })}
+              placeholder="transparent"
+              className="flex-1 text-[11px] bg-white border border-slate-200 rounded p-1 font-mono text-slate-800"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    // 1. EVENT DATE
+    if (type === 'event-date') {
     return (
       <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
@@ -346,10 +530,13 @@ export const InvitationElementsInspector: React.FC<InvitationElementsInspectorPr
   if (type === 'photo-gallery') {
     const images = content.galleryImages || [];
     const layouts = [
+      { id: 'coverflow', label: '3D Coverflow ✨' },
+      { id: 'stack', label: '3D Stack Deck ✨' },
+      { id: 'cylinder', label: '3D Rotary Reel' },
       { id: 'carousel', label: 'Carousel Slider' },
       { id: 'grid', label: 'Photo Grid' },
-      { id: 'polaroid', label: 'Polaroid Stack' },
-      { id: 'masonry', label: 'Masonry Wall' }
+      { id: 'masonry', label: 'Masonry Wall' },
+      { id: 'polaroid', label: 'Polaroid Frame' }
     ];
 
     const handleAddPhoto = () => {
@@ -626,5 +813,109 @@ export const InvitationElementsInspector: React.FC<InvitationElementsInspectorPr
     );
   }
 
-  return null;
+  // 13. DRESS CODE
+  if (type === 'dress-code') {
+    return (
+      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+          Dress Code Settings
+        </span>
+        <div>
+          <label className="text-[10px] text-slate-500 block mb-1">Dress Code Title</label>
+          <input
+            type="text"
+            value={content.dressCodeTitle || content.text || ''}
+            onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeTitle: e.target.value, text: e.target.value } })}
+            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            placeholder="e.g. Formal Black Tie"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-slate-500 block mb-1">Description / Guidelines</label>
+          <textarea
+            rows={2}
+            value={content.dressCodeDescription || ''}
+            onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeDescription: e.target.value } })}
+            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            placeholder="e.g. Tuxedos and evening gowns are kindly requested."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 14. DIRECTIONS BUTTON
+  if (type === 'directions-button') {
+    return (
+      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+          Directions Button Settings
+        </span>
+        <div>
+          <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
+          <input
+            type="text"
+            value={content.text || ''}
+            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            placeholder="e.g. Get Driving Directions"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-slate-500 block mb-1">Maps URL / Query</label>
+          <input
+            type="text"
+            value={content.mapQuery || content.url || ''}
+            onChange={(e) => onUpdateElement(element.id, { content: { ...content, mapQuery: e.target.value, url: e.target.value } })}
+            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            placeholder="e.g. https://maps.google.com/?q=..."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // 15. CONTACT BUTTON
+  if (type === 'contact-button') {
+    return (
+      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+          Contact Button Settings
+        </span>
+        <div>
+          <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
+          <input
+            type="text"
+            value={content.text || ''}
+            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            placeholder="e.g. Contact Organizer"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-slate-500 block mb-1">Phone / WhatsApp / Email</label>
+          <input
+            type="text"
+            value={content.contactInfo || content.phoneNumber || ''}
+            onChange={(e) => onUpdateElement(element.id, { content: { ...content, contactInfo: e.target.value, phoneNumber: e.target.value } })}
+            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            placeholder="e.g. +1 555-0199 or name@example.com"
+          />
+        </div>
+      </div>
+    );
+  }
+
+    return null;
+  };
+
+  const contentJsx = renderContent();
+  if (!contentJsx) return null;
+
+  return (
+    <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+      {renderQuickStyleBanner()}
+      {contentJsx}
+    </div>
+  );
 };

@@ -459,14 +459,16 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   type="button"
                   onClick={() => onAddElement('photo-gallery', {
                     content: {
-                      galleryLayout: 'carousel',
+                      galleryLayout: 'coverflow',
                       galleryImages: [
                         { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', caption: 'The Proposal' },
                         { url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80', caption: 'Engagement Memories' },
-                        { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80', caption: 'Endless Joy' }
+                        { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80', caption: 'Forever & Always' },
+                        { url: 'https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80', caption: 'Celebration of Love' },
+                        { url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80', caption: 'Sacred Vows' }
                       ]
                     },
-                    style: { x: 30, y: 150, width: 330, height: 260, borderRadius: 16 }
+                    style: { x: 25, y: 140, width: 340, height: 290, borderRadius: 16 }
                   })}
                   className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
                 >

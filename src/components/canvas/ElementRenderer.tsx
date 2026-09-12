@@ -389,19 +389,40 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'event-date': {
         return (
           <div
-            className="w-full h-full flex flex-col items-center justify-center p-2 text-center select-none"
+            className="w-full h-full flex flex-col items-center justify-center select-none transition-all"
             style={{
+              backgroundColor: style.backgroundColor || 'transparent',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : '8px',
               fontFamily: style.fontFamily || "'Cinzel', serif",
-              color: style.color || '#d4af37'
+              color: style.color || '#d4af37',
+              textAlign: style.textAlign || 'center'
             }}
           >
-            <div className="flex items-center gap-1.5 mb-1 opacity-80 font-sans text-[10px] uppercase tracking-widest text-slate-400">
+            <div
+              className="flex items-center gap-1.5 mb-1 opacity-80 text-[10px] uppercase tracking-widest"
+              style={{
+                color: style.color || '#94a3b8',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+              }}
+            >
               <CalendarIcon className="w-3.5 h-3.5" />
               <span>{content.text || 'Celebration Date'}</span>
             </div>
             <div
-              className="font-bold tracking-wide"
-              style={{ fontSize: style.fontSize ? `${style.fontSize}px` : '20px' }}
+              className="tracking-wide"
+              style={{
+                fontSize: style.fontSize ? `${style.fontSize}px` : '20px',
+                fontWeight: style.fontWeight || 'bold',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+                textTransform: style.textTransform,
+                fontStyle: style.fontStyle,
+                textShadow: getTextShadow(style)
+              }}
             >
               {content.eventDate || 'Saturday, October 24, 2026'}
             </div>
@@ -413,19 +434,40 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'event-time': {
         return (
           <div
-            className="w-full h-full flex flex-col items-center justify-center p-2 text-center select-none"
+            className="w-full h-full flex flex-col items-center justify-center select-none transition-all"
             style={{
+              backgroundColor: style.backgroundColor || 'transparent',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : '8px',
               fontFamily: style.fontFamily || "'Cinzel', serif",
-              color: style.color || '#d4af37'
+              color: style.color || '#d4af37',
+              textAlign: style.textAlign || 'center'
             }}
           >
-            <div className="flex items-center gap-1.5 mb-1 opacity-80 font-sans text-[10px] uppercase tracking-widest text-slate-400">
+            <div
+              className="flex items-center gap-1.5 mb-1 opacity-80 text-[10px] uppercase tracking-widest"
+              style={{
+                color: style.color || '#94a3b8',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+              }}
+            >
               <Clock className="w-3.5 h-3.5" />
               <span>{content.text || 'Reception Time'}</span>
             </div>
             <div
-              className="font-bold tracking-wide"
-              style={{ fontSize: style.fontSize ? `${style.fontSize}px` : '18px' }}
+              className="tracking-wide"
+              style={{
+                fontSize: style.fontSize ? `${style.fontSize}px` : '18px',
+                fontWeight: style.fontWeight || 'bold',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+                textTransform: style.textTransform,
+                fontStyle: style.fontStyle,
+                textShadow: getTextShadow(style)
+              }}
             >
               {content.eventTime || '04:00 PM – 10:00 PM'}
             </div>
@@ -501,10 +543,20 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
           <button
             type="button"
             onClick={handleClick}
-            className="w-full h-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-lg transition-transform active:scale-95 cursor-pointer"
+            className="w-full h-full flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95 cursor-pointer"
             style={{
+              backgroundColor: style.backgroundColor || '#059669',
+              color: style.color || '#ffffff',
+              fontFamily: style.fontFamily,
               fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
-              borderRadius: style.borderRadius ? `${style.borderRadius}px` : '12px'
+              fontWeight: style.fontWeight || 600,
+              letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : '12px',
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : undefined
             }}
           >
             <MessageCircle className="w-4 h-4 fill-current" />
@@ -517,10 +569,15 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'qr-code': {
         return (
           <div
-            className="w-full h-full flex flex-col items-center justify-center p-2 rounded-xl shadow-lg select-none"
+            className="w-full h-full flex flex-col items-center justify-center p-2 shadow-lg select-none transition-all"
             style={{
-              backgroundColor: content.qrBgColor || '#ffffff',
-              borderRadius: style.borderRadius ? `${style.borderRadius}px` : '12px'
+              backgroundColor: content.qrBgColor || style.backgroundColor || '#ffffff',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : '12px',
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              fontFamily: style.fontFamily
             }}
           >
             {qrCodeDataUrl ? (
@@ -529,7 +586,14 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               <QrCode className="w-12 h-12 text-neutral-800" />
             )}
             {content.qrLabel && (
-              <span className="text-[10px] font-sans font-semibold text-slate-700 mt-1">
+              <span
+                className="text-[10px] font-semibold mt-1 truncate max-w-full"
+                style={{
+                  color: style.color || '#334155',
+                  fontFamily: style.fontFamily,
+                  fontSize: style.fontSize ? `${Math.min(14, style.fontSize)}px` : undefined
+                }}
+              >
                 {content.qrLabel}
               </span>
             )}
@@ -541,27 +605,49 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'couple-names': {
         return (
           <div
-            className="w-full h-full flex flex-col items-center justify-center select-none"
+            className="w-full h-full flex flex-col items-center justify-center select-none transition-all"
             style={{
+              backgroundColor: style.backgroundColor || 'transparent',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : undefined,
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: style.color || 'inherit'
+              color: style.color || '#0f172a',
+              textAlign: style.textAlign || 'center'
             }}
           >
             <div
-              className="text-center font-bold tracking-wide"
-              style={{ fontSize: style.fontSize ? `${style.fontSize}px` : '32px' }}
+              className="w-full tracking-wide"
+              style={{
+                fontSize: style.fontSize ? `${style.fontSize}px` : '32px',
+                fontWeight: style.fontWeight || 'bold',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+                textTransform: style.textTransform,
+                fontStyle: style.fontStyle,
+                textShadow: getTextShadow(style)
+              }}
             >
               {content.coupleName1 || 'Alexander Sterling'}
             </div>
             <div
-              className="my-1 text-sm tracking-widest uppercase opacity-75 font-sans"
-              style={{ color: style.color }}
+              className="my-1 text-sm tracking-widest uppercase opacity-75 transition-colors"
+              style={{ color: style.color, fontFamily: style.fontFamily }}
             >
               {content.andConnector || '&'}
             </div>
             <div
-              className="text-center font-bold tracking-wide"
-              style={{ fontSize: style.fontSize ? `${style.fontSize}px` : '32px' }}
+              className="w-full tracking-wide"
+              style={{
+                fontSize: style.fontSize ? `${style.fontSize}px` : '32px',
+                fontWeight: style.fontWeight || 'bold',
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+                textTransform: style.textTransform,
+                fontStyle: style.fontStyle,
+                textShadow: getTextShadow(style)
+              }}
             >
               {content.coupleName2 || 'Sophia Montgomery'}
             </div>
@@ -573,11 +659,36 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'dress-code': {
         const colors = content.dressCodeColors || ['#000000', '#ffffff', '#d4af37'];
         return (
-          <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center select-none">
-            <div className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-1">
+          <div
+            className="w-full h-full flex flex-col items-center justify-center p-3 text-center select-none transition-all"
+            style={{
+              backgroundColor: style.backgroundColor || 'transparent',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : undefined,
+              fontFamily: style.fontFamily || "'Playfair Display', serif",
+              color: style.color || 'inherit'
+            }}
+          >
+            <div
+              className="text-xs uppercase tracking-widest font-semibold mb-1"
+              style={{ color: style.color || '#fbbf24' }}
+            >
               Dress Code
             </div>
-            <div className="text-sm font-bold text-neutral-100 mb-2">
+            <div
+              className="text-sm font-bold mb-2"
+              style={{
+                color: style.color || '#f1f5f9',
+                fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
+                fontWeight: style.fontWeight || 'bold',
+                fontFamily: style.fontFamily,
+                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
+              }}
+            >
               {content.dressCodeTitle || 'Black Tie Preferred'}
             </div>
             <div className="flex items-center justify-center gap-2 my-2">
@@ -591,7 +702,10 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               ))}
             </div>
             {content.dressCodeDescription && (
-              <p className="text-xs text-neutral-400 max-w-xs mt-1 leading-relaxed">
+              <p
+                className="text-xs text-neutral-400 max-w-xs mt-1 leading-relaxed"
+                style={{ fontFamily: style.fontFamily }}
+              >
                 {content.dressCodeDescription}
               </p>
             )}

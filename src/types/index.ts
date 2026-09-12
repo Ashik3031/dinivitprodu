@@ -299,7 +299,7 @@ export interface ElementContent {
   timelineLayout?: 'vertical' | 'split' | 'cards';
   
   galleryImages?: Array<{ url: string; caption?: string }>;
-  galleryLayout?: 'grid' | 'carousel' | 'masonry' | 'polaroid';
+  galleryLayout?: 'grid' | 'carousel' | 'masonry' | 'polaroid' | 'coverflow' | 'stack' | 'cylinder';
   galleryColumns?: number;
   
   buttonText?: string;
@@ -419,16 +419,70 @@ export interface InvitationTheme {
   backgroundColor: string;
 }
 
+export type OpeningCoverType = 'video' | 'image' | 'envelope' | 'custom-page';
+
+export type VideoPlayMode = 'autoplay' | 'click-to-play' | 'scroll-based' | 'click-to-open';
+
+export type ImageTransitionEffect =
+  | 'zoom-fade'
+  | 'curtain-split'
+  | 'slide-up'
+  | 'blur-dissolve'
+  | 'book-flip'
+  | 'envelope-unfold';
+
+export type ImageAdvanceTrigger =
+  | 'click-button'
+  | 'click-anywhere'
+  | 'scroll-swipe'
+  | 'auto-timer';
+
 export interface OpeningScreenConfig {
   enabled: boolean;
+  coverType?: OpeningCoverType;
   style: 'envelope' | 'wax-seal' | 'curtain' | 'card-flip' | 'monogram-glow' | 'minimal-button' | 'video-cover' | 'custom-page';
+
+  // Video Opening specific configuration
+  videoUrl?: string;
+  videoPosterUrl?: string;
+  videoPlayMode?: VideoPlayMode; // 'autoplay' | 'click-to-play' | 'scroll-based' | 'click-to-open'
+  videoAutoAdvanceOnEnd?: boolean;
+  videoDurationSeconds?: number;
+  videoMuted?: boolean;
+  videoLoop?: boolean;
+  showSkipButton?: boolean;
+  skipButtonText?: string;
+
+  // Image / Cover specific configuration
+  imageUrl?: string;
+  imageOverlayColor?: string;
+  imageOverlayOpacity?: number;
+  imageTransitionEffect?: ImageTransitionEffect; // 'zoom-fade' | 'curtain-split' | 'slide-up' | 'blur-dissolve' | 'book-flip' | 'envelope-unfold'
+  imageAdvanceTrigger?: ImageAdvanceTrigger; // 'click-button' | 'click-anywhere' | 'scroll-swipe' | 'auto-timer'
+  imageTimerSeconds?: number;
+  imageTransitionDuration?: number;
+
+  // Typography & Content
+  showTextOnCover?: boolean;
   title?: string;
   subtitle?: string;
   coupleNames?: string;
+  showOpenButton?: boolean;
   openButtonText?: string;
+  openButtonStyle?: 'pill' | 'outline' | 'gilded' | 'minimal';
+  fontFamily?: string;
+  textColor?: string;
+  accentColor?: string;
+
+  // Envelope & Seal specific
   sealColor?: string;
   sealText?: string;
+  sealIcon?: string;
   envelopeColor?: string;
+  envelopeLiner?: 'plain' | 'gold-foil' | 'floral' | 'marble' | 'stars';
+
+  // Effects & Audio
+  showConfetti?: boolean;
   background?: BackgroundConfig;
   musicAutoplayOnOpen?: boolean;
   page?: InvitationPage;

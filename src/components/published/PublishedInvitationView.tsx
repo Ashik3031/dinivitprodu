@@ -24,7 +24,7 @@ import {
   Check,
   ChevronDown
 } from 'lucide-react';
-import { resolveElementForViewport, getPageTransitionVariants, CANVAS_BREAKPOINTS } from '../../utils/responsiveUtils';
+import { resolveElementForViewport, getPageTransitionVariants, CANVAS_BREAKPOINTS, getPageCalculatedHeight } from '../../utils/responsiveUtils';
 
 interface PublishedInvitationViewProps {
   invitation: Invitation;
@@ -189,18 +189,12 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
-  const getPageCalculatedHeight = (page: InvitationPage) => {
-    if (page.heightMode === 'viewport' || page.isFullHeight) {
-      return typeof window !== 'undefined' ? window.innerHeight : 844;
-    }
-    if (page.heightMode === 'auto') {
-      const maxBottom = (page.elements || []).reduce((max, el) => {
-        const { style: s } = resolveElementForViewport(el, activeViewport);
-        return Math.max(max, (s.y || 0) + (s.height || 40));
-      }, 0);
-      return Math.max(page.height || 844, maxBottom + 60);
-    }
-    return page.height || 844;
+  const getPageHeight = (page: InvitationPage) => {
+    return getPageCalculatedHeight(
+      page,
+      activeViewport,
+      typeof window !== 'undefined' ? window.innerHeight : 844
+    );
   };
 
   return (
@@ -225,7 +219,7 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                 }`}
               >
                 <Monitor className="w-3.5 h-3.5" />
-                <span>Desktop (960px)</span>
+                <span>Desktop (768px)</span>
               </button>
               <button
                 type="button"
@@ -270,17 +264,6 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
             </div>
           </div>
         </div>
-      )}
-
-      {/* Opening Envelope Screen if enabled */}
-      {showOpeningScreen && invitation.openingScreen && (
-        <OpeningEnvelopeScreen
-          config={invitation.openingScreen}
-          theme={theme}
-          defaultTitle={invitation.title}
-          defaultDate={invitation.eventDate}
-          onOpen={handleOpenInvitation}
-        />
       )}
 
       {/* Floating Audio Soundtrack */}
@@ -340,16 +323,28 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
 
       {/* Main Invitation Stream (Vertical Pages) */}
       <div
-        className={`flex flex-col items-center justify-start transition-all duration-300 ${
+        className={`relative flex flex-col items-center justify-start transition-all duration-300 ${
           activeViewport === 'mobile' && !isMobileScreen
             ? 'w-[390px] my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
-            : activeViewport === 'tablet' && windowWidth >= 768
+            : (activeViewport === 'tablet' || activeViewport === 'desktop') && windowWidth >= 768
             ? 'w-[768px] my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
-            : activeViewport === 'desktop' && windowWidth >= 960
-            ? 'w-[960px] my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
             : 'w-full'
         }`}
+        style={showOpeningScreen ? { minHeight: `${pages[0] ? (contentScale !== 1 ? Math.round(getPageHeight(pages[0]) * contentScale) : getPageHeight(pages[0])) : 844}px` } : undefined}
       >
+        {/* Contained Opening Screen inside Frame (Framed like other pages, not a window background) */}
+        <AnimatePresence>
+          {showOpeningScreen && invitation.openingScreen && invitation.openingScreen.enabled !== false && (
+            <OpeningEnvelopeScreen
+              config={invitation.openingScreen}
+              theme={theme}
+              defaultTitle={invitation.title}
+              defaultDate={invitation.eventDate}
+              onOpen={handleOpenInvitation}
+              isContained={true}
+            />
+          )}
+        </AnimatePresence>
         {pages.map((page, index) => {
           const topLevelElements = (page.elements || []).filter((el) => {
             if (el.parentContainerId || el.isHidden) return false;
@@ -376,7 +371,7 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
             return true;
           });
 
-          const canvasHeight = getPageCalculatedHeight(page);
+          const canvasHeight = getPageHeight(page);
           const scaledHeight = contentScale !== 1 ? Math.round(canvasHeight * contentScale) : canvasHeight;
 
           const transitionType = page.transition?.type || 'fade';
@@ -416,6 +411,17 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                     muted
                     playsInline
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+                  />
+                )}
+
+                {/* Background Overlay if specified */}
+                {page.background?.overlayOpacity !== undefined && page.background.overlayOpacity > 0 && (
+                  <div
+                    className="absolute inset-0 pointer-events-none z-0"
+                    style={{
+                      backgroundColor: page.background.overlayColor || '#000000',
+                      opacity: page.background.overlayOpacity
+                    }}
                   />
                 )}
 

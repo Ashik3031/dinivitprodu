@@ -157,7 +157,7 @@ export const EditorTopNav: React.FC<EditorTopNavProps> = ({
         <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-xs font-semibold">
           <button
             type="button"
-            title="Desktop Mode (960px)"
+            title="Desktop Mode (768px)"
             onClick={() => onChangeViewport('desktop')}
             className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-md transition-all cursor-pointer ${
               viewportMode === 'desktop'

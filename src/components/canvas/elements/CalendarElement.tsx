@@ -107,31 +107,54 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-between p-3.5 rounded-2xl select-none backdrop-blur-md border border-white/10 shadow-lg text-slate-100"
+      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-md shadow-lg text-slate-100 transition-all"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
-        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+        borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
+        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.1)',
+        borderStyle: style.borderStyle || 'solid',
+        boxShadow: style.boxShadow,
+        padding: style.padding ? `${style.padding}px` : '14px'
       }}
     >
       {/* Header Month / Year */}
       <div className="flex items-center justify-between pb-2 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4" style={{ color: primaryColor }} />
-          <span className="font-bold text-sm tracking-wider uppercase font-serif">
+          <CalendarIcon className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
+          <span
+            className="font-bold tracking-wider uppercase transition-colors"
+            style={{
+              fontFamily: style.fontFamily || "'Playfair Display', serif",
+              color: primaryColor,
+              fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
+              fontWeight: style.fontWeight || 'bold',
+              letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined,
+              textTransform: style.textTransform || 'uppercase',
+              fontStyle: style.fontStyle
+            }}
+          >
             {currentMonthName} {year}
           </span>
         </div>
         <div
-          className="text-[10px] font-sans px-2 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold"
-          style={{ color: primaryColor }}
+          className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold transition-colors"
+          style={{
+            color: primaryColor,
+            borderColor: `${primaryColor}40`,
+            fontFamily: style.fontFamily
+          }}
         >
-          Save the Date
+          {content.calendarBadgeText || 'Save the Date'}
         </div>
       </div>
 
       {/* Weekday Labels */}
-      <div className="grid grid-cols-7 gap-1 text-center py-1 text-[10px] font-sans font-semibold opacity-60 tracking-wider">
+      <div
+        className="grid grid-cols-7 gap-1 text-center py-1 text-[10px] font-semibold opacity-75 tracking-wider"
+        style={{ fontFamily: style.fontFamily }}
+      >
         <span>SU</span>
         <span>MO</span>
         <span>TU</span>
@@ -142,7 +165,10 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
       </div>
 
       {/* Day Grid */}
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-sans">
+      <div
+        className="grid grid-cols-7 gap-1 text-center text-xs"
+        style={{ fontFamily: style.fontFamily }}
+      >
         {daysArray.map((day, idx) => {
           if (day === null) {
             return <div key={`empty-${idx}`} className="h-6 w-full" />;
@@ -180,10 +206,11 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
           <button
             type="button"
             onClick={handleAddToGoogleCalendar}
-            className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg text-[10px] font-sans font-semibold transition-all shadow-sm hover:brightness-110 active:scale-95 cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg text-[10px] font-semibold transition-all shadow-sm hover:brightness-110 active:scale-95 cursor-pointer"
             style={{
               backgroundColor: primaryColor,
-              color: '#0f172a'
+              color: ['#ffffff', '#f8fafc', '#fff1f2', '#fefce8', '#fde68a', '#d4af37'].includes(primaryColor.toLowerCase()) ? '#0f172a' : '#ffffff',
+              fontFamily: style.fontFamily
             }}
           >
             <Sparkles className="w-3 h-3" />

@@ -50,11 +50,16 @@ export const RSVPElement: React.FC<RSVPElementProps> = ({
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-between p-4 rounded-2xl select-none backdrop-blur-md border border-white/10 shadow-xl text-slate-100 overflow-y-auto"
+      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-md shadow-xl text-slate-100 overflow-y-auto transition-all"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
-        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px'
+        borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
+        borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
+        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.1)',
+        borderStyle: style.borderStyle || 'solid',
+        boxShadow: style.boxShadow,
+        padding: style.padding ? `${style.padding}px` : '16px'
       }}
     >
       {/* Header */}
