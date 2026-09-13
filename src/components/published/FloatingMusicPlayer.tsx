@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MusicConfig } from '../../types';
-import { Volume2, VolumeX, Music, Play, Pause } from 'lucide-react';
+import { MusicConfig, InvitationTheme } from '../../types';
+import { Music, Pause } from 'lucide-react';
 
 interface FloatingMusicPlayerProps {
   config: MusicConfig;
   autoPlayTriggered?: boolean;
+  theme?: Partial<InvitationTheme>;
 }
 
 export const FloatingMusicPlayer: React.FC<FloatingMusicPlayerProps> = ({
   config,
-  autoPlayTriggered = false
+  autoPlayTriggered = false,
+  theme
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const primaryColor = theme?.primaryColor || theme?.accentColor || '#d4af37';
 
   useEffect(() => {
     if (!config.enabled || !config.audioUrl) return;
@@ -51,28 +55,34 @@ export const FloatingMusicPlayer: React.FC<FloatingMusicPlayerProps> = ({
       <button
         type="button"
         onClick={togglePlay}
-        className={`flex items-center gap-2.5 px-3.5 py-2 rounded-full shadow-lg backdrop-blur-md border transition-all cursor-pointer ${
+        title={isPlaying ? 'Pause Music' : 'Play Music'}
+        style={
           isPlaying
-            ? 'bg-slate-900 text-white border-slate-800'
-            : 'bg-white/90 text-slate-700 border-slate-200 hover:border-slate-400'
-        }`}
+            ? {
+                backgroundColor: primaryColor,
+                borderColor: 'rgba(255, 255, 255, 0.5)',
+                boxShadow: `0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px ${primaryColor}80`
+              }
+            : {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                borderColor: primaryColor,
+                boxShadow: `0 8px 32px rgba(0, 0, 0, 0.5), 0 0 12px ${primaryColor}40`
+              }
+        }
+        className="relative w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95 backdrop-blur-md z-50"
       >
-        {/* Animated Sound Bars or Icon */}
-        <div className="flex items-center gap-0.5 h-4">
-          {isPlaying ? (
-            <>
-              <span className="w-1 bg-white rounded-full h-3 animate-pulse" />
-              <span className="w-1 bg-white rounded-full h-4 animate-bounce" />
-              <span className="w-1 bg-white rounded-full h-2 animate-pulse" />
-            </>
-          ) : (
-            <VolumeX className="w-4 h-4 text-slate-400" />
-          )}
-        </div>
+        {isPlaying && (
+          <span
+            className="absolute -inset-1 rounded-full border-2 animate-ping pointer-events-none opacity-50"
+            style={{ borderColor: primaryColor }}
+          />
+        )}
 
-        <span className="text-xs font-semibold max-w-[120px] truncate">
-          {config.title || 'Music'}
-        </span>
+        {isPlaying ? (
+          <Pause className="w-5 h-5 text-white fill-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+        ) : (
+          <Music className="w-5 h-5 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+        )}
       </button>
     </div>
   );

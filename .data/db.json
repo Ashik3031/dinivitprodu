@@ -3816,7 +3816,7 @@
               "name": "Oval Couple Photo Holder",
               "style": {
                 "x": 65,
-                "y": 60,
+                "y": 61,
                 "width": 260,
                 "height": 320,
                 "shape": "oval",
@@ -3988,30 +3988,6 @@
                 "duration": 1,
                 "delay": 1
               }
-            },
-            {
-              "id": "el-1789323759366-c3i9",
-              "type": "audio",
-              "name": "Acoustic Romance (Gentle Guitar)",
-              "parentContainerId": null,
-              "parentId": null,
-              "style": {
-                "x": 45,
-                "y": 300,
-                "width": 300,
-                "height": 52
-              },
-              "content": {
-                "audioUrl": "https://cdn.freesound.org/previews/612/612610_5674468-lq.mp3",
-                "audioTitle": "Acoustic Romance (Gentle Guitar)",
-                "audioArtist": "Audio Track",
-                "audioLoop": true
-              },
-              "animation": {
-                "type": "fadeIn",
-                "duration": 0.8,
-                "delay": 0.2
-              }
             }
           ]
         }
@@ -4022,7 +3998,7 @@
       "authorName": "Super Admin",
       "createdBy": "usr-admin-1",
       "tags": [],
-      "updatedAt": "2026-09-13T18:25:13.627Z"
+      "updatedAt": "2026-09-13T18:34:11.377Z"
     },
     {
       "id": "template-modern-birthday",

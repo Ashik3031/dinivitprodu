@@ -304,6 +304,7 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
         <FloatingMusicPlayer
           config={invitation.music}
           autoPlayTriggered={hasStartedAudio}
+          theme={theme}
         />
       )}
 

@@ -269,14 +269,16 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
               </span>
 
               {/* Insert as new Element */}
-              <button
-                type="button"
-                onClick={handleInsert}
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Insert as Canvas Element</span>
-              </button>
+              {asset.type !== 'audio' && (
+                <button
+                  type="button"
+                  onClick={handleInsert}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Insert as Canvas Element</span>
+                </button>
+              )}
 
               {/* Replace Selected Element */}
               {selectedElement && onApplyToSelected && (

@@ -254,16 +254,9 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
         style: { x: 35, y: 140, width: 320, height: 200, borderRadius: 16 }
       });
     } else if (asset.type === 'audio') {
-      onAddElement('audio', {
-        name: asset.title,
-        content: {
-          audioUrl: asset.url,
-          audioTitle: asset.title,
-          audioArtist: 'Audio Track',
-          audioLoop: true
-        },
-        style: { x: 45, y: 300, width: 300, height: 52 }
-      });
+      if (onSetAsMusic) {
+        onSetAsMusic(asset.url, asset.title);
+      }
     }
   };
 
