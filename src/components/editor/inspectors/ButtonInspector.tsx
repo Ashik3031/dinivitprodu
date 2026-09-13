@@ -1,6 +1,6 @@
 import React from 'react';
 import { CanvasElement } from '../../../types';
-import { Send, Link2, Sparkles, Sliders } from 'lucide-react';
+import { Send, Link2, Sparkles, Sliders, MailOpen } from 'lucide-react';
 
 interface ButtonInspectorProps {
   element: CanvasElement;
@@ -12,6 +12,7 @@ export const ButtonInspector: React.FC<ButtonInspectorProps> = ({
   onUpdateElement
 }) => {
   const { style, content } = element;
+  const isOpenInvitation = content.buttonAction === 'open-invitation' || element.id === 'open-elem-button';
 
   return (
     <div className="space-y-4 pt-3 border-t border-slate-200 text-xs">
@@ -31,7 +32,7 @@ export const ButtonInspector: React.FC<ButtonInspectorProps> = ({
             })
           }
           className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          placeholder="e.g. Confirm Attendance"
+          placeholder="e.g. Open Invitation"
         />
       </div>
 
@@ -39,7 +40,7 @@ export const ButtonInspector: React.FC<ButtonInspectorProps> = ({
       <div>
         <label className="text-[10px] text-slate-500 block mb-1">Click Action</label>
         <select
-          value={content.buttonAction || 'rsvp'}
+          value={content.buttonAction || (isOpenInvitation ? 'open-invitation' : 'rsvp')}
           onChange={(e) =>
             onUpdateElement(element.id, {
               content: { ...content, buttonAction: e.target.value as any }
@@ -47,6 +48,7 @@ export const ButtonInspector: React.FC<ButtonInspectorProps> = ({
           }
           className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 font-medium focus:bg-white focus:outline-none focus:border-slate-900"
         >
+          <option value="open-invitation">✨ Open Invitation (Cover Opening Action)</option>
           <option value="rsvp">Open RSVP Response Card</option>
           <option value="guestbook">Open Guestbook & Wishes</option>
           <option value="maps">Open Google Maps Location</option>
@@ -55,6 +57,17 @@ export const ButtonInspector: React.FC<ButtonInspectorProps> = ({
           <option value="next-page">Scroll / Navigate to Next Page</option>
         </select>
       </div>
+
+      {/* Open Invitation info banner */}
+      {isOpenInvitation && (
+        <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-950 flex items-start gap-2">
+          <MailOpen className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="text-[10.5px] leading-relaxed">
+            <span className="font-semibold block">Cover Opening Action:</span>
+            When tapped by guests, this button unfastens the wax seal, initiates the envelope opening transition, begins background music, and smoothly reveals the first page.
+          </div>
+        </div>
+      )}
 
       {/* Custom Link input if link */}
       {content.buttonAction === 'link' && (

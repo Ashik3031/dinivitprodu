@@ -46,7 +46,13 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     openButtonText: 'Open Invitation'
   };
 
-  const handleOpenCallback = onOpen || onOpenComplete || (() => {});
+  const hasCalledOpenRef = useRef(false);
+  const handleOpenCallback = () => {
+    if (hasCalledOpenRef.current) return;
+    hasCalledOpenRef.current = true;
+    if (onOpen) onOpen();
+    if (onOpenComplete) onOpenComplete();
+  };
   const [isOpening, setIsOpening] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -54,7 +60,6 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
   const [isMuted, setIsMuted] = useState(config.videoMuted !== false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const touchStartY = useRef<number | null>(null);
 
   // Obtain effective canvas page (WYSIWYG: what's on the canvas is what's in preview)
   const effectiveTheme = (theme || {}) as InvitationTheme;
@@ -72,23 +77,31 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     (el) => el.id === 'open-elem-button' || el.type === 'button'
   );
 
-  // Determine cover type
+  // Determine cover type: if explicitly selected, respect it strictly!
   const coverType: OpeningCoverType =
     config.coverType ||
-    (config.videoUrl || config.style === 'video-cover' || pageBg?.type === 'video'
+    (config.style === 'video-cover' || pageBg?.type === 'video'
       ? 'video'
-      : config.imageUrl || config.style === 'card-flip' || pageBg?.type === 'image'
+      : config.style === 'card-flip' || pageBg?.type === 'image'
       ? 'image'
       : config.style === 'custom-page'
       ? 'custom-page'
+      : config.videoUrl
+      ? 'video'
+      : config.imageUrl
+      ? 'image'
       : 'envelope');
 
   const videoPlayMode: VideoPlayMode = config.videoPlayMode || 'autoplay';
-  const imageTransition: ImageTransitionEffect = config.imageTransitionEffect || 'zoom-fade';
+  // Global transition effect for all cover types (video, image, envelope, custom)
+  const transitionEffect: ImageTransitionEffect =
+    config.coverTransitionEffect || config.imageTransitionEffect || 'zoom-fade';
   const imageTrigger: ImageAdvanceTrigger = config.imageAdvanceTrigger || 'click-button';
 
+  const hasTriggeredRef = useRef(false);
   const triggerOpen = (immediate = false) => {
-    if (isOpening) return;
+    if (isOpening || hasTriggeredRef.current) return;
+    hasTriggeredRef.current = true;
     setIsOpening(true);
 
     if (config.showConfetti !== false) {
@@ -102,7 +115,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
       } catch (e) {}
     }
 
-    const delay = immediate ? 350 : 850;
+    const delay = immediate ? 200 : 900;
     setTimeout(() => {
       handleOpenCallback();
     }, delay);
@@ -187,39 +200,6 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     }
   }, [coverType, imageTrigger, config.imageTimerSeconds]);
 
-  // ========================== SCROLL & TOUCH GESTURE LOGIC ==========================
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartY.current === null) return;
-    const deltaY = touchStartY.current - e.changedTouches[0].clientY;
-    // Swipe up detected (> 50px)
-    if (deltaY > 50) {
-      if (
-        (coverType === 'video' && videoPlayMode === 'scroll-based') ||
-        (coverType === 'image' && imageTrigger === 'scroll-swipe') ||
-        coverType === 'envelope'
-      ) {
-        triggerOpen();
-      }
-    }
-    touchStartY.current = null;
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.deltaY > 30) {
-      if (
-        (coverType === 'video' && videoPlayMode === 'scroll-based') ||
-        (coverType === 'image' && imageTrigger === 'scroll-swipe') ||
-        coverType === 'envelope'
-      ) {
-        triggerOpen();
-      }
-    }
-  };
-
   // Check if click anywhere trigger is active (or if there is no explicit button on canvas)
   const handleContainerClick = () => {
     if (
@@ -231,44 +211,96 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     }
   };
 
-  // Determine transition variants based on selected effect
+  // Determine transition variants based on selected effect (Global for all cover types)
   const getExitAnimation = () => {
-    if (coverType === 'image') {
-      switch (imageTransition) {
-        case 'slide-up':
-          return { y: '-100%', opacity: 0.9, transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] } };
-        case 'curtain-split':
-          return { opacity: 0, scale: 1.05, transition: { duration: 0.7 } };
-        case 'blur-dissolve':
-          return { filter: 'blur(25px)', opacity: 0, scale: 1.04, transition: { duration: 0.9 } };
-        case 'book-flip':
-          return { rotateY: -90, opacity: 0, transformOrigin: 'left center', transition: { duration: 0.85 } };
-        case 'envelope-unfold':
-          return { y: '-80%', opacity: 0, scale: 0.95, transition: { duration: 0.8 } };
-        case 'zoom-fade':
-        default:
-          return { scale: 1.25, opacity: 0, filter: 'blur(10px)', transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] } };
-      }
+    switch (transitionEffect) {
+      case 'slide-up':
+        return {
+          y: '-105%',
+          opacity: 0.8,
+          transition: { duration: 0.85, ease: [0.25, 1, 0.5, 1] }
+        };
+      case 'curtain-split':
+        return {
+          clipPath: 'inset(0% 50% 0% 50%)',
+          scale: 1.05,
+          opacity: 0,
+          transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+        };
+      case 'blur-dissolve':
+        return {
+          filter: 'blur(35px)',
+          opacity: 0,
+          scale: 1.08,
+          transition: { duration: 0.9, ease: 'easeInOut' }
+        };
+      case 'book-flip':
+        return {
+          rotateY: -95,
+          opacity: 0,
+          x: '-20%',
+          transformOrigin: 'left center',
+          transition: { duration: 0.9, ease: [0.4, 0, 0.2, 1] }
+        };
+      case 'envelope-unfold':
+        return {
+          y: '-90%',
+          rotateX: 25,
+          opacity: 0,
+          scale: 0.92,
+          transformOrigin: 'bottom center',
+          transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+        };
+      case 'zoom-fade':
+      default:
+        return {
+          scale: 1.35,
+          opacity: 0,
+          filter: 'blur(16px)',
+          transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+        };
     }
-
-    // Default for video and envelopes
-    return { opacity: 0, scale: 1.08, filter: 'blur(8px)', transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } };
   };
 
-  const isVideoBg = coverType === 'video' || pageBg?.type === 'video' || Boolean(config.videoUrl);
-  const isImageBg = coverType === 'image' || pageBg?.type === 'image' || Boolean(config.imageUrl);
+  // Strictly respect the active coverType: if image is selected, NEVER fall back to video!
+  const isVideoBg = coverType === 'video';
+  const isImageBg = coverType === 'image';
   const videoSrc = config.videoUrl || pageBg?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4';
   const imageSrc = config.imageUrl || pageBg?.imageUrl || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85';
 
   return (
-    <AnimatePresence>
-      <motion.div
-        key="opening-screen-overlay"
-        initial={{ opacity: 1 }}
+    <motion.div
+      key="opening-screen-overlay"
+        initial={{
+          opacity: 1,
+          scale: 1,
+          x: 0,
+          y: 0,
+          rotateY: 0,
+          rotateX: 0,
+          filter: 'blur(0px)',
+          clipPath: 'inset(0% 0% 0% 0%)'
+        }}
+        animate={
+          isOpening
+            ? (getExitAnimation() as any)
+            : {
+                opacity: 1,
+                scale: 1,
+                x: 0,
+                y: 0,
+                rotateY: 0,
+                rotateX: 0,
+                filter: 'blur(0px)',
+                clipPath: 'inset(0% 0% 0% 0%)'
+              }
+        }
         exit={getExitAnimation() as any}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onWheel={handleWheel}
+        onAnimationComplete={() => {
+          if (isOpening) {
+            handleOpenCallback();
+          }
+        }}
         onClick={handleContainerClick}
         className={`${
           isContained ? 'absolute' : 'fixed'
@@ -276,7 +308,8 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           !hasButtonOnCanvas || (coverType === 'image' && imageTrigger === 'click-anywhere') ? 'cursor-pointer' : ''
         }`}
         style={{
-          perspective: 1200,
+          perspective: 1400,
+          transformStyle: 'preserve-3d',
           backgroundColor: !isVideoBg && !isImageBg && pageBg?.type === 'color' ? pageBg.color : '#07120d'
         }}
       >
@@ -404,12 +437,17 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
         )}
 
         {/* ========================================================================= */}
-        {/* 2. WYSIWYG CANVAS ELEMENTS (100% Matching Editor Canvas)                   */}
+        {/* 2. WYSIWYG CANVAS ELEMENTS (100% Matching Editor Canvas Dimensions)        */}
         {/* ========================================================================= */}
         <div className="relative w-full h-full inset-0 overflow-hidden flex items-center justify-center pointer-events-auto">
           <div
-            className="relative w-full h-full max-w-[430px] mx-auto overflow-hidden"
-            style={{ minHeight: '844px' }}
+            className="relative mx-auto overflow-hidden"
+            style={{
+              width: `${page?.width || 520}px`,
+              height: page?.heightMode === 'viewport' ? '100%' : `${page?.height || 400}px`,
+              maxWidth: '100%',
+              maxHeight: page?.heightMode === 'viewport' ? '100%' : undefined
+            }}
           >
             {topLevelElements.map((el) => {
               const { style: resolvedStyle } = resolveElementForViewport(el, 'mobile');
@@ -455,6 +493,5 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           </div>
         </div>
       </motion.div>
-    </AnimatePresence>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CanvasElement, InvitationPage, ViewportMode } from '../../types';
+import { CanvasElement, InvitationPage, ViewportMode, OuterDropEffectType } from '../../types';
 import { ElementRenderer } from './ElementRenderer';
 import { resolveElementForViewport, setElementResponsiveOverride, getPageCalculatedHeight } from '../../utils/responsiveUtils';
+import { OuterDropParticles } from './OuterDropParticles';
 import {
   Lock,
   Unlock,
@@ -55,6 +56,10 @@ interface VisualCanvasProps {
   previewAnimationElementId?: string | null;
   previewAnimationKey?: number;
   onPreviewAnimation?: (elementId: string) => void;
+  outerBackgroundColor?: string;
+  showOuterDrops?: boolean;
+  outerDropEffect?: OuterDropEffectType;
+  outerDropColor?: string;
 }
 
 export const VisualCanvas: React.FC<VisualCanvasProps> = ({
@@ -83,7 +88,11 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   showGrid = false,
   previewAnimationElementId,
   previewAnimationKey,
-  onPreviewAnimation
+  onPreviewAnimation,
+  outerBackgroundColor,
+  showOuterDrops,
+  outerDropEffect,
+  outerDropColor
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -133,7 +142,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     }
   };
 
-  const canvasWidth = getCanvasWidth();
+  const canvasWidth = page.width || getCanvasWidth();
   const canvasHeight = getPageCalculatedHeight(page, viewportMode, windowHeight);
 
   // Page background style
@@ -516,9 +525,21 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
 
   return (
     <div
-      className="relative flex items-center justify-center p-8 min-h-full min-w-full overflow-auto select-none w-full"
+      className="relative flex items-center justify-center p-8 min-h-full min-w-full overflow-auto select-none w-full transition-colors duration-300"
+      style={{
+        backgroundColor: outerBackgroundColor || '#f1f5f9'
+      }}
       onClick={() => onSelectElement(null)}
     >
+      {/* Decorative Outer Floating Drops (Hearts, Sparkles, etc.) */}
+      {showOuterDrops && outerDropEffect !== 'none' && (
+        <OuterDropParticles
+          active={true}
+          color={outerDropColor || '#f43f5e'}
+          effect={outerDropEffect || 'hearts'}
+        />
+      )}
+
       {/* Design Canvas Board */}
       <div
         ref={canvasRef}

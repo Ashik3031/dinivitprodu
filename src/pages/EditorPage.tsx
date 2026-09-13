@@ -552,6 +552,13 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
     const finalizedOpening: OpeningScreenConfig = {
       ...nextConfig,
+      coverType:
+        nextConfig.coverType ||
+        (updatedPage.background?.type === 'image'
+          ? 'image'
+          : updatedPage.background?.type === 'video'
+          ? 'video'
+          : 'envelope'),
       background: updatedPage.background,
       page: updatedPage
     };
@@ -1410,6 +1417,28 @@ export const EditorPage: React.FC<EditorPageProps> = ({
             previewAnimationElementId={previewAnimationElementId}
             previewAnimationKey={previewAnimationKey}
             onPreviewAnimation={handlePreviewAnimation}
+            outerBackgroundColor={
+              (selectedPageIndex === -1 && invitation.openingScreen?.outerBackgroundColor) ||
+              invitation.theme?.outerBackgroundColor ||
+              invitation.openingScreen?.outerBackgroundColor ||
+              '#f1f5f9'
+            }
+            showOuterDrops={
+              (selectedPageIndex === -1 ? invitation.openingScreen?.showOuterDrops : invitation.theme?.showOuterDrops) ??
+              (invitation.openingScreen?.showOuterDrops || invitation.theme?.showOuterDrops)
+            }
+            outerDropEffect={
+              (selectedPageIndex === -1 ? invitation.openingScreen?.outerDropEffect : invitation.theme?.outerDropEffect) ||
+              invitation.openingScreen?.outerDropEffect ||
+              invitation.theme?.outerDropEffect ||
+              'hearts'
+            }
+            outerDropColor={
+              (selectedPageIndex === -1 ? invitation.openingScreen?.outerDropColor : invitation.theme?.outerDropColor) ||
+              invitation.openingScreen?.outerDropColor ||
+              invitation.theme?.outerDropColor ||
+              '#f43f5e'
+            }
           />
         </div>
 

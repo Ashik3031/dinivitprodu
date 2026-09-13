@@ -507,12 +507,16 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           {isOpeningScreen && openingScreenConfig && onUpdateOpeningScreen && (
             <OpeningScreenInspector
               config={openingScreenConfig}
+              page={page}
               onUpdate={onUpdateOpeningScreen}
               onTestOpeningScreen={onTestOpeningScreen}
+              onSelectElement={onSelectElement}
+              onAddElement={onAddElement}
+              onUpdatePage={onUpdatePage}
             />
           )}
 
-          {/* Page Height Configuration (Standard pages or Opening) */}
+          {/* Page Height & Width Configuration (Standard pages or Opening) */}
           {!isOpeningScreen && (
             <div className="space-y-3">
               <div className="flex justify-between items-center text-xs">
@@ -634,8 +638,228 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Canvas Width Configuration */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-slate-700 uppercase tracking-wider">Canvas Width</span>
+                  <span className="text-slate-900 font-mono font-medium text-[11px] bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    {page.width || 390}px
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min="320"
+                    max="850"
+                    step="10"
+                    value={page.width || 390}
+                    onChange={(e) => onUpdatePage({ width: Number(e.target.value) })}
+                    className="flex-1 accent-slate-900 cursor-pointer"
+                  />
+                  <input
+                    type="number"
+                    min="320"
+                    max="950"
+                    value={page.width || 390}
+                    onChange={(e) => onUpdatePage({ width: Number(e.target.value) })}
+                    className="w-16 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-center"
+                  />
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-[10px]">
+                  {[
+                    { label: '390 (Phone)', val: 390 },
+                    { label: '420 (Large)', val: 420 },
+                    { label: '480 (Card)', val: 480 },
+                    { label: '768 (Tablet)', val: 768 }
+                  ].map((wPreset) => (
+                    <button
+                      key={wPreset.label}
+                      type="button"
+                      onClick={() => onUpdatePage({ width: wPreset.val })}
+                      className={`py-1 px-1 rounded border text-center cursor-pointer transition-colors ${
+                        (page.width || 390) === wPreset.val
+                          ? 'bg-slate-900 text-white font-bold border-slate-900'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
+                      }`}
+                    >
+                      {wPreset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Outer Canvas Backdrop & Heart Drops */}
+          <div className="space-y-3 pt-3 border-t border-slate-200 bg-rose-50/40 p-3 rounded-xl border border-rose-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold text-rose-950 text-xs">
+                <Heart className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
+                <span>Outer Canvas Backdrop</span>
+              </div>
+              <span className="text-[9.5px] font-semibold text-rose-700 bg-white px-2 py-0.5 rounded-full border border-rose-200">
+                Outside Canvas
+              </span>
+            </div>
+
+            {/* Outer Background Color */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-semibold text-slate-700">Outer Background:</span>
+                <span className="font-mono text-xs font-semibold text-slate-800">
+                  {theme?.outerBackgroundColor || openingScreenConfig?.outerBackgroundColor || '#0a0a0a'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={theme?.outerBackgroundColor || openingScreenConfig?.outerBackgroundColor || '#0a0a0a'}
+                  onChange={(e) => {
+                    const color = e.target.value;
+                    onUpdateTheme({ outerBackgroundColor: color });
+                    if (onUpdateOpeningScreen) onUpdateOpeningScreen({ outerBackgroundColor: color });
+                  }}
+                  className="w-7 h-7 rounded border border-slate-300 cursor-pointer p-0.5 bg-white shadow-xs"
+                />
+                <input
+                  type="text"
+                  value={theme?.outerBackgroundColor || openingScreenConfig?.outerBackgroundColor || '#0a0a0a'}
+                  onChange={(e) => {
+                    const color = e.target.value;
+                    onUpdateTheme({ outerBackgroundColor: color });
+                    if (onUpdateOpeningScreen) onUpdateOpeningScreen({ outerBackgroundColor: color });
+                  }}
+                  placeholder="#0a0a0a"
+                  className="flex-1 text-xs bg-white border border-slate-200 rounded px-2 py-1.5 font-mono text-slate-800 focus:outline-none focus:border-rose-500"
+                />
+              </div>
+
+              {/* Presets */}
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                {[
+                  { name: 'Midnight Dark', color: '#0a0a0a' },
+                  { name: 'Charcoal', color: '#171717' },
+                  { name: 'Slate Navy', color: '#0f172a' },
+                  { name: 'Espresso', color: '#1c1917' },
+                  { name: 'Deep Wine', color: '#2a080c' },
+                  { name: 'Deep Emerald', color: '#071912' },
+                  { name: 'Warm Ivory', color: '#fdfbf7' },
+                  { name: 'Light Slate', color: '#f1f5f9' }
+                ].map((p) => (
+                  <button
+                    key={p.color}
+                    type="button"
+                    onClick={() => {
+                      onUpdateTheme({ outerBackgroundColor: p.color });
+                      if (onUpdateOpeningScreen) onUpdateOpeningScreen({ outerBackgroundColor: p.color });
+                    }}
+                    title={p.name}
+                    className="w-5 h-5 rounded-full border border-slate-300 shadow-2xs hover:scale-110 transition-transform cursor-pointer"
+                    style={{ backgroundColor: p.color }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Heart Drops Toggle */}
+            <div className="pt-2 border-t border-rose-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-rose-950">
+                  Floating Heart Drops (Outside Canvas)
+                </span>
+                <input
+                  type="checkbox"
+                  checked={theme?.showOuterDrops || openingScreenConfig?.showOuterDrops}
+                  onChange={(e) => {
+                    const enable = e.target.checked;
+                    onUpdateTheme({
+                      showOuterDrops: enable,
+                      outerDropEffect: enable ? (theme?.outerDropEffect || 'hearts') : 'none'
+                    });
+                    if (onUpdateOpeningScreen) {
+                      onUpdateOpeningScreen({
+                        showOuterDrops: enable,
+                        outerDropEffect: enable ? (openingScreenConfig?.outerDropEffect || 'hearts') : 'none'
+                      });
+                    }
+                  }}
+                  className="rounded text-rose-600 focus:ring-rose-500 w-4 h-4 cursor-pointer"
+                />
+              </div>
+
+              {(theme?.showOuterDrops || openingScreenConfig?.showOuterDrops) && (
+                <div className="space-y-2 bg-white/80 p-2.5 rounded-lg border border-rose-200/80">
+                  {/* Drop Symbol Style Dropdown */}
+                  <div>
+                    <label className="text-[10px] font-semibold text-slate-700 block mb-1">
+                      Drop Symbol Style
+                    </label>
+                    <select
+                      value={theme?.outerDropEffect || openingScreenConfig?.outerDropEffect || 'hearts'}
+                      onChange={(e) => {
+                        const effect = e.target.value as any;
+                        onUpdateTheme({ outerDropEffect: effect });
+                        if (onUpdateOpeningScreen) onUpdateOpeningScreen({ outerDropEffect: effect });
+                      }}
+                      className="w-full text-xs bg-white border border-slate-200 rounded p-1.5 text-slate-800 focus:outline-none focus:border-rose-500 font-medium"
+                    >
+                      <option value="hearts">❤️ Romantic Hearts</option>
+                      <option value="petals">🌸 Rose & Sakura Petals</option>
+                      <option value="sparkles">✨ Golden Sparkles</option>
+                      <option value="stars">⭐ Starlight Stars</option>
+                      <option value="butterflies">🦋 Fluttering Butterflies</option>
+                      <option value="leaves">🍃 Botanical Leaves</option>
+                      <option value="snow">❄️ Winter Snowflakes</option>
+                      <option value="confetti">🎊 Celebration Confetti</option>
+                      <option value="bubbles">🫧 Iridescent Bubbles</option>
+                      <option value="rings">💍 Wedding Rings & Gems</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-semibold text-slate-700">Drop Symbol Color:</span>
+                    <span className="font-mono text-slate-800 font-semibold">
+                      {theme?.outerDropColor || openingScreenConfig?.outerDropColor || '#f43f5e'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={theme?.outerDropColor || openingScreenConfig?.outerDropColor || '#f43f5e'}
+                      onChange={(e) => {
+                        const color = e.target.value;
+                        onUpdateTheme({ outerDropColor: color });
+                        if (onUpdateOpeningScreen) onUpdateOpeningScreen({ outerDropColor: color });
+                      }}
+                      className="w-7 h-7 rounded border border-rose-300 cursor-pointer p-0.5 bg-white shadow-xs"
+                    />
+                    <div className="flex items-center gap-1 flex-1">
+                      {[
+                        { name: 'Rose Pink', color: '#f43f5e' },
+                        { name: 'Gilded Gold', color: '#d4af37' },
+                        { name: 'Ruby Red', color: '#e11d48' },
+                        { name: 'Soft Blush', color: '#fda4af' },
+                        { name: 'Velvet White', color: '#ffffff' }
+                      ].map((c) => (
+                        <button
+                          key={c.color}
+                          type="button"
+                          onClick={() => {
+                            onUpdateTheme({ outerDropColor: c.color });
+                            if (onUpdateOpeningScreen) onUpdateOpeningScreen({ outerDropColor: c.color });
+                          }}
+                          title={c.name}
+                          className="w-4 h-4 rounded-full border border-slate-300 shadow-2xs cursor-pointer hover:scale-110 transition-transform"
+                          style={{ backgroundColor: c.color }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Page Background */}
           <div className="space-y-3 pt-3 border-t border-slate-200">

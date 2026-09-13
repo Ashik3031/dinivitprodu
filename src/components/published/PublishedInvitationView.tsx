@@ -25,6 +25,8 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { resolveElementForViewport, getPageTransitionVariants, CANVAS_BREAKPOINTS, getPageCalculatedHeight } from '../../utils/responsiveUtils';
+import { OuterDropParticles } from '../canvas/OuterDropParticles';
+import { getOrCreateOpeningScreenPage } from '../../utils/openingScreenUtils';
 
 interface PublishedInvitationViewProps {
   invitation: Invitation;
@@ -197,11 +199,42 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
     );
   };
 
+  const outerBg = invitation.openingScreen?.outerBackgroundColor || theme?.outerBackgroundColor || '#0a0a0a';
+  const showOuterDrops = (invitation.openingScreen?.showOuterDrops || theme?.showOuterDrops) &&
+    invitation.openingScreen?.outerDropEffect !== 'none' && theme?.outerDropEffect !== 'none';
+  const outerDropEffect = invitation.openingScreen?.outerDropEffect || theme?.outerDropEffect || 'hearts';
+  const outerDropColor = invitation.openingScreen?.outerDropColor || theme?.outerDropColor || '#f43f5e';
+
+  const isCoverActive = showOpeningScreen && !!invitation.openingScreen && invitation.openingScreen.enabled !== false;
+  const openingPage = isCoverActive ? (invitation.openingScreen?.page || getOrCreateOpeningScreenPage(invitation)) : null;
+
+  const configuredWidth = isCoverActive
+    ? (openingPage?.width || 520)
+    : (pages[0]?.width || (activeViewport === 'mobile' ? 390 : 768));
+
+  const frameWidth = configuredWidth
+    ? `${configuredWidth}px`
+    : (activeViewport === 'mobile' ? '390px' : '768px');
+
+  const coverCalculatedHeight = isCoverActive && openingPage
+    ? (openingPage.heightMode === 'viewport' ? (typeof window !== 'undefined' ? window.innerHeight : 844) : (openingPage.height || 400))
+    : null;
+
   return (
     <div
       ref={containerRef}
-      className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col items-center justify-start select-none relative overflow-x-hidden font-sans scroll-smooth"
+      className="min-h-screen text-neutral-100 flex flex-col items-center justify-start select-none relative overflow-x-hidden font-sans scroll-smooth transition-colors duration-300"
+      style={{ backgroundColor: outerBg }}
     >
+      {/* Outer Floating Drops / Heart particles (outside invitation frame) */}
+      {showOuterDrops && (
+        <OuterDropParticles
+          active={true}
+          color={outerDropColor}
+          effect={outerDropEffect}
+        />
+      )}
+
       {/* Interactive Preview Bar for toggling [ Desktop ] [ Tablet ] [ Mobile ] in preview mode */}
       {(!isLiveViewer || showPreviewControls) && (
         <div className="sticky top-0 z-50 w-full bg-slate-900/95 backdrop-blur-md border-b border-slate-800 py-2.5 px-4 flex flex-wrap items-center justify-between gap-2 text-xs shadow-md">
@@ -325,12 +358,23 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
       <div
         className={`relative flex flex-col items-center justify-start transition-all duration-300 ${
           activeViewport === 'mobile' && !isMobileScreen
-            ? 'w-[390px] my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
+            ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
             : (activeViewport === 'tablet' || activeViewport === 'desktop') && windowWidth >= 768
-            ? 'w-[768px] my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
+            ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
             : 'w-full'
         }`}
-        style={showOpeningScreen ? { minHeight: `${pages[0] ? (contentScale !== 1 ? Math.round(getPageHeight(pages[0]) * contentScale) : getPageHeight(pages[0])) : 844}px` } : undefined}
+        style={{
+          width: (!isMobileScreen || activeViewport !== 'mobile') ? frameWidth : '100%',
+          maxWidth: '100%',
+          ...(isCoverActive && coverCalculatedHeight
+            ? {
+                minHeight: `${coverCalculatedHeight}px`,
+                ...(openingPage?.heightMode !== 'viewport' ? { height: `${coverCalculatedHeight}px` } : {})
+              }
+            : showOpeningScreen
+            ? { minHeight: `${pages[0] ? (contentScale !== 1 ? Math.round(getPageHeight(pages[0]) * contentScale) : getPageHeight(pages[0])) : 844}px` }
+            : {})
+        }}
       >
         {/* Contained Opening Screen inside Frame (Framed like other pages, not a window background) */}
         <AnimatePresence>

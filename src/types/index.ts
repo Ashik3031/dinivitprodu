@@ -373,6 +373,7 @@ export interface InvitationPage {
   id: string;
   name: string;
   order?: number;
+  width?: number; // custom canvas pixel width (default 390 mobile, or user-customized e.g. 360 - 900)
   heightMode?: PageHeightMode;
   height?: number; // default e.g. 844 or custom pixel height
   isFullHeight?: boolean;
@@ -409,6 +410,19 @@ export interface PageTemplate {
   page: Omit<InvitationPage, 'id'>;
 }
 
+export type OuterDropEffectType =
+  | 'none'
+  | 'hearts'
+  | 'petals'
+  | 'sparkles'
+  | 'stars'
+  | 'butterflies'
+  | 'leaves'
+  | 'snow'
+  | 'confetti'
+  | 'bubbles'
+  | 'rings';
+
 export interface InvitationTheme {
   primaryColor: string;
   secondaryColor: string;
@@ -417,6 +431,10 @@ export interface InvitationTheme {
   fontBody: string;
   fontScript: string;
   backgroundColor: string;
+  outerBackgroundColor?: string;
+  showOuterDrops?: boolean;
+  outerDropEffect?: OuterDropEffectType;
+  outerDropColor?: string;
 }
 
 export type OpeningCoverType = 'video' | 'image' | 'envelope' | 'custom-page';
@@ -457,13 +475,18 @@ export interface OpeningScreenConfig {
   imageUrl?: string;
   imageOverlayColor?: string;
   imageOverlayOpacity?: number;
-  imageTransitionEffect?: ImageTransitionEffect; // 'zoom-fade' | 'curtain-split' | 'slide-up' | 'blur-dissolve' | 'book-flip' | 'envelope-unfold'
+  // Page Reveal / Transition Effect (Global for all cover types: video, image, envelope, custom)
+  coverTransitionEffect?: ImageTransitionEffect;
+  imageTransitionEffect?: ImageTransitionEffect; // legacy alias: 'zoom-fade' | 'curtain-split' | 'slide-up' | 'blur-dissolve' | 'book-flip' | 'envelope-unfold'
   imageAdvanceTrigger?: ImageAdvanceTrigger; // 'click-button' | 'click-anywhere' | 'scroll-swipe' | 'auto-timer'
   imageTimerSeconds?: number;
   imageTransitionDuration?: number;
 
   // Typography & Content
   showTextOnCover?: boolean;
+  showOverline?: boolean;
+  showCoupleNames?: boolean;
+  showDateSubtitle?: boolean;
   title?: string;
   subtitle?: string;
   coupleNames?: string;
@@ -475,6 +498,7 @@ export interface OpeningScreenConfig {
   accentColor?: string;
 
   // Envelope & Seal specific
+  envelopeTemplate?: 'simple-modern' | 'classic-wax-seal' | 'minimalist-clean' | 'royal-luxury';
   sealColor?: string;
   sealText?: string;
   sealIcon?: string;
@@ -483,6 +507,10 @@ export interface OpeningScreenConfig {
 
   // Effects & Audio
   showConfetti?: boolean;
+  outerBackgroundColor?: string;
+  showOuterDrops?: boolean;
+  outerDropEffect?: OuterDropEffectType;
+  outerDropColor?: string;
   background?: BackgroundConfig;
   musicAutoplayOnOpen?: boolean;
   page?: InvitationPage;

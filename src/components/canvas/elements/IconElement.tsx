@@ -16,8 +16,52 @@ export const IconElement: React.FC<IconElementProps> = ({ style, content }) => {
   const bgColor = content.iconBgColor || style.backgroundColor || 'transparent';
   const borderRadius = content.iconBorderRadius ?? (style.borderRadius ? Number(style.borderRadius) : 0);
 
-  // Safely find the icon component in LucideIcons
-  const IconComponent = (LucideIcons as any)[iconName] || LucideIcons.Heart;
+  // Safely find the icon component in LucideIcons with case-insensitivity and friendly aliases
+  const rawName = (content.iconName || 'Heart').trim();
+  const pascalName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+  
+  const ICON_ALIASES: Record<string, string> = {
+    ring: 'Gem',
+    rings: 'Gem',
+    rose: 'Flower2',
+    flower: 'Flower2',
+    dove: 'Bird',
+    bird: 'Bird',
+    butterfly: 'Sparkles',
+    cheers: 'Wine',
+    champagne: 'Wine',
+    gift: 'Gift',
+    sparkle: 'Sparkles',
+    sparkles: 'Sparkles',
+    mail: 'Mail',
+    envelope: 'Mail',
+    letter: 'Mail',
+    star: 'Star',
+    crown: 'Crown',
+    heart: 'Heart',
+    hearts: 'Heart',
+    gem: 'Gem',
+    leaf: 'Leaf',
+    moon: 'Moon',
+    sun: 'Sun',
+    bell: 'Bell',
+    music: 'Music',
+    infinity: 'Infinity',
+    flame: 'Flame'
+  };
+
+  const resolvedName =
+    ICON_ALIASES[rawName.toLowerCase()] ||
+    pascalName;
+
+  const IconComponent =
+    (LucideIcons as any)[resolvedName] ||
+    (LucideIcons as any)[rawName] ||
+    (LucideIcons as any)[pascalName] ||
+    (LucideIcons as any)[
+      Object.keys(LucideIcons).find((k) => k.toLowerCase() === rawName.toLowerCase()) || ''
+    ] ||
+    LucideIcons.Heart;
 
   return (
     <div

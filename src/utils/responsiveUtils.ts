@@ -204,8 +204,11 @@ export function getPageCalculatedHeight(
     page.heightMode === 'viewport' ||
     (page.isFullHeight && page.heightMode !== 'custom' && page.heightMode !== 'auto')
   ) {
-    // In viewport mode, use the window inner height so it fills the screen cleanly
-    return winHeight > 0 ? winHeight : 844;
+    // In viewport mode, ensure the canvas is at least page.height (or standard 844px),
+    // so elements placed towards the bottom (e.g. CTA / Open buttons at y: 560-620)
+    // are never clipped off by the canvas boundary in the editor.
+    const minHeight = page.height || 844;
+    return Math.max(minHeight, winHeight > 0 ? winHeight : 844);
   }
 
   // 2. Auto Height Mode (fits content bounds snugly with breathing room)

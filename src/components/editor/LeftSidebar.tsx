@@ -26,7 +26,8 @@ import {
   Shapes,
   Upload,
   Check,
-  Wand2
+  Wand2,
+  MailOpen
 } from 'lucide-react';
 import {
   InvitationPage,
@@ -224,6 +225,99 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         {/* ELEMENTS TAB */}
         {activeTab === 'elements' && (
           <div className="space-y-5">
+            {/* Opening / Cover Screen Elements (Highlighted when editing Opening Screen) */}
+            {activePageIndex === -1 && (
+              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/90 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-amber-950">
+                    <MailOpen className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Cover Screen Elements</span>
+                  </div>
+                  <span className="text-[10px] text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded font-medium">
+                    Optional Elements
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-1.5">
+                  {/* OPEN INVITATION BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onAddElement('button', {
+                        id: 'open-elem-button',
+                        name: 'Open Invitation Button',
+                        content: {
+                          buttonText: openingScreen?.openButtonText || 'Open Invitation',
+                          buttonAction: 'open-invitation',
+                          buttonShape: 'pill'
+                        },
+                        style: {
+                          x: 45,
+                          y: 580,
+                          width: 300,
+                          height: 52,
+                          backgroundColor: openingScreen?.sealColor || '#d4af37',
+                          color: '#07120d',
+                          fontSize: 13,
+                          fontWeight: 800,
+                          borderRadius: 9999,
+                          boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.4)',
+                          letterSpacing: 1.5,
+                          zIndex: 20
+                        },
+                        animation: {
+                          type: 'bounce',
+                          duration: 1.5,
+                          delay: 0.6,
+                          repeat: 'infinite'
+                        }
+                      })
+                    }
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-white hover:bg-amber-100/60 border border-amber-300 text-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-xs group text-left"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                        <MailOpen className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <div className="text-slate-900 font-bold">Open Invitation Button</div>
+                        <div className="text-[10px] text-slate-500 font-normal">Editable CTA to unfold & enter</div>
+                      </div>
+                    </div>
+                    <Plus className="w-4 h-4 text-amber-600" />
+                  </button>
+
+                  {/* WAX SEAL BADGE */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onAddElement('icon', {
+                        id: `open-seal-${Date.now()}`,
+                        name: 'Wax Seal Emblem',
+                        content: { iconName: 'heart', iconSize: 40, iconColor: '#07120d' },
+                        style: {
+                          x: 162,
+                          y: 340,
+                          width: 65,
+                          height: 65,
+                          backgroundColor: openingScreen?.sealColor || '#d4af37',
+                          borderRadius: 9999,
+                          zIndex: 15
+                        }
+                      })
+                    }
+                    className="flex items-center justify-between p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-4 h-4 text-rose-500" />
+                      <span>Wax Seal Badge</span>
+                    </div>
+                    <Plus className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Basic Elements */}
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center justify-between">
@@ -524,6 +618,47 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 >
                   <QrCode className="w-4 h-4 text-slate-700" />
                   <span>QR Code</span>
+                </button>
+
+                {/* 13. OPEN INVITATION BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => onAddElement('button', {
+                    id: 'open-elem-button',
+                    name: 'Open Invitation Button',
+                    content: {
+                      buttonText: openingScreen?.openButtonText || 'Open Invitation',
+                      buttonAction: 'open-invitation',
+                      buttonShape: 'pill'
+                    },
+                    style: {
+                      x: 45,
+                      y: 580,
+                      width: 300,
+                      height: 52,
+                      backgroundColor: openingScreen?.sealColor || '#d4af37',
+                      color: '#07120d',
+                      fontSize: 13,
+                      fontWeight: 800,
+                      borderRadius: 9999,
+                      boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.4)',
+                      letterSpacing: 1.5,
+                      zIndex: 20
+                    },
+                    animation: {
+                      type: 'bounce',
+                      duration: 1.5,
+                      delay: 0.6,
+                      repeat: 'infinite'
+                    }
+                  })}
+                  className="col-span-2 flex items-center justify-between p-2.5 rounded-lg bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200/90 text-amber-950 text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <MailOpen className="w-4 h-4 text-amber-600" />
+                    <span>Open Invitation Button (Cover Action)</span>
+                  </div>
+                  <span className="text-[10px] text-amber-800 bg-amber-200/60 px-1.5 py-0.5 rounded font-medium">Interactive CTA</span>
                 </button>
               </div>
             </div>
