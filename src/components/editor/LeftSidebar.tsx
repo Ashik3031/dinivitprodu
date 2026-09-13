@@ -369,20 +369,17 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   <span>Video Clip</span>
                 </button>
 
-                {/* 4. AUDIO */}
+                {/* 4. BACKGROUND MUSIC */}
                 <button
                   type="button"
-                  onClick={() => onAddElement('audio', {
-                    content: {
-                      audioUrl: 'https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3',
-                      audioTitle: 'Romantic Wedding Symphony'
-                    },
-                    style: { x: 45, y: 400, width: 300, height: 50, borderRadius: 12 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
+                  onClick={() => {
+                    setActiveTab('media');
+                    setMediaCategory('audio');
+                  }}
+                  className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-semibold transition-colors cursor-pointer"
                 >
-                  <Music className="w-4 h-4 text-slate-600" />
-                  <span>Audio Player</span>
+                  <Music className="w-4 h-4 text-amber-600" />
+                  <span>Background Music</span>
                 </button>
 
                 {/* 5. BUTTON */}

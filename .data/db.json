@@ -3773,10 +3773,10 @@
         "primaryColor": "#4a6741",
         "secondaryColor": "#2d3b2a",
         "accentColor": "#c5a059",
+        "backgroundColor": "#f8f9f6",
         "fontHeading": "'Cormorant Garamond', serif",
         "fontBody": "'Plus Jakarta Sans', sans-serif",
-        "fontScript": "'Alex Brush', cursive",
-        "backgroundColor": "#f8f9f6"
+        "fontScript": "'Alex Brush', cursive"
       },
       "openingScreen": {
         "enabled": true,
@@ -3792,7 +3792,7 @@
       "music": {
         "enabled": true,
         "audioUrl": "https://cdn.freesound.org/previews/612/612610_5674468-lq.mp3",
-        "title": "Acoustic Romance",
+        "title": "Acoustic Romance (Gentle Guitar)",
         "artist": "Gentle Strings",
         "autoPlay": true,
         "loop": true,
@@ -3988,6 +3988,30 @@
                 "duration": 1,
                 "delay": 1
               }
+            },
+            {
+              "id": "el-1789323759366-c3i9",
+              "type": "audio",
+              "name": "Acoustic Romance (Gentle Guitar)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 45,
+                "y": 300,
+                "width": 300,
+                "height": 52
+              },
+              "content": {
+                "audioUrl": "https://cdn.freesound.org/previews/612/612610_5674468-lq.mp3",
+                "audioTitle": "Acoustic Romance (Gentle Guitar)",
+                "audioArtist": "Audio Track",
+                "audioLoop": true
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
             }
           ]
         }
@@ -3996,7 +4020,9 @@
       "isSuperAdmin": true,
       "authorRole": "superadmin",
       "authorName": "Super Admin",
-      "createdBy": "usr-admin-1"
+      "createdBy": "usr-admin-1",
+      "tags": [],
+      "updatedAt": "2026-09-13T18:25:13.627Z"
     },
     {
       "id": "template-modern-birthday",
@@ -4634,10 +4660,10 @@
         "primaryColor": "#d4af37",
         "secondaryColor": "#0a3d2c",
         "accentColor": "#f9f6ee",
+        "backgroundColor": "#0c1b15",
         "fontHeading": "'Cinzel', serif",
         "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#0c1b15"
+        "fontScript": "'Great Vibes', cursive"
       },
       "openingScreen": {
         "enabled": true,
@@ -5006,6 +5032,29 @@
               },
               "content": {
                 "iconName": "Check",
+                "iconSize": 36,
+                "iconColor": "#e11d48"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789323400241-uhg5",
+              "type": "icon",
+              "name": "icon",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 165,
+                "y": 120,
+                "width": 60,
+                "height": 60
+              },
+              "content": {
+                "iconName": "Heart",
                 "iconSize": 36,
                 "iconColor": "#e11d48"
               },
@@ -5425,7 +5474,7 @@
         }
       ],
       "createdAt": "2026-09-13T18:12:08.760Z",
-      "updatedAt": "2026-09-13T18:15:26.920Z"
+      "updatedAt": "2026-09-13T18:17:54.020Z"
     }
   ],
   "rsvps": [],

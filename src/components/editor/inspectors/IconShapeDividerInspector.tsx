@@ -1,6 +1,6 @@
 import React from 'react';
 import { CanvasElement } from '../../../types';
-import { Heart, Sparkles, Music, MapPin, Calendar, Clock, Phone, Mail, Gift, Camera, Star, Wine, Check, Sliders, Shapes } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 interface IconShapeDividerInspectorProps {
   element: CanvasElement;
@@ -18,7 +18,7 @@ export const IconShapeDividerInspector: React.FC<IconShapeDividerInspectorProps>
     const popularIcons = [
       'Heart', 'Sparkles', 'Music', 'MapPin', 'Calendar', 'Clock',
       'Mail', 'Phone', 'Gift', 'Camera', 'Star', 'Wine', 'Check',
-      'Send', 'MessageCircle', 'Compass', 'Compass', 'Users'
+      'Send', 'MessageCircle', 'Compass', 'Users'
     ];
 
     return (
@@ -31,25 +31,28 @@ export const IconShapeDividerInspector: React.FC<IconShapeDividerInspectorProps>
         <div>
           <label className="text-[10px] text-slate-500 block mb-1">Select Icon</label>
           <div className="grid grid-cols-6 gap-1 p-1 bg-slate-50 border border-slate-200 rounded-lg max-h-32 overflow-y-auto">
-            {popularIcons.map((ic) => (
-              <button
-                key={ic}
-                type="button"
-                onClick={() =>
-                  onUpdateElement(element.id, {
-                    content: { ...content, iconName: ic }
-                  })
-                }
-                className={`p-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  (content.iconName || 'Heart') === ic
-                    ? 'bg-slate-900 text-white shadow'
-                    : 'hover:bg-slate-200 text-slate-700'
-                }`}
-                title={ic}
-              >
-                <Heart className="w-3.5 h-3.5" />
-              </button>
-            ))}
+            {popularIcons.map((ic) => {
+              const IconComp = (LucideIcons as any)[ic] || LucideIcons.Heart;
+              return (
+                <button
+                  key={ic}
+                  type="button"
+                  onClick={() =>
+                    onUpdateElement(element.id, {
+                      content: { ...content, iconName: ic }
+                    })
+                  }
+                  className={`p-2 rounded flex items-center justify-center transition-colors cursor-pointer ${
+                    (content.iconName || 'Heart') === ic
+                      ? 'bg-slate-900 text-white shadow'
+                      : 'hover:bg-slate-200 text-slate-700'
+                  }`}
+                  title={ic}
+                >
+                  <IconComp className="w-3.5 h-3.5" />
+                </button>
+              );
+            })}
           </div>
         </div>
 

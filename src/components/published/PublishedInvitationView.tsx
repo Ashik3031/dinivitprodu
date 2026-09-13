@@ -299,8 +299,8 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
         </div>
       )}
 
-      {/* Floating Audio Soundtrack */}
-      {invitation.music && (
+      {/* Floating Audio Soundtrack - Only shown & played AFTER opening the envelope */}
+      {invitation.music && (invitation.music.enabled !== false) && !showOpeningScreen && (
         <FloatingMusicPlayer
           config={invitation.music}
           autoPlayTriggered={hasStartedAudio}
