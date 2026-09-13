@@ -11,7 +11,7 @@
       "role": "admin",
       "isActive": true,
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "lastLogin": "2026-09-13T15:08:31.113Z"
+      "lastLogin": "2026-09-13T17:34:22.234Z"
     },
     {
       "id": "usr-biz-royal",
@@ -572,8 +572,8 @@
               "type": "container",
               "name": "Monogram Seal Circle",
               "style": {
-                "x": 157,
-                "y": 84,
+                "x": 254,
+                "y": 134,
                 "width": 80,
                 "height": 80,
                 "shape": "circle",
@@ -597,7 +597,7 @@
               "name": "Monogram Initials",
               "style": {
                 "x": 157,
-                "y": 102,
+                "y": 180,
                 "width": 80,
                 "height": 44,
                 "fontFamily": "'Cinzel', serif",
@@ -796,8 +796,8 @@
               "type": "container",
               "name": "Frosted Invitation Card",
               "style": {
-                "x": 30,
-                "y": 347,
+                "x": 38,
+                "y": 182,
                 "width": 340,
                 "height": 560,
                 "shape": "rounded-rectangle",
@@ -866,7 +866,7 @@
                 "letterSpacing": 3
               },
               "content": {
-                "text": "TOGETHER WITH OUR FAMILIES"
+                "text": "TOGETHER WITH OUR FAMILI"
               },
               "animation": {
                 "type": "slideDown",
@@ -1397,7 +1397,7 @@
       },
       "viewsCount": 406,
       "createdAt": "2026-09-13T15:20:01.269Z",
-      "updatedAt": "2026-09-13T17:20:05.338Z",
+      "updatedAt": "2026-09-13T17:28:34.826Z",
       "eventDate": "December 2026",
       "customerName": "Rahul & Priya"
     },
@@ -2933,6 +2933,71 @@
       "viewsCount": 0,
       "createdAt": "2026-09-13T15:40:05.048Z",
       "updatedAt": "2026-09-13T15:44:36.151Z"
+    },
+    {
+      "id": "inv-1789320898929-ivy2",
+      "businessId": "usr-admin-1",
+      "title": "Wedding Invitation",
+      "customerName": "",
+      "eventDate": "",
+      "eventType": "wedding",
+      "slug": "wedding-invitation-p81fh",
+      "category": "wedding",
+      "status": "draft",
+      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+      "theme": {
+        "primaryColor": "#d4af37",
+        "secondaryColor": "#0a3d2c",
+        "accentColor": "#f9f6ee",
+        "fontHeading": "'Cinzel', serif",
+        "fontBody": "'Montserrat', sans-serif",
+        "fontScript": "'Great Vibes', cursive",
+        "backgroundColor": "#f8fafc"
+      },
+      "openingScreen": {
+        "enabled": false,
+        "style": "envelope",
+        "title": "Wedding Invitation",
+        "openButtonText": "Open Invitation",
+        "envelopeColor": "#071811",
+        "sealColor": "#d4af37",
+        "musicAutoplayOnOpen": false
+      },
+      "music": {
+        "enabled": false,
+        "audioUrl": "",
+        "title": "No Music Selected",
+        "artist": "",
+        "autoPlay": false,
+        "loop": true,
+        "floatingBadge": false
+      },
+      "pages": [
+        {
+          "id": "page-1789320898924-7s8j",
+          "name": "Section 1",
+          "order": 0,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "color",
+            "color": "#f8fafc"
+          },
+          "elements": []
+        }
+      ],
+      "settings": {
+        "enableAutoScroll": false,
+        "autoScrollSpeed": 30,
+        "showPageNavDots": true,
+        "allowGuestComments": true,
+        "allowRSVP": true,
+        "enableConfettiOnOpen": true
+      },
+      "viewsCount": 0,
+      "createdAt": "2026-09-13T17:34:58.928Z",
+      "updatedAt": "2026-09-13T17:34:58.928Z"
     }
   ],
   "templates": [
@@ -4166,6 +4231,134 @@
       "authorRole": "superadmin",
       "authorName": "Super Admin",
       "createdBy": "usr-admin-1"
+    },
+    {
+      "id": "tmpl-1789321911083-tyhh",
+      "title": "tt",
+      "category": "save-the-date",
+      "description": "tt",
+      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80",
+      "isPremium": false,
+      "isPublic": true,
+      "isSuperAdmin": true,
+      "authorRole": "superadmin",
+      "authorName": "Super Admin",
+      "createdBy": "usr-admin-1",
+      "tags": [
+        "wedding",
+        "luxury",
+        "formal"
+      ],
+      "theme": {
+        "primaryColor": "#d4af37",
+        "secondaryColor": "#1a3628",
+        "accentColor": "#d4af37",
+        "fontHeading": "'Cinzel', serif",
+        "fontBody": "'Montserrat', sans-serif",
+        "fontScript": "'Parisienne', cursive",
+        "backgroundColor": "#f8fafc"
+      },
+      "openingScreen": {
+        "enabled": true,
+        "style": "envelope",
+        "title": "Formal Invitation",
+        "subtitle": "You are cordially invited",
+        "coupleNames": "tt",
+        "openButtonText": "Open Invitation",
+        "sealColor": "#d4af37",
+        "envelopeColor": "#1a3628",
+        "musicAutoplayOnOpen": true
+      },
+      "music": {
+        "enabled": true,
+        "audioUrl": "https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3",
+        "title": "Romantic Prelude Strings",
+        "artist": "Studio Symphony",
+        "autoPlay": true,
+        "loop": true,
+        "floatingBadge": true
+      },
+      "pages": [
+        {
+          "id": "p-1789321911078-1",
+          "name": "Cover & Invitation Header",
+          "order": 0,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "color",
+            "color": "#f8fafc"
+          },
+          "elements": [
+            {
+              "id": "el-box-1789321911078",
+              "type": "container",
+              "name": "Ornamental Card Frame",
+              "style": {
+                "x": 20,
+                "y": 40,
+                "width": 350,
+                "height": 740,
+                "shape": "rounded-rectangle",
+                "borderRadius": 16,
+                "backgroundColor": "#1a3628",
+                "borderWidth": 1,
+                "borderColor": "#d4af3744",
+                "boxShadow": "0 12px 36px rgba(0,0,0,0.5)",
+                "padding": 24
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-title-1789321911078",
+              "type": "heading",
+              "name": "Template Title",
+              "parentContainerId": "el-box-1789321911078",
+              "style": {
+                "x": 35,
+                "y": 160,
+                "width": 320,
+                "height": 60,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 28,
+                "fontWeight": 700,
+                "color": "#d4af37",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "tt"
+              }
+            },
+            {
+              "id": "el-desc-1789321911078",
+              "type": "text",
+              "name": "Invitation Lead",
+              "parentContainerId": "el-box-1789321911078",
+              "style": {
+                "x": 40,
+                "y": 240,
+                "width": 310,
+                "height": 48,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 14,
+                "fontWeight": 400,
+                "color": "#ffffffdd",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "Request the honor of your presence at the celebration"
+              }
+            }
+          ]
+        }
+      ],
+      "createdAt": "2026-09-13T17:51:51.083Z",
+      "updatedAt": "2026-09-13T17:51:51.083Z"
     }
   ],
   "rsvps": [],

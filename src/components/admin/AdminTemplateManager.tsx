@@ -49,7 +49,7 @@ const PRESET_THEMES = [
     name: 'Royal Emerald & Gold',
     primary: '#d4af37',
     secondary: '#1a3628',
-    bg: '#071912',
+    bg: '#f8fafc',
     fontHeading: "'Cinzel', serif",
     fontBody: "'Montserrat', sans-serif"
   },
@@ -969,92 +969,33 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
                 />
               </div>
 
-              {/* Preset Selection (if in preset mode) */}
-              {createMode === 'preset' && (
-                <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-slate-300">
-                    Aesthetic Palette & Typography Pairing:
+              {/* Cover Thumbnail URL & Tags */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Cover Thumbnail Image URL
                   </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {PRESET_THEMES.map((thm, idx) => (
-                      <button
-                        key={thm.name}
-                        type="button"
-                        onClick={() => setCreateForm({ ...createForm, selectedPresetIdx: idx })}
-                        className={`p-3 rounded-xl border text-left transition-all ${
-                          createForm.selectedPresetIdx === idx
-                            ? 'bg-slate-800 border-amber-500 shadow-md ring-1 ring-amber-500'
-                            : 'bg-slate-950 border-slate-800 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-white/20"
-                            style={{ backgroundColor: thm.primary }}
-                          />
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-white/20"
-                            style={{ backgroundColor: thm.secondary }}
-                          />
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-white/20"
-                            style={{ backgroundColor: thm.bg }}
-                          />
-                        </div>
-                        <span className="text-xs font-semibold text-white block truncate">
-                          {thm.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Opening Screen Style */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Opening Envelope Style
-                      </label>
-                      <select
-                        value={createForm.openingStyle}
-                        onChange={(e: any) => setCreateForm({ ...createForm, openingStyle: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
-                      >
-                        <option value="envelope">Classic Folding Envelope with Wax Seal</option>
-                        <option value="card-flip">3D Card Flip Experience</option>
-                        <option value="curtain">Grand Theatre Silk Curtain</option>
-                        <option value="monogram-glow">Monogram Glow Seal</option>
-                        <option value="minimal-button">Minimalist Floating Button</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Tags (comma-separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={createForm.tags}
-                        onChange={(e) => setCreateForm({ ...createForm, tags: e.target.value })}
-                        placeholder="wedding, royal, floral, elegant"
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  </div>
+                  <input
+                    type="url"
+                    value={createForm.thumbnail}
+                    onChange={(e) => setCreateForm({ ...createForm, thumbnail: e.target.value })}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                  />
                 </div>
-              )}
 
-              {/* Cover Thumbnail URL */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Cover Thumbnail Image URL
-                </label>
-                <input
-                  type="url"
-                  value={createForm.thumbnail}
-                  onChange={(e) => setCreateForm({ ...createForm, thumbnail: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
-                />
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Tags (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={createForm.tags}
+                    onChange={(e) => setCreateForm({ ...createForm, tags: e.target.value })}
+                    placeholder="wedding, royal, floral, elegant"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                  />
+                </div>
               </div>
 
               {/* Toggles */}
