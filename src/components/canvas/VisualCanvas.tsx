@@ -95,6 +95,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   outerDropColor
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const wasDraggingRef = useRef(false);
 
   // Drag & Transform states
   const [isDragging, setIsDragging] = useState(false);
@@ -470,6 +471,10 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     };
 
     const handleMouseUp = () => {
+      if (isDragging || isResizing || isRotating || isMarqueeActive) {
+        wasDraggingRef.current = true;
+        setTimeout(() => { wasDraggingRef.current = false; }, 0);
+      }
       setIsDragging(false);
       setIsResizing(null);
       setIsRotating(false);
@@ -529,7 +534,10 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
       style={{
         backgroundColor: outerBackgroundColor || '#f1f5f9'
       }}
-      onClick={() => onSelectElement(null)}
+      onClick={() => {
+        if (wasDraggingRef.current) return;
+        onSelectElement(null);
+      }}
     >
       {/* Decorative Outer Floating Drops (Hearts, Sparkles, etc.) */}
       {showOuterDrops && outerDropEffect !== 'none' && (

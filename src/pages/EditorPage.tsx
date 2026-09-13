@@ -863,6 +863,10 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     const items = activePage.elements.filter(el => targetIds.includes(el.id));
     if (items.length < 2) return;
 
+    const parentId = items[0].parentContainerId || items[0].parentId || null;
+    const allSameParent = items.every(el => (el.parentContainerId || el.parentId || null) === parentId);
+    const finalParentId = allSameParent ? parentId : null;
+
     const minX = Math.min(...items.map(el => el.style.x));
     const minY = Math.min(...items.map(el => el.style.y));
     const maxX = Math.max(...items.map(el => el.style.x + el.style.width));
@@ -879,6 +883,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       id: containerId,
       type: 'container',
       name: 'Group Container',
+      parentContainerId: finalParentId,
+      parentId: finalParentId,
       style: {
         x: containerX,
         y: containerY,
@@ -929,6 +935,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     );
 
     const childIds = children.map(c => c.id);
+    const parentContainerId = container.parentContainerId || container.parentId || null;
 
     updateActivePageElements(elements =>
       elements
@@ -937,8 +944,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           if (childIds.includes(el.id)) {
             return {
               ...el,
-              parentContainerId: null,
-              parentId: null,
+              parentContainerId: parentContainerId,
+              parentId: parentContainerId,
               style: {
                 ...el.style,
                 x: (container.style.x || 0) + el.style.x,
