@@ -1047,7 +1047,7 @@ export function createBlankInvitation(businessId: string, customTitle?: string, 
     isFullHeight: true,
     background: {
       type: 'color' as const,
-      color: '#071912'
+      color: '#f8fafc'
     },
     elements: []
   };
@@ -1066,7 +1066,7 @@ export function createBlankInvitation(businessId: string, customTitle?: string, 
       fontHeading: "'Cinzel', serif",
       fontBody: "'Montserrat', sans-serif",
       fontScript: "'Great Vibes', cursive",
-      backgroundColor: '#0c1b15'
+      backgroundColor: '#f8fafc'
     },
     openingScreen: {
       enabled: false,

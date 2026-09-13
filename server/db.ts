@@ -692,7 +692,7 @@ export const dbService = {
       isFullHeight: true,
       background: {
         type: 'color',
-        color: '#071912'
+        color: '#f8fafc'
       },
       elements: []
     };
@@ -715,7 +715,7 @@ export const dbService = {
         fontHeading: "'Cinzel', serif",
         fontBody: "'Montserrat', sans-serif",
         fontScript: "'Great Vibes', cursive",
-        backgroundColor: '#0c1b15'
+        backgroundColor: '#f8fafc'
       },
       openingScreen: invitationData.openingScreen || {
         enabled: false,

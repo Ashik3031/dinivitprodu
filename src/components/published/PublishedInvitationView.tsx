@@ -91,7 +91,7 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
   const theme = invitation.theme || {
     primaryColor: '#d4af37',
     secondaryColor: '#0a3d2c',
-    backgroundColor: '#071912',
+    backgroundColor: '#f8fafc',
     fontHeading: "'Playfair Display', serif",
     fontBody: "'Montserrat', sans-serif"
   };
@@ -132,11 +132,11 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
 
   const getPageBgStyle = (page: InvitationPage) => {
     const bg = page.background;
-    if (!bg) return { backgroundColor: theme.backgroundColor || '#071912' };
+    if (!bg) return { backgroundColor: theme.backgroundColor || '#f8fafc' };
 
     switch (bg.type) {
       case 'color':
-        return { backgroundColor: bg.color || '#071912' };
+        return { backgroundColor: bg.color || '#f8fafc' };
       case 'gradient':
         if (bg.gradient) {
           const colors = bg.gradient.colors.join(', ');
@@ -148,7 +148,7 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                 : `linear-gradient(${angle}deg, ${colors})`
           };
         }
-        return { backgroundColor: bg.color || '#071912' };
+        return { backgroundColor: bg.color || '#f8fafc' };
       case 'image':
         return {
           backgroundImage: `url(${bg.imageUrl})`,
@@ -157,9 +157,9 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
           backgroundRepeat: bg.repeat || 'no-repeat'
         };
       case 'video':
-        return { backgroundColor: '#071912' };
+        return { backgroundColor: '#f8fafc' };
       default:
-        return { backgroundColor: '#071912' };
+        return { backgroundColor: '#f8fafc' };
     }
   };
 

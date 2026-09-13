@@ -148,11 +148,11 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   // Page background style
   const getPageBgStyle = () => {
     const bg = page.background;
-    if (!bg) return { backgroundColor: '#000000' };
+    if (!bg) return { backgroundColor: '#f8fafc' };
 
     switch (bg.type) {
       case 'color':
-        return { backgroundColor: bg.color || '#000000' };
+        return { backgroundColor: bg.color || '#f8fafc' };
       case 'gradient':
         if (bg.gradient) {
           const colors = bg.gradient.colors.join(', ');
@@ -163,7 +163,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
               : `linear-gradient(${angle}deg, ${colors})`
           };
         }
-        return { backgroundColor: bg.color || '#000000' };
+        return { backgroundColor: bg.color || '#f8fafc' };
       case 'image':
       case 'pattern':
       case 'texture': {
@@ -173,13 +173,13 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
           backgroundSize: bg.size || (bg.type === 'pattern' ? 'auto' : 'cover'),
           backgroundRepeat: bg.repeat || (bg.type === 'pattern' ? 'repeat' : 'no-repeat'),
           backgroundPosition: bg.position || 'center',
-          backgroundColor: '#000000'
+          backgroundColor: '#f8fafc'
         };
       }
       case 'video':
-        return { backgroundColor: '#000000' };
+        return { backgroundColor: '#f8fafc' };
       default:
-        return { backgroundColor: '#000000' };
+        return { backgroundColor: '#f8fafc' };
     }
   };
 

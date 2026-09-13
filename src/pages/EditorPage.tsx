@@ -94,7 +94,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
             primaryColor: '#c5a059',
             secondaryColor: '#1e293b',
             accentColor: '#c5a059',
-            backgroundColor: '#0f172a',
+            backgroundColor: '#f8fafc',
             fontHeading: "'Cinzel', serif",
             fontBody: "'Plus Jakarta Sans', sans-serif",
             fontScript: "'Parisienne', cursive"
@@ -140,7 +140,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
                 order: 0,
                 height: 844,
                 isFullHeight: true,
-                background: { type: 'color', color: '#0f172a' },
+                background: { type: 'color', color: '#f8fafc' },
                 elements: []
               }
             ],
@@ -425,7 +425,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     if (!invitation) return;
     const newPage = createBlankPage(
       invitation.pages.length,
-      invitation.theme?.backgroundColor || '#071912'
+      invitation.theme?.backgroundColor || '#f8fafc'
     );
     const newPages = [...invitation.pages, newPage];
     updateInvitationState({ ...invitation, pages: newPages });

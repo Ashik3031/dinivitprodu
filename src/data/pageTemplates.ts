@@ -1444,7 +1444,7 @@ export function createBlankPage(orderIndex: number, themeBgColor?: string): Invi
     isFullHeight: true,
     background: {
       type: 'color',
-      color: themeBgColor || '#071912'
+      color: themeBgColor || '#f8fafc'
     },
     elements: []
   };
