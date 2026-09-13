@@ -24,7 +24,7 @@
       "role": "business",
       "isActive": true,
       "createdAt": "2026-02-10T10:00:00.000Z",
-      "lastLogin": "2026-09-13T14:58:23.007Z",
+      "lastLogin": "2026-09-13T15:26:18.595Z",
       "brandColor": "#d4af37"
     },
     {
@@ -509,6 +509,474 @@
                 "delay": 1.5,
                 "repeat": true
               }
+            },
+            {
+              "id": "el-1789314344360-5kgn",
+              "type": "container",
+              "name": "Rounded Rect",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 104,
+                "y": 425,
+                "width": 182,
+                "height": 176,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "backgroundColor": "#f8fafc",
+                "borderWidth": 1.5,
+                "borderColor": "#cbd5e1",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.05)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "container-mu02r7gu-n0hlb",
+              "type": "container",
+              "name": "Gilded Border Frame",
+              "style": {
+                "x": 18,
+                "y": 50,
+                "width": 358,
+                "height": 812,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "borderColor": "#d4af3766",
+                "backgroundColor": "#0d281e22"
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 1,
+                "delay": 0.1
+              },
+              "parentContainerId": null,
+              "parentId": null,
+              "responsive": {
+                "tablet": {
+                  "x": 198,
+                  "y": 114
+                }
+              }
+            },
+            {
+              "id": "container-mu02r7gu-6q2iy",
+              "type": "container",
+              "name": "Monogram Seal Circle",
+              "style": {
+                "x": 157,
+                "y": 84,
+                "width": 80,
+                "height": 80,
+                "shape": "circle",
+                "backgroundColor": "#d4af371a",
+                "borderWidth": 1.5,
+                "borderColor": "#d4af37",
+                "boxShadow": "0 4px 20px rgba(212,175,55,0.2)"
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "parentContainerId": null,
+              "parentId": null
+            },
+            {
+              "id": "text-mu02r7gu-0zpw1",
+              "type": "text",
+              "name": "Monogram Initials",
+              "style": {
+                "x": 157,
+                "y": 102,
+                "width": 80,
+                "height": 44,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 22,
+                "fontWeight": 700,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 3
+              },
+              "content": {
+                "text": "A & S"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.3
+              },
+              "parentContainerId": null,
+              "parentId": null
+            },
+            {
+              "id": "text-mu02r7gu-7ctd6",
+              "type": "text",
+              "name": "Announcement Subtitle",
+              "style": {
+                "x": 32,
+                "y": 184,
+                "width": 330,
+                "height": 22,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 10,
+                "fontWeight": 600,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "textTransform": "uppercase",
+                "letterSpacing": 4
+              },
+              "content": {
+                "text": "THE WEDDING CELEBRATION OF"
+              },
+              "animation": {
+                "type": "slideDown",
+                "duration": 0.8,
+                "delay": 0.3
+              },
+              "parentContainerId": null,
+              "parentId": null
+            },
+            {
+              "id": "heading-mu02r7gu-a8174",
+              "type": "heading",
+              "name": "Couple Names",
+              "style": {
+                "x": 22,
+                "y": 214,
+                "width": 350,
+                "height": 110,
+                "fontFamily": "'Playfair Display', serif",
+                "fontSize": 32,
+                "fontWeight": 700,
+                "color": "#f9f6ee",
+                "textAlign": "center",
+                "lineHeight": 1.25
+              },
+              "content": {
+                "text": "Alexander\n&\nSop"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 1,
+                "delay": 0.4
+              },
+              "parentContainerId": null,
+              "parentId": null,
+              "responsive": {
+                "tablet": {
+                  "x": 129,
+                  "y": 179
+                }
+              }
+            },
+            {
+              "id": "container-mu02r7gu-8683x",
+              "type": "container",
+              "name": "Arch Portrait Window",
+              "style": {
+                "x": 77,
+                "y": 344,
+                "width": 240,
+                "height": 330,
+                "shape": "arch",
+                "borderRadius": 120,
+                "borderWidth": 2,
+                "borderColor": "#d4af37",
+                "boxShadow": "0 12px 32px rgba(0,0,0,0.5)",
+                "background": {
+                  "type": "image",
+                  "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                  "size": "cover"
+                },
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 1,
+                "delay": 0.5
+              },
+              "parentContainerId": null,
+              "parentId": null
+            },
+            {
+              "id": "container-mu02r7gu-qymzx",
+              "type": "container",
+              "name": "Date Badge Container",
+              "style": {
+                "x": 57,
+                "y": 699,
+                "width": 280,
+                "height": 48,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "backgroundColor": "#0d281eee",
+                "borderWidth": 1,
+                "borderColor": "#d4af3788",
+                "boxShadow": "0 4px 16px rgba(0,0,0,0.3)"
+              },
+              "content": {},
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.6
+              },
+              "parentContainerId": null,
+              "parentId": null
+            },
+            {
+              "id": "text-mu02r7gu-skvtj",
+              "type": "text",
+              "name": "Date Announcement",
+              "parentContainerId": "container-mu02r7gu-qymzx",
+              "style": {
+                "x": 57,
+                "y": 712,
+                "width": 280,
+                "height": 22,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 11,
+                "fontWeight": 600,
+                "color": "#f9f6ee",
+                "textAlign": "center",
+                "letterSpacing": 2
+              },
+              "content": {
+                "text": "SATURDAY, OCTOBER 24, 2026"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.7
+              },
+              "parentId": "container-mu02r7gu-qymzx"
+            },
+            {
+              "id": "button-mu02r7gu-d38e4",
+              "type": "button",
+              "name": "Open Invitation Button",
+              "style": {
+                "x": 97,
+                "y": 769,
+                "width": 200,
+                "height": 46,
+                "backgroundColor": "#d4af37",
+                "color": "#071912",
+                "fontSize": 12,
+                "fontWeight": 700,
+                "borderRadius": 23,
+                "boxShadow": "0 4px 20px rgba(212,175,55,0.4)",
+                "letterSpacing": 2
+              },
+              "content": {
+                "buttonText": "OPEN INVITATION ✉️",
+                "buttonAction": "next-page"
+              },
+              "animation": {
+                "type": "pulse",
+                "duration": 2,
+                "delay": 0.9,
+                "repeat": true
+              },
+              "parentContainerId": null,
+              "parentId": null
+            },
+            {
+              "id": "container-mu02rbtk-jeci2",
+              "type": "container",
+              "name": "Frosted Invitation Card",
+              "style": {
+                "x": 30,
+                "y": 347,
+                "width": 340,
+                "height": 560,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "borderColor": "rgba(255, 255, 255, 0.4)",
+                "backgroundColor": "rgba(7, 25, 18, 0.65)",
+                "backdropBlur": 16,
+                "padding": 24,
+                "boxShadow": "0 16px 40px rgba(0, 0, 0, 0.4)"
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 1,
+                "delay": 0.2
+              },
+              "parentContainerId": null,
+              "parentId": null,
+              "responsive": {
+                "tablet": {
+                  "x": 224,
+                  "y": 734
+                }
+              }
+            },
+            {
+              "id": "icon-mu02rbtk-o5ei4",
+              "type": "icon",
+              "name": "Crown Monogram Icon",
+              "parentContainerId": "container-mu02rbtk-jeci2",
+              "style": {
+                "x": 152,
+                "y": 264,
+                "width": 50,
+                "height": 50,
+                "color": "#d4af37"
+              },
+              "content": {
+                "iconName": "Crown",
+                "iconSize": 42,
+                "iconColor": "#d4af37"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.3
+              },
+              "parentId": "container-mu02rbtk-jeci2"
+            },
+            {
+              "id": "text-mu02rbtk-jwl5m",
+              "type": "text",
+              "name": "Welcome Subtitle",
+              "parentContainerId": "container-mu02rbtk-jeci2",
+              "style": {
+                "x": 27,
+                "y": 329,
+                "width": 300,
+                "height": 20,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 10,
+                "fontWeight": 600,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 3
+              },
+              "content": {
+                "text": "TOGETHER WITH OUR FAMILIES"
+              },
+              "animation": {
+                "type": "slideDown",
+                "duration": 0.8,
+                "delay": 0.4
+              },
+              "parentId": "container-mu02rbtk-jeci2"
+            },
+            {
+              "id": "heading-mu02rbtk-braxw",
+              "type": "heading",
+              "name": "Couple Names",
+              "parentContainerId": "container-mu02rbtk-jeci2",
+              "style": {
+                "x": 17,
+                "y": 364,
+                "width": 320,
+                "height": 120,
+                "fontFamily": "'Playfair Display', serif",
+                "fontSize": 32,
+                "fontWeight": 700,
+                "color": "#ffffff",
+                "textAlign": "center",
+                "lineHeight": 1.3
+              },
+              "content": {
+                "text": "Alexander Hayes\n&\nSophia Montgomery"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 1,
+                "delay": 0.5
+              },
+              "parentId": "container-mu02rbtk-jeci2"
+            },
+            {
+              "id": "divider-mu02rbtk-lgfob",
+              "type": "divider",
+              "name": "Ornate Floral Divider",
+              "parentContainerId": "container-mu02rbtk-jeci2",
+              "style": {
+                "x": 67,
+                "y": 499,
+                "width": 220,
+                "height": 20,
+                "color": "#d4af37",
+                "dividerStyle": "ornamental"
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.6
+              },
+              "parentId": "container-mu02rbtk-jeci2"
+            },
+            {
+              "id": "text-mu02rbtk-hjqf3",
+              "type": "text",
+              "name": "Invitation Notice",
+              "parentContainerId": "container-mu02rbtk-jeci2",
+              "style": {
+                "x": 27,
+                "y": 534,
+                "width": 300,
+                "height": 60,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 12,
+                "color": "#f3e8cb",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "Request the honor of your presence\nat the celebration of their marriage\nOctober 24, 2026"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.7
+              },
+              "parentId": "container-mu02rbtk-jeci2"
+            },
+            {
+              "id": "button-mu02rbtk-u5gox",
+              "type": "button",
+              "name": "View Details Button",
+              "parentContainerId": "container-mu02rbtk-jeci2",
+              "style": {
+                "x": 62,
+                "y": 629,
+                "width": 230,
+                "height": 48,
+                "backgroundColor": "#d4af37",
+                "color": "#071912",
+                "fontSize": 12,
+                "fontWeight": 700,
+                "borderRadius": 24,
+                "letterSpacing": 2
+              },
+              "content": {
+                "buttonText": "ENTER CELEBRATION",
+                "buttonAction": "next-page"
+              },
+              "animation": {
+                "type": "pulse",
+                "duration": 2,
+                "delay": 0.8,
+                "repeat": true
+              },
+              "parentId": "container-mu02rbtk-jeci2"
             }
           ]
         },
@@ -927,9 +1395,9 @@
         "allowRSVP": true,
         "enableConfettiOnOpen": true
       },
-      "viewsCount": 384,
+      "viewsCount": 406,
       "createdAt": "2026-09-13T15:20:01.269Z",
-      "updatedAt": "2026-09-13T15:22:22.928Z",
+      "updatedAt": "2026-09-13T17:20:05.338Z",
       "eventDate": "December 2026",
       "customerName": "Rahul & Priya"
     },
@@ -945,30 +1413,282 @@
       "status": "draft",
       "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
       "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
+        "primaryColor": "#f59e0b",
+        "secondaryColor": "#18181b",
+        "accentColor": "#fbbf24",
+        "fontHeading": "'Playfair Display', serif",
         "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
+        "fontScript": "'Parisienne', cursive",
+        "backgroundColor": "#09090b"
       },
       "openingScreen": {
         "enabled": true,
-        "style": "video-cover",
-        "title": "Birthday Invitation",
+        "style": "card-flip",
+        "title": "You're Invited to Celebrate",
+        "subtitle": "An Unforgettable 30th Birthday Gala",
+        "coupleNames": "Victoria Sterling",
+        "openButtonText": "View VIP Invitation",
+        "sealColor": "#f59e0b",
+        "envelopeColor": "#18181b",
+        "musicAutoplayOnOpen": true
+      },
+      "music": {
+        "enabled": true,
+        "audioUrl": "https://cdn.freesound.org/previews/538/538848_10202167-lq.mp3",
+        "title": "Midnight Celebration Piano",
+        "artist": "Studio Nights",
+        "autoPlay": true,
+        "loop": true,
+        "floatingBadge": true
+      },
+      "pages": [
+        {
+          "id": "page-1789313142658-0",
+          "name": "VIP Invitation",
+          "order": 0,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "angle": 145,
+              "colors": [
+                "#09090b",
+                "#18181b",
+                "#000000"
+              ]
+            }
+          },
+          "elements": [
+            {
+              "id": "bday-ticket-box",
+              "type": "container",
+              "name": "VIP Pass Ticket Shape",
+              "style": {
+                "x": 20,
+                "y": 40,
+                "width": 350,
+                "height": 740,
+                "shape": "ticket",
+                "backgroundColor": "#121215",
+                "borderWidth": 1,
+                "borderColor": "#f59e0b66",
+                "boxShadow": "0 20px 40px rgba(0,0,0,0.8)",
+                "padding": 20
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 0.9,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "bday-vip-badge",
+              "type": "text",
+              "name": "VIP Badge",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 40,
+                "y": 70,
+                "width": 310,
+                "height": 24,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 12,
+                "fontWeight": 700,
+                "color": "#f59e0b",
+                "textAlign": "center",
+                "letterSpacing": 4
+              },
+              "content": {
+                "text": "★ EXCLUSIVE VIP INVITATION ★"
+              }
+            },
+            {
+              "id": "bday-title",
+              "type": "heading",
+              "name": "Birthday Title",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 30,
+                "y": 110,
+                "width": 330,
+                "height": 60,
+                "fontFamily": "'Playfair Display', serif",
+                "fontSize": 36,
+                "fontWeight": 700,
+                "color": "#ffffff",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "Victoria's 30th"
+              }
+            },
+            {
+              "id": "bday-subtitle",
+              "type": "text",
+              "name": "Party Theme",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 30,
+                "y": 170,
+                "width": 330,
+                "height": 30,
+                "fontFamily": "'Parisienne', cursive",
+                "fontSize": 26,
+                "color": "#fbbf24",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "A Night of Champagne & Gold"
+              }
+            },
+            {
+              "id": "bday-date-time",
+              "type": "text",
+              "name": "Party Date Time",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 30,
+                "y": 230,
+                "width": 330,
+                "height": 40,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 14,
+                "fontWeight": 600,
+                "color": "#e4e4e7",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "SATURDAY, NOVEMBER 14, 2026\n8:00 PM ONWARDS"
+              }
+            },
+            {
+              "id": "bday-countdown",
+              "type": "countdown",
+              "name": "Countdown to Party",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 35,
+                "y": 290,
+                "width": 320,
+                "height": 80,
+                "fontFamily": "'Montserrat', sans-serif"
+              },
+              "content": {
+                "countdownTarget": "2026-11-14T20:00:00",
+                "countdownLabels": {
+                  "days": "DAYS",
+                  "hours": "HRS",
+                  "minutes": "MINS",
+                  "seconds": "SECS"
+                }
+              }
+            },
+            {
+              "id": "bday-venue-box",
+              "type": "venue",
+              "name": "Venue Info",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 35,
+                "y": 390,
+                "width": 320,
+                "height": 100,
+                "backgroundColor": "#1f1f23",
+                "borderRadius": 12,
+                "padding": 12
+              },
+              "content": {
+                "venueName": "The Penthouse Rooftop Lounge",
+                "venueAddress": "450 West 33rd St, Manhattan, New York",
+                "mapQuery": "Manhattan+New+York"
+              }
+            },
+            {
+              "id": "bday-whatsapp-btn",
+              "type": "whatsapp-button",
+              "name": "WhatsApp RSVP Button",
+              "parentContainerId": "bday-ticket-box",
+              "style": {
+                "x": 60,
+                "y": 520,
+                "width": 270,
+                "height": 46,
+                "shape": "rounded-rectangle",
+                "borderRadius": 23,
+                "backgroundColor": "#25D366",
+                "color": "#ffffff",
+                "fontSize": 14,
+                "fontWeight": 600
+              },
+              "content": {
+                "buttonText": "RSVP via WhatsApp",
+                "whatsappPhone": "+1234567890",
+                "whatsappMessage": "Hi Victoria! I would love to attend your 30th Birthday Gala!"
+              }
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "enableAutoScroll": false,
+        "autoScrollSpeed": 30,
+        "showPageNavDots": true,
+        "allowGuestComments": true,
+        "allowRSVP": true,
+        "enableConfettiOnOpen": true
+      },
+      "viewsCount": 0,
+      "createdAt": "2026-09-13T15:22:58.853Z",
+      "updatedAt": "2026-09-13T15:25:47.262Z"
+    },
+    {
+      "id": "inv-1789313218147-hqft",
+      "businessId": "usr-biz-royal",
+      "title": "Birthday Invitation",
+      "customerName": "",
+      "eventDate": "2026-09-24",
+      "eventType": "birthday",
+      "slug": "birthday-invitation-h3ci7",
+      "category": "birthday",
+      "status": "published",
+      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+      "theme": {
+        "primaryColor": "#5fd93a",
+        "secondaryColor": "#3cd719",
+        "accentColor": "#c5a059",
+        "fontHeading": "'Cormorant Garamond', serif",
+        "fontBody": "'Plus Jakarta Sans', sans-serif",
+        "fontScript": "'Alex Brush', cursive",
+        "backgroundColor": "#f8f9f6"
+      },
+      "openingScreen": {
+        "enabled": true,
+        "style": "envelope",
+        "title": "Save the Date",
+        "subtitle": "For the wedding celebration of",
+        "coupleNames": "Liam & Olivia",
         "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false,
-        "coverType": "video",
-        "coverTransitionEffect": "blur-dissolve",
-        "imageTransitionEffect": "blur-dissolve",
+        "sealColor": "#4a6741",
+        "envelopeColor": "#e9ece4",
+        "musicAutoplayOnOpen": true,
+        "outerBackgroundColor": "#d32727",
+        "coverType": "envelope",
         "background": {
-          "type": "video",
-          "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4",
-          "overlayColor": "#000000",
-          "overlayOpacity": 0.35
+          "type": "gradient",
+          "gradient": {
+            "type": "radial",
+            "colors": [
+              "#172520",
+              "#07120d"
+            ],
+            "angle": 180
+          },
+          "overlayColor": "#4a6741",
+          "overlayOpacity": 0.05
         },
         "page": {
           "id": "opening-screen-page",
@@ -979,86 +1699,68 @@
           "heightMode": "custom",
           "isFullHeight": false,
           "background": {
-            "type": "video",
-            "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4",
-            "overlayColor": "#000000",
-            "overlayOpacity": 0.35
+            "type": "gradient",
+            "gradient": {
+              "type": "radial",
+              "colors": [
+                "#172520",
+                "#07120d"
+              ],
+              "angle": 180
+            },
+            "overlayColor": "#4a6741",
+            "overlayOpacity": 0.05
           },
           "elements": [
             {
-              "id": "open-elem-title",
-              "type": "heading",
-              "name": "Overline Title",
+              "id": "open-container-card",
+              "type": "shape",
+              "name": "Minimal Cover Frame",
               "style": {
-                "x": 30,
-                "y": 42,
-                "width": 460,
-                "height": 22,
-                "fontSize": 10,
-                "fontWeight": 700,
-                "color": "#d4af37",
-                "textAlign": "center",
-                "letterSpacing": 3,
-                "zIndex": 10
+                "x": 20,
+                "y": 20,
+                "width": 480,
+                "height": 360,
+                "backgroundColor": "#e9ece4",
+                "borderRadius": 16,
+                "borderWidth": 1,
+                "borderColor": "rgba(255, 255, 255, 0.12)",
+                "boxShadow": "0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05)",
+                "zIndex": 1,
+                "shapeType": "rectangle"
               },
-              "content": {
-                "text": "Birthday Invitation"
-              },
+              "content": {},
               "animation": {
-                "type": "fadeIn",
+                "type": "zoomIn",
                 "duration": 0.8,
-                "delay": 0.2
+                "delay": 0.1
               }
             },
             {
               "id": "open-elem-couple",
               "type": "heading",
-              "name": "Couple / Event Names",
+              "name": "Two Names",
               "style": {
                 "x": 30,
-                "y": 70,
+                "y": 124,
                 "width": 460,
-                "height": 56,
-                "fontSize": 26,
-                "fontFamily": "'Cinzel', serif",
+                "height": 68,
+                "fontSize": 32,
+                "fontFamily": "'Cormorant Garamond', serif",
                 "fontWeight": 700,
                 "color": "#ffffff",
                 "textAlign": "center",
-                "lineHeight": 1.2,
+                "lineHeight": 1.25,
+                "letterSpacing": 1,
                 "zIndex": 10
               },
               "content": {
-                "text": "Birthday Invitation"
+                "text": "Liam & Olivia"
               },
               "animation": {
                 "type": "slideUp",
                 "duration": 0.8,
-                "delay": 0.3
-              }
-            },
-            {
-              "id": "open-elem-date",
-              "type": "text",
-              "name": "Date / Subtitle",
-              "style": {
-                "x": 30,
-                "y": 132,
-                "width": 460,
-                "height": 24,
-                "fontSize": 12,
-                "fontWeight": 500,
-                "color": "#e2e8f0",
-                "textAlign": "center",
-                "letterSpacing": 2,
-                "zIndex": 10
-              },
-              "content": {
-                "text": "2026-09-22"
-              },
-              "animation": {
-                "type": "fadeIn",
-                "duration": 0.8,
-                "delay": 0.4
+                "delay": 0.25
               }
             },
             {
@@ -1066,11 +1768,11 @@
               "type": "button",
               "name": "Open Invitation Button",
               "style": {
-                "x": 140,
-                "y": 245,
-                "width": 240,
+                "x": 135,
+                "y": 218,
+                "width": 250,
                 "height": 44,
-                "backgroundColor": "#d4af37",
+                "backgroundColor": "#4a6741",
                 "color": "#09090b",
                 "fontSize": 12,
                 "fontWeight": 800,
@@ -1092,65 +1794,1132 @@
               }
             },
             {
-              "id": "open-elem-play-btn",
-              "type": "icon",
-              "name": "Center Play Button",
+              "id": "open-elem-title",
+              "type": "heading",
+              "name": "Overline Title",
               "style": {
-                "x": 228,
-                "y": 172,
-                "width": 64,
-                "height": 64,
-                "color": "#07120d",
-                "backgroundColor": "#d4af37",
-                "borderRadius": 9999,
-                "borderWidth": 3,
-                "borderColor": "rgba(255, 255, 255, 0.4)",
-                "boxShadow": "0 10px 30px rgba(0,0,0,0.6), 0 0 35px rgba(212, 175, 55, 0.5)",
-                "zIndex": 15
+                "x": 30,
+                "y": 104,
+                "width": 460,
+                "height": 20,
+                "fontSize": 10,
+                "fontWeight": 700,
+                "color": "#4a6741",
+                "textAlign": "center",
+                "letterSpacing": 3,
+                "zIndex": 10
               },
               "content": {
-                "iconName": "play",
-                "iconColor": "#07120d",
-                "iconSize": 28
+                "text": "Save the Date"
               },
               "animation": {
-                "type": "pulse",
-                "duration": 2,
-                "delay": 0.5,
-                "repeat": "infinite"
+                "type": "fadeIn",
+                "duration": 0.6,
+                "delay": 0.3
+              }
+            },
+            {
+              "id": "open-elem-date",
+              "type": "text",
+              "name": "Date / Subtitle",
+              "style": {
+                "x": 30,
+                "y": 202,
+                "width": 460,
+                "height": 24,
+                "fontSize": 12,
+                "fontWeight": 500,
+                "color": "#94a3b8",
+                "textAlign": "center",
+                "letterSpacing": 2,
+                "zIndex": 10
+              },
+              "content": {
+                "text": "For the wedding celebration of"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.6,
+                "delay": 0.6
               }
             }
           ]
-        },
-        "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
-        "imageAdvanceTrigger": "click-button",
-        "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4",
-        "videoPlayMode": "click-to-play",
-        "videoAutoAdvanceOnEnd": true,
-        "videoMuted": false
+        }
       },
       "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
+        "enabled": true,
+        "audioUrl": "https://cdn.freesound.org/previews/612/612610_5674468-lq.mp3",
+        "title": "Acoustic Romance",
+        "artist": "Gentle Strings",
+        "autoPlay": true,
         "loop": true,
-        "floatingBadge": false
+        "floatingBadge": true
       },
       "pages": [
         {
-          "id": "page-1789312978849-nn2g",
-          "name": "Section 1",
+          "id": "p-bot-1",
+          "name": "Welcome",
           "order": 0,
-          "heightMode": "viewport",
           "height": 844,
           "isFullHeight": true,
           "background": {
             "type": "color",
-            "color": "#f8fafc"
+            "color": "#8bb635"
           },
-          "elements": []
+          "elements": [
+            {
+              "id": "bot-oval-container",
+              "type": "container",
+              "name": "Oval Couple Photo Holder",
+              "style": {
+                "x": 65,
+                "y": 60,
+                "width": 260,
+                "height": 320,
+                "shape": "oval",
+                "backgroundColor": "#e6ebe2",
+                "borderWidth": 2,
+                "borderColor": "#4a6741",
+                "boxShadow": "0 10px 25px rgba(74,103,65,0.15)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 1,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "bot-oval-img",
+              "type": "image",
+              "name": "Liam & Olivia Portrait",
+              "parentContainerId": "bot-oval-container",
+              "style": {
+                "x": 0,
+                "y": 0,
+                "width": 260,
+                "height": 320,
+                "objectFit": "cover"
+              },
+              "content": {
+                "src": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+                "alt": "Liam & Olivia"
+              }
+            },
+            {
+              "id": "bot-heading",
+              "type": "heading",
+              "name": "Couple Names",
+              "style": {
+                "x": 20,
+                "y": 410,
+                "width": 350,
+                "height": 50,
+                "fontFamily": "'Cormorant Garamond', serif",
+                "fontSize": 38,
+                "fontWeight": 600,
+                "color": "#2d3b2a",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "Liam & Olivia"
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.4
+              }
+            },
+            {
+              "id": "bot-subtext",
+              "type": "text",
+              "name": "Invite Subtext",
+              "style": {
+                "x": 30,
+                "y": 470,
+                "width": 330,
+                "height": 40,
+                "fontFamily": "'Plus Jakarta Sans', sans-serif",
+                "fontSize": 14,
+                "color": "#6b7280",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "Invite you to join them as they exchange marriage vows and begin their new life together"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.6
+              }
+            },
+            {
+              "id": "bot-date-pill",
+              "type": "container",
+              "name": "Date Banner Pill",
+              "style": {
+                "x": 45,
+                "y": 540,
+                "width": 300,
+                "height": 80,
+                "shape": "rounded-rectangle",
+                "borderRadius": 40,
+                "backgroundColor": "#edf2ea",
+                "borderWidth": 1,
+                "borderColor": "#4a674144"
+              },
+              "content": {},
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.8
+              }
+            },
+            {
+              "id": "bot-date-text",
+              "type": "text",
+              "name": "Date Text",
+              "parentContainerId": "bot-date-pill",
+              "style": {
+                "x": 55,
+                "y": 555,
+                "width": 280,
+                "height": 24,
+                "fontFamily": "'Cormorant Garamond', serif",
+                "fontSize": 18,
+                "fontWeight": 700,
+                "color": "#4a6741",
+                "textAlign": "center",
+                "letterSpacing": 2
+              },
+              "content": {
+                "text": "AUGUST 18, 2026"
+              }
+            },
+            {
+              "id": "bot-time-text",
+              "type": "text",
+              "name": "Time Text",
+              "parentContainerId": "bot-date-pill",
+              "style": {
+                "x": 55,
+                "y": 580,
+                "width": 280,
+                "height": 20,
+                "fontFamily": "'Plus Jakarta Sans', sans-serif",
+                "fontSize": 12,
+                "color": "#4b5563",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "5:00 PM • Sonoma Valley Vineyards, California"
+              }
+            },
+            {
+              "id": "bot-rsvp-btn",
+              "type": "button",
+              "name": "RSVP Action Button",
+              "style": {
+                "x": 95,
+                "y": 660,
+                "width": 200,
+                "height": 48,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "backgroundColor": "#4a6741",
+                "color": "#ffffff",
+                "fontSize": 14,
+                "fontWeight": 600,
+                "fontFamily": "'Plus Jakarta Sans', sans-serif",
+                "boxShadow": "0 4px 14px rgba(74,103,65,0.3)"
+              },
+              "content": {
+                "buttonText": "RSVP Online",
+                "buttonAction": "next-page"
+              },
+              "animation": {
+                "type": "bounce",
+                "duration": 1,
+                "delay": 1
+              }
+            },
+            {
+              "id": "el-1789313842279-1s6j",
+              "type": "countdown",
+              "name": "countdown",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 18,
+                "y": 811,
+                "width": 340,
+                "height": 84
+              },
+              "content": {
+                "countdownTarget": "2026-10-24T16:00:00",
+                "countdownStyle": "boxes"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789313885864-hnqp",
+              "type": "calendar",
+              "name": "calendar",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 22,
+                "y": 364,
+                "width": 330,
+                "height": 280,
+                "backgroundColor": "#0f172a",
+                "borderRadius": 16
+              },
+              "content": {
+                "eventDate": "2026-10-24",
+                "calendarMonth": "October",
+                "calendarYear": 2026,
+                "calendarDay": 24,
+                "calendarShowAddToCal": true,
+                "calendarEventTitle": "Alexander & Sophia Wedding"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ],
+          "transition": {
+            "type": "slide-horizontal",
+            "duration": 0.6
+          }
+        }
+      ],
+      "settings": {
+        "enableAutoScroll": false,
+        "autoScrollSpeed": 30,
+        "showPageNavDots": true,
+        "allowGuestComments": true,
+        "allowRSVP": true,
+        "enableConfettiOnOpen": true
+      },
+      "viewsCount": 4,
+      "createdAt": "2026-09-13T15:26:58.147Z",
+      "updatedAt": "2026-09-13T15:39:37.698Z"
+    },
+    {
+      "id": "inv-1789314005048-peau",
+      "businessId": "usr-biz-royal",
+      "title": "Wedding Invitation",
+      "customerName": "",
+      "eventDate": "2026-09-16",
+      "eventType": "wedding",
+      "slug": "wedding-invitation-15bu1",
+      "category": "wedding",
+      "status": "draft",
+      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+      "theme": {
+        "primaryColor": "#d4af37",
+        "secondaryColor": "#0a3d2c",
+        "accentColor": "#f9f6ee",
+        "fontHeading": "'Cinzel', serif",
+        "fontBody": "'Montserrat', sans-serif",
+        "fontScript": "'Great Vibes', cursive",
+        "backgroundColor": "#0c1b15"
+      },
+      "openingScreen": {
+        "enabled": true,
+        "style": "wax-seal",
+        "title": "You Are Cordially Invited",
+        "subtitle": "To the sacred union of",
+        "coupleNames": "Alexander & Sophia",
+        "openButtonText": "Open Royal Invitation",
+        "sealColor": "#d4af37",
+        "envelopeColor": "#071811",
+        "musicAutoplayOnOpen": true
+      },
+      "music": {
+        "enabled": true,
+        "audioUrl": "https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3",
+        "title": "Ethereal Bridal Strings",
+        "artist": "Symphony Ensemble",
+        "autoPlay": true,
+        "loop": true,
+        "floatingBadge": true
+      },
+      "pages": [
+        {
+          "id": "p-1-cover",
+          "name": "Cover & Announcement",
+          "order": 0,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "angle": 180,
+              "colors": [
+                "#071912",
+                "#0d281e",
+                "#071912"
+              ]
+            },
+            "overlayColor": "#d4af37",
+            "overlayOpacity": 0.05
+          },
+          "elements": [
+            {
+              "id": "el-frame-border",
+              "type": "container",
+              "name": "Gold Ornamental Border",
+              "style": {
+                "x": 16,
+                "y": 16,
+                "width": 358,
+                "height": 812,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "borderColor": "#d4af3766",
+                "backgroundColor": "#0d281e33",
+                "boxShadow": "inset 0 0 30px rgba(212,175,55,0.1)"
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 1.2,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-monogram-circle",
+              "type": "container",
+              "name": "Monogram Emblem Seal",
+              "style": {
+                "x": 155,
+                "y": 60,
+                "width": 80,
+                "height": 80,
+                "shape": "circle",
+                "backgroundColor": "#d4af371a",
+                "borderWidth": 1.5,
+                "borderColor": "#d4af37",
+                "boxShadow": "0 8px 24px rgba(212,175,55,0.2)"
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 1,
+                "delay": 0.3
+              }
+            },
+            {
+              "id": "el-monogram-text",
+              "type": "text",
+              "name": "Monogram Letters",
+              "style": {
+                "x": 155,
+                "y": 78,
+                "width": 80,
+                "height": 44,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 26,
+                "fontWeight": 700,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 2
+              },
+              "content": {
+                "text": "A & S"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.5
+              }
+            },
+            {
+              "id": "el-pre-heading",
+              "type": "text",
+              "name": "Invitation Prefix",
+              "style": {
+                "x": 30,
+                "y": 160,
+                "width": 330,
+                "height": 28,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 12,
+                "fontWeight": 500,
+                "color": "#d4af37cc",
+                "textAlign": "center",
+                "letterSpacing": 4,
+                "textTransform": "uppercase"
+              },
+              "content": {
+                "text": "Together with their families"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.4
+              }
+            },
+            {
+              "id": "el-couple-name1",
+              "type": "heading",
+              "name": "Groom Name",
+              "style": {
+                "x": 20,
+                "y": 200,
+                "width": 350,
+                "height": 60,
+                "fontFamily": "'Great Vibes', cursive",
+                "fontSize": 48,
+                "color": "#f9f6ee",
+                "textAlign": "center",
+                "textShadow": "0 2px 12px rgba(212,175,55,0.4)"
+              },
+              "content": {
+                "text": "Alexander Sterli"
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.9,
+                "delay": 0.6
+              }
+            },
+            {
+              "id": "el-and-symbol",
+              "type": "text",
+              "name": "And Connector",
+              "style": {
+                "x": 170,
+                "y": 265,
+                "width": 50,
+                "height": 32,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 18,
+                "fontWeight": 400,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 3
+              },
+              "content": {
+                "text": "— & —"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.6,
+                "delay": 0.7
+              }
+            },
+            {
+              "id": "el-couple-name2",
+              "type": "heading",
+              "name": "Bride Name",
+              "style": {
+                "x": 20,
+                "y": 300,
+                "width": 350,
+                "height": 60,
+                "fontFamily": "'Great Vibes', cursive",
+                "fontSize": 48,
+                "color": "#f9f6ee",
+                "textAlign": "center",
+                "textShadow": "0 2px 12px rgba(212,175,55,0.4)"
+              },
+              "content": {
+                "text": "Sophia Montgomery"
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.9,
+                "delay": 0.8
+              }
+            },
+            {
+              "id": "el-arch-container",
+              "type": "container",
+              "name": "Arch Portrait Container",
+              "style": {
+                "x": 55,
+                "y": 380,
+                "width": 280,
+                "height": 290,
+                "shape": "arch",
+                "backgroundColor": "#071912",
+                "borderWidth": 2,
+                "borderColor": "#d4af37",
+                "boxShadow": "0 12px 36px rgba(0,0,0,0.6)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 1,
+                "delay": 1
+              }
+            },
+            {
+              "id": "el-arch-image",
+              "type": "image",
+              "name": "Couple Photo Inside Arch",
+              "parentContainerId": "el-arch-container",
+              "style": {
+                "x": 0,
+                "y": 0,
+                "width": 280,
+                "height": 290,
+                "objectFit": "cover"
+              },
+              "content": {
+                "src": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                "alt": "Alexander & Sophia"
+              }
+            },
+            {
+              "id": "el-date-time-box",
+              "type": "text",
+              "name": "Date Banner",
+              "style": {
+                "x": 40,
+                "y": 690,
+                "width": 310,
+                "height": 30,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 16,
+                "fontWeight": 600,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 3
+              },
+              "content": {
+                "text": "SATURDAY, OCTOBER 24, 2026"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 1.2
+              }
+            },
+            {
+              "id": "el-venue-city",
+              "type": "text",
+              "name": "Venue City Line",
+              "style": {
+                "x": 40,
+                "y": 725,
+                "width": 310,
+                "height": 24,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 13,
+                "color": "#e5e7eb",
+                "textAlign": "center",
+                "letterSpacing": 2
+              },
+              "content": {
+                "text": "THE BILTMORE ESTATE • ASHEVILLE, NC"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 1.3
+              }
+            },
+            {
+              "id": "el-scroll-indicator",
+              "type": "button",
+              "name": "Scroll Down Button",
+              "style": {
+                "x": 135,
+                "y": 765,
+                "width": 120,
+                "height": 36,
+                "shape": "rounded-rectangle",
+                "borderRadius": 18,
+                "backgroundColor": "#d4af3726",
+                "borderWidth": 1,
+                "borderColor": "#d4af3788",
+                "color": "#f9f6ee",
+                "fontSize": 12,
+                "fontFamily": "'Montserrat', sans-serif"
+              },
+              "content": {
+                "buttonText": "View Details ↓",
+                "buttonAction": "next-page"
+              },
+              "animation": {
+                "type": "pulse",
+                "duration": 2,
+                "delay": 1.5,
+                "repeat": true
+              }
+            },
+            {
+              "id": "el-1789314041032-04hl",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 31,
+                "y": 351,
+                "width": 330,
+                "height": 60,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "a"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789314273132-agk4",
+              "type": "image",
+              "name": "Baroque Filigree Antique Border",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 35,
+                "y": 90,
+                "width": 320,
+                "height": 448,
+                "borderRadius": 0
+              },
+              "content": {
+                "src": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20400%20560%22%20width%3D%22400%22%20height%3D%22560%22%20fill%3D%22none%22%3E%0A%20%20%3C!--%20Outer%20Rectangle%20--%3E%0A%20%20%3Crect%20x%3D%2218%22%20y%3D%2218%22%20width%3D%22364%22%20height%3D%22524%22%20rx%3D%224%22%20stroke%3D%22%23c59b27%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3C!--%20Inner%20Fine%20Line%20--%3E%0A%20%20%3Crect%20x%3D%2228%22%20y%3D%2228%22%20width%3D%22344%22%20height%3D%22504%22%20rx%3D%222%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%221%22%20stroke-opacity%3D%220.8%22%2F%3E%0A%20%20%0A%20%20%3C!--%20Top-Left%20Corner%20Filigree%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(18%2C%2018)%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%200%2035%20C%2010%2030%2C%2025%2025%2C%2025%2010%20C%2025%204%2C%2018%200%2C%2010%200%20C%204%200%2C%200%208%2C%200%2015%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%2035%200%20C%2030%2010%2C%2025%2025%2C%2010%2025%20C%204%2025%2C%200%2018%2C%200%2010%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2228%22%20cy%3D%2228%22%20r%3D%223%22%20fill%3D%22%23d4af37%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3C!--%20Top-Right%20Corner%20Filigree%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(382%2C%2018)%20scale(-1%2C%201)%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%200%2035%20C%2010%2030%2C%2025%2025%2C%2025%2010%20C%2025%204%2C%2018%200%2C%2010%200%20C%204%200%2C%200%208%2C%200%2015%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%2035%200%20C%2030%2010%2C%2025%2025%2C%2010%2025%20C%204%2025%2C%200%2018%2C%200%2010%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2228%22%20cy%3D%2228%22%20r%3D%223%22%20fill%3D%22%23d4af37%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3C!--%20Bottom-Left%20Corner%20Filigree%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(18%2C%20542)%20scale(1%2C%20-1)%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%200%2035%20C%2010%2030%2C%2025%2025%2C%2025%2010%20C%2025%204%2C%2018%200%2C%2010%200%20C%204%200%2C%200%208%2C%200%2015%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%2035%200%20C%2030%2010%2C%2025%2025%2C%2010%2025%20C%204%2025%2C%200%2018%2C%200%2010%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2228%22%20cy%3D%2228%22%20r%3D%223%22%20fill%3D%22%23d4af37%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3C!--%20Bottom-Right%20Corner%20Filigree%20--%3E%0A%20%20%3Cg%20transform%3D%22translate(382%2C%20542)%20scale(-1%2C%20-1)%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%221.5%22%20fill%3D%22none%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%200%2035%20C%2010%2030%2C%2025%2025%2C%2025%2010%20C%2025%204%2C%2018%200%2C%2010%200%20C%204%200%2C%200%208%2C%200%2015%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M%2035%200%20C%2030%2010%2C%2025%2025%2C%2010%2025%20C%204%2025%2C%200%2018%2C%200%2010%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2228%22%20cy%3D%2228%22%20r%3D%223%22%20fill%3D%22%23d4af37%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3C!--%20Top%20Center%20Crest%20Accent%20--%3E%0A%20%20%3Cpath%20d%3D%22M%20180%2018%20C%20190%2028%2C%20210%2028%2C%20220%2018%22%20stroke%3D%22%23d4af37%22%20stroke-width%3D%221.5%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22200%22%20cy%3D%2226%22%20r%3D%222.5%22%20fill%3D%22%23d4af37%22%2F%3E%0A%3C%2Fsvg%3E",
+                "alt": "Baroque Filigree Antique Border"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "p-2-event-details",
+          "name": "Event Details & Countdown",
+          "order": 1,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "color",
+            "color": "#071912"
+          },
+          "elements": [
+            {
+              "id": "el-countdown-box",
+              "type": "container",
+              "name": "Countdown Card Box",
+              "style": {
+                "x": 24,
+                "y": 40,
+                "width": 342,
+                "height": 170,
+                "shape": "rounded-rectangle",
+                "borderRadius": 16,
+                "backgroundColor": "#0e261d",
+                "borderWidth": 1,
+                "borderColor": "#d4af3744",
+                "boxShadow": "0 8px 30px rgba(0,0,0,0.5)",
+                "padding": 16
+              },
+              "content": {},
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-countdown-label",
+              "type": "text",
+              "name": "Countdown Label",
+              "parentContainerId": "el-countdown-box",
+              "style": {
+                "x": 40,
+                "y": 55,
+                "width": 310,
+                "height": 24,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 13,
+                "fontWeight": 600,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 3
+              },
+              "content": {
+                "text": "COUNTING DOWN TO THE CELEBRATION"
+              }
+            },
+            {
+              "id": "el-countdown-widget",
+              "type": "countdown",
+              "name": "Live Countdown Timer",
+              "parentContainerId": "el-countdown-box",
+              "style": {
+                "x": 40,
+                "y": 90,
+                "width": 310,
+                "height": 90,
+                "fontFamily": "'Montserrat', sans-serif"
+              },
+              "content": {
+                "countdownTarget": "2026-10-24T16:00:00",
+                "countdownLabels": {
+                  "days": "DAYS",
+                  "hours": "HOURS",
+                  "minutes": "MINS",
+                  "seconds": "SECS"
+                }
+              }
+            },
+            {
+              "id": "el-venue-card",
+              "type": "container",
+              "name": "Ceremony & Reception Card",
+              "style": {
+                "x": 24,
+                "y": 230,
+                "width": 342,
+                "height": 380,
+                "shape": "rounded-rectangle",
+                "borderRadius": 16,
+                "backgroundColor": "#0e261d",
+                "borderWidth": 1,
+                "borderColor": "#d4af3744",
+                "boxShadow": "0 8px 30px rgba(0,0,0,0.5)",
+                "padding": 20
+              },
+              "content": {},
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.4
+              }
+            },
+            {
+              "id": "el-venue-heading",
+              "type": "heading",
+              "name": "Venue Title",
+              "parentContainerId": "el-venue-card",
+              "style": {
+                "x": 44,
+                "y": 250,
+                "width": 302,
+                "height": 36,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 20,
+                "fontWeight": 700,
+                "color": "#d4af37",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "The Wedding Ceremony"
+              }
+            },
+            {
+              "id": "el-venue-time",
+              "type": "text",
+              "name": "Ceremony Time",
+              "parentContainerId": "el-venue-card",
+              "style": {
+                "x": 44,
+                "y": 290,
+                "width": 302,
+                "height": 24,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 14,
+                "fontWeight": 600,
+                "color": "#f9f6ee",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "Four O'Clock in the Afternoon"
+              }
+            },
+            {
+              "id": "el-venue-location",
+              "type": "text",
+              "name": "Venue Name & Address",
+              "parentContainerId": "el-venue-card",
+              "style": {
+                "x": 44,
+                "y": 320,
+                "width": 302,
+                "height": 48,
+                "fontFamily": "'Montserrat', sans-serif",
+                "fontSize": 13,
+                "color": "#d1d5db",
+                "textAlign": "center",
+                "lineHeight": 1.5
+              },
+              "content": {
+                "text": "Lioncrest at Biltmore Estate\n1 Lodge St, Asheville, North Carolina 28803"
+              }
+            },
+            {
+              "id": "el-google-maps",
+              "type": "google-maps",
+              "name": "Maps Embed Preview",
+              "parentContainerId": "el-venue-card",
+              "style": {
+                "x": 44,
+                "y": 380,
+                "width": 302,
+                "height": 150,
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "borderColor": "#d4af3733"
+              },
+              "content": {
+                "venueName": "The Biltmore Estate",
+                "venueAddress": "1 Lodge St, Asheville, NC 28803",
+                "mapQuery": "Biltmore+Estate+Asheville+NC"
+              }
+            },
+            {
+              "id": "el-directions-btn",
+              "type": "directions-button",
+              "name": "Get Directions Button",
+              "parentContainerId": "el-venue-card",
+              "style": {
+                "x": 95,
+                "y": 545,
+                "width": 200,
+                "height": 42,
+                "shape": "rounded-rectangle",
+                "borderRadius": 21,
+                "backgroundColor": "#d4af37",
+                "color": "#071912",
+                "fontWeight": 600,
+                "fontSize": 13,
+                "fontFamily": "'Montserrat', sans-serif"
+              },
+              "content": {
+                "buttonText": "Open in Google Maps",
+                "venueAddress": "1 Lodge St, Asheville, NC 28803"
+              }
+            },
+            {
+              "id": "el-dress-code-box",
+              "type": "dress-code",
+              "name": "Black Tie Dress Code",
+              "style": {
+                "x": 24,
+                "y": 630,
+                "width": 342,
+                "height": 160,
+                "shape": "rounded-rectangle",
+                "borderRadius": 16,
+                "backgroundColor": "#0e261d",
+                "borderWidth": 1,
+                "borderColor": "#d4af3744",
+                "boxShadow": "0 8px 30px rgba(0,0,0,0.5)",
+                "padding": 16
+              },
+              "content": {
+                "dressCodeTitle": "Attire: Black Tie Preferred",
+                "dressCodeColors": [
+                  "#0c1b15",
+                  "#1a3628",
+                  "#d4af37",
+                  "#f9f6ee",
+                  "#2c2c2c"
+                ],
+                "dressCodeDescription": "Gentlemen: Dark tuxedos or formal suits. Ladies: Floor-length evening gowns or elegant cocktail dresses."
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "id": "p-3-timeline",
+          "name": "Itinerary & Timeline",
+          "order": 2,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "color",
+            "color": "#071912"
+          },
+          "elements": [
+            {
+              "id": "el-timeline-title",
+              "type": "heading",
+              "name": "Timeline Header",
+              "style": {
+                "x": 20,
+                "y": 40,
+                "width": 350,
+                "height": 40,
+                "fontFamily": "'Cinzel', serif",
+                "fontSize": 24,
+                "fontWeight": 700,
+                "color": "#d4af37",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "Wedding Day Timeline"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-timeline-widget",
+              "type": "timeline",
+              "name": "Schedule of Events",
+              "style": {
+                "x": 24,
+                "y": 100,
+                "width": 342,
+                "height": 680,
+                "backgroundColor": "#0e261d",
+                "borderRadius": 16,
+                "borderWidth": 1,
+                "borderColor": "#d4af3744",
+                "padding": 20
+              },
+              "content": {
+                "timelineEvents": [
+                  {
+                    "time": "04:00 PM",
+                    "title": "Guest Arrival & Welcome Drinks",
+                    "description": "Champagne and live harp prelude on the terrace."
+                  },
+                  {
+                    "time": "04:30 PM",
+                    "title": "Solemn Wedding Ceremony",
+                    "description": "Exchange of sacred vows at the Sunken Garden."
+                  },
+                  {
+                    "time": "05:30 PM",
+                    "title": "Cocktail Hour & Hors d'œuvres",
+                    "description": "Signature cocktails, artisanal charcuterie, and photo sessions."
+                  },
+                  {
+                    "time": "07:00 PM",
+                    "title": "Grand Dinner & Toasts",
+                    "description": "Four-course plated banquet with wine pairings."
+                  },
+                  {
+                    "time": "08:30 PM",
+                    "title": "First Dance & Celebration",
+                    "description": "Live jazz orchestra and dancing beneath the stars."
+                  },
+                  {
+                    "time": "11:30 PM",
+                    "title": "Sparkler Send-Off",
+                    "description": "Farewell gathering along the main courtyard."
+                  }
+                ]
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.4
+              }
+            }
+          ]
+        },
+        {
+          "id": "p-4-rsvp",
+          "name": "RSVP & Guestbook",
+          "order": 3,
+          "height": 960,
+          "isFullHeight": false,
+          "background": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "angle": 180,
+              "colors": [
+                "#071912",
+                "#0c231a",
+                "#05120d"
+              ]
+            }
+          },
+          "elements": [
+            {
+              "id": "el-rsvp-form-block",
+              "type": "rsvp-form",
+              "name": "Interactive RSVP Form",
+              "style": {
+                "x": 20,
+                "y": 40,
+                "width": 350,
+                "height": 420,
+                "shape": "rounded-rectangle",
+                "borderRadius": 16,
+                "backgroundColor": "#0e261d",
+                "borderWidth": 1,
+                "borderColor": "#d4af37",
+                "boxShadow": "0 12px 36px rgba(0,0,0,0.6)",
+                "padding": 20
+              },
+              "content": {
+                "text": "Kindly RSVP by September 15, 2026"
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-guestbook-block",
+              "type": "guestbook",
+              "name": "Live Guestbook & Wishes Board",
+              "style": {
+                "x": 20,
+                "y": 490,
+                "width": 350,
+                "height": 420,
+                "shape": "rounded-rectangle",
+                "borderRadius": 16,
+                "backgroundColor": "#0e261d",
+                "borderWidth": 1,
+                "borderColor": "#d4af3744",
+                "boxShadow": "0 8px 30px rgba(0,0,0,0.5)",
+                "padding": 20
+              },
+              "content": {
+                "text": "Leave your blessings and congratulations for the happy couple."
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.4
+              }
+            }
+          ]
         }
       ],
       "settings": {
@@ -1162,8 +2931,8 @@
         "enableConfettiOnOpen": true
       },
       "viewsCount": 0,
-      "createdAt": "2026-09-13T15:22:58.853Z",
-      "updatedAt": "2026-09-13T15:24:33.449Z"
+      "createdAt": "2026-09-13T15:40:05.048Z",
+      "updatedAt": "2026-09-13T15:44:36.151Z"
     }
   ],
   "templates": [
