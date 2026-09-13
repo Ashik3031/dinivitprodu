@@ -107,7 +107,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     try {
       setIsLoading(true);
       const [invRes, tmplRes] = await Promise.all([
-        api.getInvitations(),
+        api.getInvitations(
+          user?.role === 'admin' ? undefined : user?.id,
+          user?.role
+        ),
         api.getTemplates()
       ]);
       setInvitations(invRes.invitations || []);
