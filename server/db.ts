@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset } from '../src/types';
 import { INITIAL_TEMPLATES, createInvitationFromTemplate, createBlankInvitation } from '../src/data/initialTemplates';
 import { DEFAULT_PUBLIC_ASSETS } from '../src/data/stockFramesAndStickers';
+import { STOCK_ASSETS } from '../src/data/stockAssets';
 
 export function hashPassword(plainText: string): string {
   if (!plainText) return '';
@@ -365,16 +366,27 @@ export function loadDatabase(): DatabaseSchema {
       db = JSON.parse(data);
       // Ensure templates are present
       if (!db.templates || db.templates.length === 0) {
-        db.templates = INITIAL_TEMPLATES.map(t => ({ ...t, isPublic: true }));
+        db.templates = INITIAL_TEMPLATES.map(t => ({
+          ...t,
+          isPublic: true,
+          isSuperAdmin: true,
+          authorRole: 'superadmin',
+          authorName: 'Super Admin',
+          createdBy: 'usr-admin-1'
+        }));
       } else {
-        // Ensure every template has an explicit isPublic flag
+        // Ensure every template has an explicit isPublic flag and super admin tags
         db.templates = db.templates.map(t => ({
           ...t,
-          isPublic: t.isPublic !== false
+          isPublic: t.isPublic !== false,
+          isSuperAdmin: t.isSuperAdmin !== false,
+          authorRole: t.authorRole || 'superadmin',
+          authorName: t.authorName || 'Super Admin',
+          createdBy: t.createdBy || 'usr-admin-1'
         }));
       }
 
-      // Ensure public assets (frames, stickers) exist in db.media
+      // Ensure public assets (frames, stickers, gifs, videos) exist in db.media
       if (!db.media) db.media = [];
       for (const asset of DEFAULT_PUBLIC_ASSETS) {
         if (!db.media.some(m => m.id === asset.id)) {
@@ -386,12 +398,39 @@ export function loadDatabase(): DatabaseSchema {
             url: asset.url,
             thumbnailUrl: asset.thumbnailUrl || asset.url,
             type: asset.type as any,
-            format: 'svg',
-            size: 15000,
+            format: asset.type === 'gif' ? 'gif' : asset.type === 'video' ? 'mp4' : 'svg',
+            size: asset.type === 'video' ? 3500000 : (asset.type === 'gif' ? 1200000 : 15000),
             dimensions: asset.dimensions || { width: 400, height: 600 },
+            duration: (asset as any).duration,
             category: asset.category,
             tags: asset.tags,
             isPublic: true,
+            isSuperAdmin: true,
+            authorRole: 'superadmin',
+            createdAt: new Date().toISOString()
+          });
+        }
+      }
+
+      // Ensure stock library assets (photos, patterns, textures) exist in db.media
+      for (const asset of STOCK_ASSETS) {
+        if (!db.media.some(m => m.id === asset.id)) {
+          db.media.push({
+            id: asset.id,
+            businessId: 'admin',
+            title: asset.name,
+            name: asset.name,
+            url: asset.url,
+            thumbnailUrl: asset.thumbnail || asset.url,
+            type: asset.type as any,
+            format: 'jpg',
+            size: 450000,
+            dimensions: { width: 1200, height: 800 },
+            category: asset.category,
+            tags: asset.tags,
+            isPublic: true,
+            isSuperAdmin: true,
+            authorRole: 'superadmin',
             createdAt: new Date().toISOString()
           });
         }
@@ -683,13 +722,18 @@ export const dbService = {
   },
 
   // Templates Management
-  getTemplates: (params: { category?: string; search?: string; all?: boolean } = {}) => {
+  getTemplates: (params: { category?: string; search?: string; all?: boolean; superAdminOnly?: boolean } = {}) => {
     loadDatabase();
     let list = db.templates || [];
 
     // Filter by publish status: if not requesting all (admin view), show only published templates
     if (!params.all) {
       list = list.filter(t => t.isPublic !== false);
+    }
+
+    // Filter by super admin creation
+    if (params.superAdminOnly) {
+      list = list.filter(t => t.isSuperAdmin !== false);
     }
 
     // Filter by category
@@ -705,7 +749,8 @@ export const dbService = {
         t.title.toLowerCase().includes(q) ||
         (t.description && t.description.toLowerCase().includes(q)) ||
         (t.category && t.category.toLowerCase().includes(q)) ||
-        (t.tags && t.tags.some(tag => tag.toLowerCase().includes(q)))
+        (t.tags && t.tags.some(tag => tag.toLowerCase().includes(q))) ||
+        (t.authorName && t.authorName.toLowerCase().includes(q))
       );
     }
 
@@ -732,7 +777,11 @@ export const dbService = {
       thumbnail: templateData.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
       isPremium: Boolean(templateData.isPremium),
       isPublic: templateData.isPublic !== false, // default to published
-      tags: templateData.tags || [templateData.category || 'wedding', 'custom'],
+      isSuperAdmin: templateData.isSuperAdmin !== false,
+      authorRole: templateData.authorRole || 'superadmin',
+      authorName: templateData.authorName || 'Super Admin',
+      createdBy: templateData.createdBy || 'usr-admin-1',
+      tags: templateData.tags || [templateData.category || 'wedding', 'custom', 'super-admin'],
       theme: templateData.theme || {
         primaryColor: '#d4af37',
         secondaryColor: '#1a3628',
@@ -999,35 +1048,93 @@ export const dbService = {
     loadDatabase();
     let list = db.media || [];
 
-    // Filter by public or business
-    if (params.isPublic === true || params.isPublic === 'true' || params.scope === 'public') {
-      list = list.filter(m => m.isPublic);
-    } else if (params.businessId && params.businessId !== 'all') {
-      if (params.scope === 'all') {
-        list = list.filter(m => m.businessId === params.businessId || m.isPublic);
-      } else {
-        list = list.filter(m => m.businessId === params.businessId);
+    // Filter by public, scope, or business
+    if (params.scope === 'public' || params.scope === 'stock' || params.scope === 'admin') {
+      list = list.filter(m => m.isPublic || m.isSuperAdmin || m.businessId === 'admin');
+    } else if (params.scope === 'uploads' || params.scope === 'my_uploads') {
+      if (params.invitationId && params.invitationId !== 'all') {
+        list = list.filter(m => 
+          !m.isSuperAdmin && (
+            m.invitationId === params.invitationId ||
+            (m.invitationIds && m.invitationIds.includes(params.invitationId!)) ||
+            (params.businessId && m.businessId === params.businessId && !m.isPublic)
+          )
+        );
+      } else if (params.businessId && params.businessId !== 'all') {
+        list = list.filter(m => m.businessId === params.businessId && !m.isSuperAdmin);
       }
-    }
-
-    // Filter by invitation if provided and not requested 'all'
-    if (params.invitationId && params.invitationId !== 'all' && params.scope !== 'public') {
-      list = list.filter(m => 
-        m.invitationId === params.invitationId || 
-        (m.invitationIds && m.invitationIds.includes(params.invitationId!)) ||
-        m.isPublic
-      );
+    } else if (params.isPublic === true || params.isPublic === 'true') {
+      list = list.filter(m => m.isPublic || m.isSuperAdmin || m.businessId === 'admin');
+    } else if (params.scope === 'all') {
+      // Return everything: user's uploads + all public/admin created assets
+      if (params.businessId && params.businessId !== 'all') {
+        list = list.filter(m => m.businessId === params.businessId || m.isPublic || m.isSuperAdmin || m.businessId === 'admin');
+      }
+    } else {
+      // Default: show invitation items AND public/admin assets so users can select and use them
+      if (params.invitationId && params.invitationId !== 'all') {
+        list = list.filter(m => 
+          m.invitationId === params.invitationId || 
+          (m.invitationIds && m.invitationIds.includes(params.invitationId!)) ||
+          m.isPublic ||
+          m.isSuperAdmin ||
+          m.businessId === 'admin'
+        );
+      } else if (params.businessId && params.businessId !== 'all') {
+        list = list.filter(m => m.businessId === params.businessId || m.isPublic || m.isSuperAdmin || m.businessId === 'admin');
+      }
     }
 
     // Filter by media type
     if (params.type && params.type !== 'all') {
-      list = list.filter(m => m.type === params.type);
+      const t = params.type.toLowerCase().trim();
+      list = list.filter(m => {
+        if (t === 'image') return m.type === 'image' || m.type === 'frame' || m.type === 'sticker' || m.type === 'decoration' || m.type === 'pattern' || m.type === 'texture';
+        if (t === 'frame') return m.type === 'frame' || (m.category || '').toLowerCase().includes('frame');
+        if (t === 'gif') return m.type === 'gif' || m.format === 'gif';
+        if (t === 'video') return m.type === 'video';
+        if (t === 'audio') return m.type === 'audio';
+        return m.type === t;
+      });
     }
 
-    // Filter by category
+    // Filter by category with flexible semantic matching
     if (params.category && params.category !== 'all') {
       const cat = params.category.toLowerCase().trim();
-      list = list.filter(m => (m.category || '').toLowerCase() === cat);
+      list = list.filter(m => {
+        const mCat = (m.category || '').toLowerCase();
+        const mType = (m.type || '').toLowerCase();
+        const mTags = (m.tags || []).map(t => t.toLowerCase());
+
+        if (cat === 'frames' || cat === 'frame') {
+          return mType === 'frame' || mCat.includes('frame') || mTags.includes('frame') || mCat.includes('arch');
+        }
+        if (cat === 'borders' || cat === 'border') {
+          return mCat.includes('border') || mTags.includes('border') || mCat.includes('frame') || mType === 'frame';
+        }
+        if (cat === 'gif' || cat === 'gifs') {
+          return mType === 'gif' || mCat.includes('gif') || m.format === 'gif';
+        }
+        if (cat === 'video' || cat === 'videos') {
+          return mType === 'video' || mCat.includes('video') || m.format === 'mp4' || m.format === 'webm';
+        }
+        if (cat === 'stickers' || cat === 'sticker' || cat === 'badges' || cat === 'badge' || cat === 'seals') {
+          return mType === 'sticker' || mType === 'decoration' || mCat.includes('sticker') || mCat.includes('seal') || mCat.includes('badge') || mTags.includes('sticker');
+        }
+        if (cat === 'photos' || cat === 'stock' || cat === 'images') {
+          return mType === 'image' && !mCat.includes('frame') && !mCat.includes('sticker');
+        }
+        if (cat === 'floral' || cat === 'botanical') {
+          return mCat.includes('floral') || mCat.includes('botanical') || mTags.includes('floral') || mTags.includes('botanical');
+        }
+        if (cat === 'music' || cat === 'audio') {
+          return mType === 'audio' || mCat.includes('audio') || mCat.includes('music');
+        }
+        if (cat === 'monograms' || cat === 'monogram') {
+          return mCat.includes('monogram') || mTags.includes('monogram');
+        }
+        return mCat === cat || mCat.includes(cat) || mTags.some(t => t.includes(cat));
+      });
     }
 
     // Search query by title, name, or tags

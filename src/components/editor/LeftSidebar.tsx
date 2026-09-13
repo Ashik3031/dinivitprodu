@@ -118,7 +118,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   // Filter media
-  const [mediaCategory, setMediaCategory] = useState<'all' | 'wedding' | 'pattern' | 'texture' | 'audio'>('all');
+  const [mediaCategory, setMediaCategory] = useState<string>('all');
 
   const handleGenerateAI = async () => {
     setIsGeneratingAI(true);
@@ -433,6 +433,76 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 >
                   <Shapes className="w-4 h-4 text-amber-500" />
                   <span>Vector Shape</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Frames, Stickers & Stock Assets Shortcuts */}
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Frames & Library Assets</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaCategory('all');
+                    setActiveTab('media');
+                  }}
+                  className="text-[10px] text-slate-600 hover:text-slate-900 font-semibold cursor-pointer underline"
+                >
+                  View All
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaCategory('frames');
+                    setActiveTab('media');
+                  }}
+                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
+                >
+                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Frames & Borders</div>
+                  <div className="text-[9px] text-slate-500">Arch, floral, gold borders</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaCategory('gif');
+                    setActiveTab('media');
+                  }}
+                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
+                >
+                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Animated GIFs</div>
+                  <div className="text-[9px] text-slate-500">Rings, sparkles, confetti</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaCategory('stickers');
+                    setActiveTab('media');
+                  }}
+                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
+                >
+                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Stickers & Seals</div>
+                  <div className="text-[9px] text-slate-500">Wax seals, monograms, flora</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMediaCategory('video');
+                    setActiveTab('media');
+                  }}
+                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
+                >
+                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Stock Videos</div>
+                  <div className="text-[9px] text-slate-500">Ambient loops & motion</div>
                 </button>
               </div>
             </div>
@@ -892,6 +962,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         {activeTab === 'media' && (
           <div className="h-full flex flex-col">
             <MediaLibraryView
+              key={mediaCategory}
               currentInvitationId={currentInvitationId}
               businessId={businessId}
               onAddElement={handleAdd}
@@ -899,6 +970,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               onUpdateElement={onUpdateElement}
               onSetAsBackground={onSetAsBackground}
               onSetAsMusic={onSetAsMusic}
+              initialCategory={mediaCategory}
             />
           </div>
         )}

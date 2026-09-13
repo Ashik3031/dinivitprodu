@@ -621,11 +621,15 @@ export interface InvitationTemplate {
   isPremium?: boolean;
   isPublic?: boolean;
   tags?: string[];
+  createdBy?: string;
+  authorRole?: 'admin' | 'superadmin' | 'business';
+  authorName?: string;
+  isSuperAdmin?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export type MediaAssetType = 'image' | 'video' | 'audio' | 'pattern' | 'texture' | 'frame' | 'sticker' | 'decoration';
+export type MediaAssetType = 'image' | 'video' | 'audio' | 'pattern' | 'texture' | 'frame' | 'sticker' | 'decoration' | 'gif';
 
 export interface MediaAsset {
   id: string;
@@ -637,7 +641,7 @@ export interface MediaAsset {
   url: string;
   thumbnailUrl?: string;
   type: MediaAssetType;
-  format?: 'jpg' | 'png' | 'webp' | 'mp4' | 'mp3' | 'wav' | 'svg' | string;
+  format?: 'jpg' | 'png' | 'webp' | 'mp4' | 'mp3' | 'wav' | 'svg' | 'gif' | 'webm' | string;
   size?: number; // In bytes
   dimensions?: {
     width: number;
@@ -647,6 +651,8 @@ export interface MediaAsset {
   category?: string;
   tags?: string[];
   isPublic?: boolean;
+  isSuperAdmin?: boolean;
+  authorRole?: string;
   createdAt: string;
   updatedAt?: string;
 }

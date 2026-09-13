@@ -95,7 +95,9 @@ router.post('/', (req: Request, res: Response) => {
       duration: duration ? Number(duration) : undefined,
       category: category || 'uploads',
       tags: tags || [],
-      isPublic: Boolean(isPublic)
+      isPublic: Boolean(isPublic),
+      isSuperAdmin: Boolean(req.body.isSuperAdmin || businessId === 'admin' || isPublic),
+      authorRole: (businessId === 'admin' || req.body.isSuperAdmin) ? 'superadmin' : undefined
     });
 
     res.status(201).json({

@@ -353,11 +353,12 @@ export const api = {
   },
 
   // Templates Management
-  getTemplates: async (params?: { category?: string; search?: string; all?: boolean }): Promise<{ templates: InvitationTemplate[] }> => {
+  getTemplates: async (params?: { category?: string; search?: string; all?: boolean; superAdminOnly?: boolean }): Promise<{ templates: InvitationTemplate[] }> => {
     const searchParams = new URLSearchParams();
     if (params?.category && params.category !== 'all') searchParams.append('category', params.category);
     if (params?.search) searchParams.append('search', params.search);
     if (params?.all) searchParams.append('all', 'true');
+    if (params?.superAdminOnly) searchParams.append('superAdminOnly', 'true');
 
     const res = await fetch(`/api/templates?${searchParams.toString()}`);
     const data = await res.json();

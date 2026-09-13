@@ -23,12 +23,17 @@ import {
   Layers,
   Crop,
   CheckCircle2,
-  FileCheck
+  FileCheck,
+  Film,
+  Video,
+  Play
 } from 'lucide-react';
 
 const ASSET_TYPE_FILTERS = [
   { id: 'all', label: 'All Assets', icon: Layers },
   { id: 'frame', label: 'Frames & Borders', icon: Crop },
+  { id: 'gif', label: 'Animated GIFs', icon: Film },
+  { id: 'video', label: 'Stock Videos', icon: Video },
   { id: 'image', label: 'Photos & Art', icon: ImageIcon },
   { id: 'sticker', label: 'Stickers & Wax Seals', icon: Sparkles },
   { id: 'decoration', label: 'Dividers & Flourishes', icon: Tag },
@@ -39,6 +44,9 @@ const ASSET_TYPE_FILTERS = [
 const STOCK_CATEGORY_SUGGESTIONS = [
   'Frames & Arches',
   'Gold & Foil Borders',
+  'Animated GIFs & Sparkles',
+  'Stock Videos & Ambient Loops',
+  'Celebration & Confetti',
   'Floral & Botanical',
   'Wax Seals & Stamps',
   'Art Deco & Geometric',
@@ -142,8 +150,38 @@ export const AdminAssetManager: React.FC = () => {
       const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
       const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
 
-      // Auto detect dimensions if image
-      if (file.type.startsWith('image/')) {
+      if (file.type === 'image/gif' || ext === 'gif') {
+        const img = new Image();
+        img.onload = () => {
+          setUploadForm((prev) => ({
+            ...prev,
+            title: prev.title || cleanTitle,
+            url: dataUri,
+            format: 'gif',
+            width: img.width || 480,
+            height: img.height || 270,
+            type: 'gif',
+            category: prev.category === 'Frames & Arches' ? 'Animated GIFs & Sparkles' : prev.category
+          }));
+        };
+        img.src = dataUri;
+      } else if (file.type.startsWith('video/') || ext === 'mp4' || ext === 'webm') {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          setUploadForm((prev) => ({
+            ...prev,
+            title: prev.title || cleanTitle,
+            url: dataUri,
+            format: ext,
+            width: video.videoWidth || 1920,
+            height: video.videoHeight || 1080,
+            type: 'video',
+            category: prev.category === 'Frames & Arches' ? 'Stock Videos & Ambient Loops' : prev.category
+          }));
+        };
+        video.src = dataUri;
+      } else if (file.type.startsWith('image/')) {
         const img = new Image();
         img.onload = () => {
           setUploadForm((prev) => ({
@@ -192,6 +230,7 @@ export const AdminAssetManager: React.FC = () => {
         .filter(Boolean);
 
       const res = await api.uploadMedia({
+        businessId: 'admin',
         title: uploadForm.title.trim(),
         name: uploadForm.title.trim().toLowerCase().replace(/\s+/g, '-'),
         url: finalUrl,
@@ -204,7 +243,8 @@ export const AdminAssetManager: React.FC = () => {
         },
         category: uploadForm.category.trim(),
         tags: tagsArray,
-        isPublic: uploadForm.isPublic
+        isPublic: true,
+        isSuperAdmin: true
       });
 
       setAssets((prev) => [res.media, ...prev]);
@@ -425,6 +465,8 @@ export const AdminAssetManager: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filteredAssets.map((asset) => {
             const isAudio = asset.type === 'audio';
+            const isVideo = asset.type === 'video';
+            const isGif = asset.type === 'gif';
             const isFrame = asset.type === 'frame';
             const isSticker = asset.type === 'sticker' || asset.type === 'decoration';
 
@@ -450,6 +492,25 @@ export const AdminAssetManager: React.FC = () => {
                         {asset.title}
                       </span>
                     </div>
+                  ) : isVideo ? (
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded">
+                      <img
+                        src={asset.thumbnailUrl || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=300&q=80'}
+                        alt={asset.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-amber-500/90 text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                          <Play className="w-5 h-5 fill-current ml-0.5" />
+                        </div>
+                      </div>
+                      {asset.duration && (
+                        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white">
+                          {Math.floor(asset.duration)}s
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <img
                       src={asset.url}
@@ -463,8 +524,14 @@ export const AdminAssetManager: React.FC = () => {
 
                   {/* Type Badge */}
                   <div className="absolute top-2 left-2">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-slate-950/80 text-amber-300 border border-amber-500/30 backdrop-blur-sm">
-                      {asset.type}
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm ${
+                      isGif
+                        ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
+                        : isVideo
+                        ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
+                        : 'bg-slate-950/80 text-amber-300 border border-amber-500/30'
+                    }`}>
+                      {isGif ? 'GIF' : isVideo ? 'VIDEO' : asset.type}
                     </span>
                   </div>
 
@@ -579,7 +646,7 @@ export const AdminAssetManager: React.FC = () => {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/svg+xml,image/png,image/jpeg,image/webp,audio/mpeg,audio/mp3,audio/wav"
+                    accept="image/svg+xml,image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,audio/mpeg,audio/mp3,audio/wav"
                     onChange={handleFileChange}
                     className="hidden"
                   />
@@ -589,9 +656,17 @@ export const AdminAssetManager: React.FC = () => {
                   >
                     {filePreview ? (
                       <div className="flex flex-col items-center">
-                        <div className="w-24 h-24 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 flex items-center justify-center p-2 mb-2">
+                        <div className="w-28 h-28 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 flex items-center justify-center p-2 mb-2">
                           {uploadForm.type === 'audio' ? (
                             <Music className="w-10 h-10 text-emerald-400" />
+                          ) : uploadForm.type === 'video' ? (
+                            <video
+                              src={filePreview}
+                              controls
+                              muted
+                              playsInline
+                              className="max-w-full max-h-full object-contain rounded-lg"
+                            />
                           ) : (
                             <img
                               src={filePreview}
@@ -608,10 +683,10 @@ export const AdminAssetManager: React.FC = () => {
                           <Upload className="w-6 h-6" />
                         </div>
                         <span className="text-sm font-semibold text-slate-200">
-                          Click to browse SVG, PNG, WebP or MP3
+                          Click to browse GIF, MP4 Video, SVG, PNG, or MP3
                         </span>
                         <span className="text-xs text-slate-500 mt-1">
-                          Vector SVG or transparent PNG recommended for frames (Max 15MB)
+                          GIFs, stock videos (MP4), vector SVGs, and transparent PNGs supported (Max 15MB)
                         </span>
                       </div>
                     )}
@@ -626,8 +701,21 @@ export const AdminAssetManager: React.FC = () => {
                     type="url"
                     required
                     value={uploadForm.url}
-                    onChange={(e) => setUploadForm({ ...uploadForm, url: e.target.value })}
-                    placeholder="https://example.com/assets/royal-frame.svg"
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const lower = val.toLowerCase();
+                      let detectedType = uploadForm.type;
+                      let detectedCat = uploadForm.category;
+                      if (lower.endsWith('.gif') || lower.includes('.gif?')) {
+                        detectedType = 'gif';
+                        detectedCat = 'Animated GIFs & Sparkles';
+                      } else if (lower.endsWith('.mp4') || lower.endsWith('.webm')) {
+                        detectedType = 'video';
+                        detectedCat = 'Stock Videos & Ambient Loops';
+                      }
+                      setUploadForm({ ...uploadForm, url: val, type: detectedType, category: detectedCat });
+                    }}
+                    placeholder="https://example.com/assets/sparkle.gif or .mp4"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -644,7 +732,7 @@ export const AdminAssetManager: React.FC = () => {
                     required
                     value={uploadForm.title}
                     onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
-                    placeholder="e.g., Baroque Gold Arch Frame"
+                    placeholder="e.g., Golden Sparkle Rain GIF"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -659,6 +747,8 @@ export const AdminAssetManager: React.FC = () => {
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="frame">Frame & Border (Cutout)</option>
+                    <option value="gif">Animated GIF</option>
+                    <option value="video">Stock Video (Cinematic MP4)</option>
                     <option value="image">Stock Photo / Graphic</option>
                     <option value="sticker">Sticker & Wax Seal</option>
                     <option value="decoration">Divider & Flourish</option>
@@ -797,12 +887,32 @@ export const AdminAssetManager: React.FC = () => {
                     Your browser does not support audio playback.
                   </audio>
                 </div>
+              ) : previewAsset.type === 'video' ? (
+                <div className="w-full flex flex-col items-center justify-center">
+                  <video
+                    controls
+                    autoPlay
+                    loop
+                    playsInline
+                    className="max-w-full max-h-[460px] rounded-xl shadow-2xl border border-slate-800"
+                    src={previewAsset.url}
+                  >
+                    Your browser does not support video playback.
+                  </video>
+                </div>
               ) : (
-                <img
-                  src={previewAsset.url}
-                  alt={previewAsset.title}
-                  className="max-w-full max-h-[460px] object-contain rounded-lg shadow-2xl"
-                />
+                <div className="relative">
+                  <img
+                    src={previewAsset.url}
+                    alt={previewAsset.title}
+                    className="max-w-full max-h-[460px] object-contain rounded-lg shadow-2xl"
+                  />
+                  {previewAsset.type === 'gif' && (
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-purple-950/90 text-purple-300 border border-purple-500/40">
+                      ANIMATED GIF
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 

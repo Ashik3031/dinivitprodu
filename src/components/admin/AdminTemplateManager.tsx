@@ -93,6 +93,7 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [tierFilter, setTierFilter] = useState<'all' | 'free' | 'premium'>('all');
+  const [authorFilter, setAuthorFilter] = useState<'all' | 'superadmin'>('all');
 
   // Modals
   const [previewTemplate, setPreviewTemplate] = useState<InvitationTemplate | null>(null);
@@ -174,6 +175,11 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
       // Tier filter
       if (tierFilter === 'premium' && !tmpl.isPremium) return false;
       if (tierFilter === 'free' && tmpl.isPremium) return false;
+
+      // Author filter (Super Admin)
+      if (authorFilter === 'superadmin' && !tmpl.isSuperAdmin && tmpl.authorRole !== 'superadmin') {
+        return false;
+      }
 
       // Search query
       if (searchQuery.trim()) {
@@ -598,6 +604,16 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
               <option value="premium">Premium Only</option>
             </select>
 
+            {/* Author filter (Super Admin) */}
+            <select
+              value={authorFilter}
+              onChange={(e: any) => setAuthorFilter(e.target.value)}
+              className="bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500/60"
+            >
+              <option value="all">All Authors</option>
+              <option value="superadmin">👑 Super Admin Only</option>
+            </select>
+
             <button
               type="button"
               onClick={fetchTemplates}
@@ -714,7 +730,7 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
 
                     {/* Tags */}
                     {tmpl.tags && tmpl.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-3">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-3">
                         {tmpl.tags.slice(0, 3).map((tag, idx) => (
                           <span
                             key={idx}

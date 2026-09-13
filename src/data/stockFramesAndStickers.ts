@@ -2,12 +2,14 @@ export interface StockFrameOrSticker {
   id: string;
   name: string;
   title: string;
-  type: 'frame' | 'sticker' | 'decoration' | 'image';
-  category: 'frames' | 'stickers' | 'luxury' | 'floral' | 'vintage' | 'minimal';
+  type: 'frame' | 'sticker' | 'decoration' | 'image' | 'gif' | 'video';
+  category: 'frames' | 'stickers' | 'luxury' | 'floral' | 'vintage' | 'minimal' | 'gifs' | 'videos' | string;
   url: string;
   thumbnailUrl?: string;
   tags: string[];
   dimensions?: { width: number; height: number };
+  duration?: number;
+  isSuperAdmin?: boolean;
 }
 
 // Crisp inline SVGs encoded as reliable data URIs that work in <img>, background, and canvas overlay
@@ -348,5 +350,96 @@ export const DEFAULT_PUBLIC_ASSETS: StockFrameOrSticker[] = [
     thumbnailUrl: SVG_STICKER_RIBBON,
     tags: ['sticker', 'ribbon', 'bow', 'gold', 'luxury', 'gift'],
     dimensions: { width: 180, height: 150 }
+  },
+
+  // Curated Super Admin Animated GIFs
+  {
+    id: 'pub-gif-confetti',
+    name: 'Golden Confetti Sparkles Rain',
+    title: 'Golden Confetti Sparkles Rain',
+    type: 'gif',
+    category: 'gifs',
+    url: 'https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif',
+    thumbnailUrl: 'https://media.giphy.com/media/26AHONQ79FdWZhAI0/200w.gif',
+    tags: ['gif', 'confetti', 'gold', 'celebration', 'sparkle', 'animated'],
+    dimensions: { width: 480, height: 270 },
+    isSuperAdmin: true
+  },
+  {
+    id: 'pub-gif-floating-hearts',
+    name: 'Floating Romantic Hearts',
+    title: 'Floating Romantic Hearts',
+    type: 'gif',
+    category: 'gifs',
+    url: 'https://media.giphy.com/media/l4pTdcifPZLpDjL1e/giphy.gif',
+    thumbnailUrl: 'https://media.giphy.com/media/l4pTdcifPZLpDjL1e/200w.gif',
+    tags: ['gif', 'hearts', 'romantic', 'wedding', 'love', 'animated'],
+    dimensions: { width: 480, height: 270 },
+    isSuperAdmin: true
+  },
+  {
+    id: 'pub-gif-champagne-toast',
+    name: 'Champagne Flutes Toast Sparkle',
+    title: 'Champagne Flutes Toast Sparkle',
+    type: 'gif',
+    category: 'gifs',
+    url: 'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif',
+    thumbnailUrl: 'https://media.giphy.com/media/g9582DNuQppxC/200w.gif',
+    tags: ['gif', 'champagne', 'cheers', 'toast', 'party', 'animated'],
+    dimensions: { width: 480, height: 270 },
+    isSuperAdmin: true
+  },
+  {
+    id: 'pub-gif-rose-petals',
+    name: 'Falling Rose Petals Cascade',
+    title: 'Falling Rose Petals Cascade',
+    type: 'gif',
+    category: 'gifs',
+    url: 'https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif',
+    thumbnailUrl: 'https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/200w.gif',
+    tags: ['gif', 'rose', 'petals', 'falling', 'floral', 'animated'],
+    dimensions: { width: 480, height: 270 },
+    isSuperAdmin: true
+  },
+
+  // Curated Super Admin Stock Cinematic Videos
+  {
+    id: 'pub-vid-bokeh',
+    name: 'Golden Particle Bokeh Lights Loop',
+    title: 'Golden Particle Bokeh Lights Loop',
+    type: 'video',
+    category: 'videos',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
+    tags: ['video', 'bokeh', 'gold', 'particles', 'ambient', 'loop'],
+    dimensions: { width: 1920, height: 1080 },
+    duration: 15,
+    isSuperAdmin: true
+  },
+  {
+    id: 'pub-vid-rings',
+    name: 'Wedding Rings in Velvet Box Cinematic',
+    title: 'Wedding Rings in Velvet Box Cinematic',
+    type: 'video',
+    category: 'videos',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-wedding-rings-in-a-box-41589-large.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=600&q=80',
+    tags: ['video', 'wedding', 'rings', 'cinematic', 'jewelry'],
+    dimensions: { width: 1920, height: 1080 },
+    duration: 18,
+    isSuperAdmin: true
+  },
+  {
+    id: 'pub-vid-curtain',
+    name: 'Soft Floating White Silk Breeze',
+    title: 'Soft Floating White Silk Breeze',
+    type: 'video',
+    category: 'videos',
+    url: 'https://assets.mixkit.co/videos/preview/mixkit-white-curtain-in-the-wind-41593-large.mp4',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=600&q=80',
+    tags: ['video', 'silk', 'curtain', 'wind', 'minimal', 'pure'],
+    dimensions: { width: 1920, height: 1080 },
+    duration: 14,
+    isSuperAdmin: true
   }
 ];

@@ -3,15 +3,17 @@ import { dbService } from '../db';
 
 const router = express.Router();
 
-// Get templates (with category, search, and all/published filters)
+// Get templates (with category, search, superAdmin, and all/published filters)
 router.get('/', (req, res) => {
   try {
-    const { category, search, all } = req.query;
+    const { category, search, all, superAdmin, superAdminOnly } = req.query;
     const isAll = all === 'true' || all === '1';
+    const isSuperAdminOnly = superAdmin === 'true' || superAdminOnly === 'true';
     const templates = dbService.getTemplates({
       category: category as string,
       search: search as string,
-      all: isAll
+      all: isAll,
+      superAdminOnly: isSuperAdminOnly
     });
     return res.json({ templates });
   } catch (error: any) {
