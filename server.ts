@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
+import { initMongo } from './server/db';
 import authRoutes from './server/routes/auth';
 import adminRoutes from './server/routes/admin';
 import invitationRoutes from './server/routes/invitations';
@@ -13,6 +14,9 @@ import mediaRoutes from './server/routes/media';
 dotenv.config();
 
 async function startServer() {
+  // Initialize MongoDB connection if configured
+  await initMongo();
+
   const app = express();
   const PORT = 3000;
 

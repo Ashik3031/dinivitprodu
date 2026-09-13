@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
+import { MongoClient, Db } from 'mongodb';
 import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset } from '../src/types';
 import { INITIAL_TEMPLATES, createInvitationFromTemplate, createBlankInvitation } from '../src/data/initialTemplates';
 import { DEFAULT_PUBLIC_ASSETS } from '../src/data/stockFramesAndStickers';
@@ -456,11 +457,91 @@ export function loadDatabase(): DatabaseSchema {
   return db;
 }
 
+let mongoClient: MongoClient | null = null;
+let mongoDb: Db | null = null;
+let isMongoConnected = false;
+
+async function persistToMongo(): Promise<void> {
+  if (!mongoDb || !isMongoConnected) return;
+  try {
+    const collections: (keyof DatabaseSchema)[] = ['users', 'invitations', 'templates', 'rsvps', 'guestbook', 'media'];
+    for (const name of collections) {
+      const col = mongoDb.collection(name);
+      const items = db[name];
+      if (items) {
+        await col.deleteMany({});
+        if (items.length > 0) {
+          await col.insertMany(items.map(it => ({ ...it })));
+        }
+      }
+    }
+  } catch (err: any) {
+    console.error('[MongoDB] Sync error to Atlas:', err.message);
+  }
+}
+
+export async function initMongo(): Promise<boolean> {
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB || 'onlineinvite';
+
+  if (!uri) {
+    console.log('[MongoDB] No MONGODB_URI provided in .env. Using local storage (.data/db.json).');
+    return false;
+  }
+
+  try {
+    console.log(`[MongoDB] Connecting to MongoDB Atlas (${dbName})...`);
+    mongoClient = new MongoClient(uri, { serverSelectionTimeoutMS: 5000 });
+    await mongoClient.connect();
+    mongoDb = mongoClient.db(dbName);
+    isMongoConnected = true;
+    console.log(`[MongoDB] Successfully connected to MongoDB Atlas database "${dbName}"!`);
+
+    // Check existing collections
+    const collections = await mongoDb.listCollections().toArray();
+    const names = collections.map(c => c.name);
+
+    if (names.includes('users') && names.includes('invitations')) {
+      const users = await mongoDb.collection('users').find({}).toArray();
+      const invitations = await mongoDb.collection('invitations').find({}).toArray();
+      const templates = await mongoDb.collection('templates').find({}).toArray();
+      const rsvps = await mongoDb.collection('rsvps').find({}).toArray();
+      const guestbook = await mongoDb.collection('guestbook').find({}).toArray();
+      const media = await mongoDb.collection('media').find({}).toArray();
+
+      if (users.length > 0) db.users = users.map(({ _id, ...u }) => u as any);
+      if (invitations.length > 0) db.invitations = invitations.map(({ _id, ...i }) => i as any);
+      if (templates.length > 0) db.templates = templates.map(({ _id, ...t }) => t as any);
+      if (rsvps.length > 0) db.rsvps = rsvps.map(({ _id, ...r }) => r as any);
+      if (guestbook.length > 0) db.guestbook = guestbook.map(({ _id, ...g }) => g as any);
+      if (media.length > 0) db.media = media.map(({ _id, ...m }) => m as any);
+
+      saveDatabase();
+      console.log(`[MongoDB] Loaded data from Atlas: ${db.users.length} users, ${db.invitations.length} invitations.`);
+    } else {
+      console.log('[MongoDB] Initializing Atlas database with initial seed data...');
+      await persistToMongo();
+      console.log('[MongoDB] Seed data written to MongoDB Atlas successfully.');
+    }
+    return true;
+  } catch (err: any) {
+    console.warn(`[MongoDB] Could not establish connection to MongoDB Atlas: ${err.message}`);
+    console.warn('[MongoDB] Continuing with local storage database (.data/db.json).');
+    return false;
+  }
+}
+
 export function saveDatabase(): void {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf-8');
   } catch (err) {
     console.error('Error saving DB file:', err);
+  }
+
+  if (isMongoConnected) {
+    persistToMongo().catch(err => {
+      console.error('[MongoDB] Persistence error:', err.message);
+    });
   }
 }
 
