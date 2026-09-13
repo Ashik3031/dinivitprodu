@@ -3988,6 +3988,64 @@
                 "duration": 1,
                 "delay": 1
               }
+            },
+            {
+              "id": "el-1789324828767-keh2",
+              "type": "calendar",
+              "name": "calendar",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 13,
+                "y": 658,
+                "width": 336,
+                "height": 279,
+                "backgroundColor": "#0f172a",
+                "borderRadius": 16,
+                "fontSize": 10
+              },
+              "content": {
+                "eventDate": "2026-10-24",
+                "calendarMonth": "October",
+                "calendarYear": 2026,
+                "calendarDay": 24,
+                "calendarShowAddToCal": true,
+                "calendarEventTitle": "Alexander & Sophia Wedding"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789324863025-t9c6",
+              "type": "calendar",
+              "name": "calendar",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 21,
+                "y": 374,
+                "width": 330,
+                "height": 260,
+                "backgroundColor": "#0f172a",
+                "borderRadius": 16,
+                "fontFamily": "'Playfair Display', serif"
+              },
+              "content": {
+                "eventDate": "2026-10-24",
+                "calendarMonth": "October",
+                "calendarYear": 2026,
+                "calendarDay": 24,
+                "calendarShowAddToCal": true,
+                "calendarEventTitle": "Alexander & Sophia Wedding"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
             }
           ]
         }
@@ -3998,7 +4056,7 @@
       "authorName": "Super Admin",
       "createdBy": "usr-admin-1",
       "tags": [],
-      "updatedAt": "2026-09-13T18:37:49.234Z"
+      "updatedAt": "2026-09-13T18:45:45.734Z"
     },
     {
       "id": "template-modern-birthday",
