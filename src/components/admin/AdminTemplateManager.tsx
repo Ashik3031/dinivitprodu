@@ -370,69 +370,12 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
           pages: [
             {
               id: `p-${Date.now()}-1`,
-              name: 'Cover & Invitation Header',
+              name: 'Section 1',
               order: 0,
               height: 844,
               isFullHeight: true,
-              background: { type: 'color', color: preset.bg },
-              elements: [
-                {
-                  id: `el-box-${Date.now()}`,
-                  type: 'container',
-                  name: 'Ornamental Card Frame',
-                  style: {
-                    x: 20,
-                    y: 40,
-                    width: 350,
-                    height: 740,
-                    shape: 'rounded-rectangle',
-                    borderRadius: 16,
-                    backgroundColor: preset.secondary,
-                    borderWidth: 1,
-                    borderColor: `${preset.primary}44`,
-                    boxShadow: '0 12px 36px rgba(0,0,0,0.5)',
-                    padding: 24
-                  },
-                  content: {},
-                  animation: { type: 'zoomIn', duration: 0.8, delay: 0.2 }
-                },
-                {
-                  id: `el-title-${Date.now()}`,
-                  type: 'heading',
-                  name: 'Template Title',
-                  parentContainerId: `el-box-${Date.now()}`,
-                  style: {
-                    x: 35,
-                    y: 160,
-                    width: 320,
-                    height: 60,
-                    fontFamily: preset.fontHeading,
-                    fontSize: 28,
-                    fontWeight: 700,
-                    color: preset.primary,
-                    textAlign: 'center'
-                  },
-                  content: { text: createForm.title }
-                },
-                {
-                  id: `el-desc-${Date.now()}`,
-                  type: 'text',
-                  name: 'Invitation Lead',
-                  parentContainerId: `el-box-${Date.now()}`,
-                  style: {
-                    x: 40,
-                    y: 240,
-                    width: 310,
-                    height: 48,
-                    fontFamily: preset.fontBody,
-                    fontSize: 14,
-                    fontWeight: 400,
-                    color: '#ffffffdd',
-                    textAlign: 'center'
-                  },
-                  content: { text: 'Request the honor of your presence at the celebration' }
-                }
-              ]
+              background: { type: 'color', color: '#f8fafc' },
+              elements: []
             }
           ]
         });

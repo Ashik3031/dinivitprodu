@@ -722,13 +722,6 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
         return (
           <ShapeMask shape={style.shape || 'rectangle'} style={style} isEditor={isEditor}>
             <div className="relative w-full h-full">
-              {isEditor && childElements.length === 0 && !style.background?.imageUrl && !style.background?.videoUrl && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4 text-center">
-                  <div className="text-[11px] text-slate-400 font-medium px-2 py-1 rounded bg-black/10 backdrop-blur-xs">
-                    {element.name || 'Container Block'}
-                  </div>
-                </div>
-              )}
 
               {childElements.map(child => {
                 const isChildSelected = selectedElementId === child.id;

@@ -4359,6 +4359,205 @@
       ],
       "createdAt": "2026-09-13T17:51:51.083Z",
       "updatedAt": "2026-09-13T17:51:51.083Z"
+    },
+    {
+      "id": "tmpl-1789322153988-rsyq",
+      "title": "tttt",
+      "category": "wedding",
+      "description": "Luxury digital invitation template crafted for celebration.",
+      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80",
+      "isPremium": false,
+      "isPublic": true,
+      "isSuperAdmin": true,
+      "authorRole": "superadmin",
+      "authorName": "Super Admin",
+      "createdBy": "usr-admin-1",
+      "tags": [
+        "wedding",
+        "luxury",
+        "formal"
+      ],
+      "theme": {
+        "primaryColor": "#d4af37",
+        "secondaryColor": "#1a3628",
+        "accentColor": "#d4af37",
+        "backgroundColor": "#f8fafc",
+        "fontHeading": "'Cinzel', serif",
+        "fontBody": "'Montserrat', sans-serif",
+        "fontScript": "'Parisienne', cursive"
+      },
+      "openingScreen": {
+        "enabled": true,
+        "style": "envelope",
+        "title": "Formal Invitation",
+        "subtitle": "You are cordially invited",
+        "coupleNames": "tttt",
+        "openButtonText": "Open Invitation",
+        "sealColor": "#d4af37",
+        "envelopeColor": "#1a3628",
+        "musicAutoplayOnOpen": true
+      },
+      "music": {
+        "enabled": true,
+        "audioUrl": "https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3",
+        "title": "Romantic Prelude Strings",
+        "artist": "Studio Symphony",
+        "autoPlay": true,
+        "loop": true,
+        "floatingBadge": true
+      },
+      "pages": [
+        {
+          "id": "p-1789322153983-1",
+          "name": "Section 1",
+          "order": 0,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "color",
+            "color": "#f8fafc"
+          },
+          "elements": [
+            {
+              "id": "el-1789322473900-q8b5",
+              "type": "container",
+              "name": "Rectangle",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 35,
+                "y": 150,
+                "width": 320,
+                "height": 300,
+                "shape": "rectangle",
+                "borderRadius": 0,
+                "backgroundColor": "#f8fafc",
+                "borderWidth": 1.5,
+                "borderColor": "#cbd5e1",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.05)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789322475463-kapv",
+              "type": "container",
+              "name": "Rounded Rect",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 35,
+                "y": 150,
+                "width": 320,
+                "height": 300,
+                "shape": "rounded-rectangle",
+                "borderRadius": 24,
+                "backgroundColor": "#f8fafc",
+                "borderWidth": 1.5,
+                "borderColor": "#cbd5e1",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.05)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789322476497-3ba9",
+              "type": "container",
+              "name": "Square",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 35,
+                "y": 150,
+                "width": 280,
+                "height": 280,
+                "shape": "square",
+                "borderRadius": 0,
+                "backgroundColor": "#f8fafc",
+                "borderWidth": 1.5,
+                "borderColor": "#cbd5e1",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.05)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789322477180-vpr9",
+              "type": "container",
+              "name": "Circle",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 59,
+                "y": 291,
+                "width": 280,
+                "height": 280,
+                "shape": "circle",
+                "borderRadius": 0,
+                "backgroundColor": "#f8fafc",
+                "borderWidth": 1.5,
+                "borderColor": "#cbd5e1",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.05)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1789322477984-e84r",
+              "type": "container",
+              "name": "Oval",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": -10,
+                "y": 480,
+                "width": 320,
+                "height": 300,
+                "shape": "oval",
+                "borderRadius": 0,
+                "backgroundColor": "#f8fafc",
+                "borderWidth": 1.5,
+                "borderColor": "#cbd5e1",
+                "boxShadow": "0 4px 12px rgba(0,0,0,0.05)",
+                "overflow": "hidden",
+                "clipMask": true
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        }
+      ],
+      "createdAt": "2026-09-13T17:55:53.988Z",
+      "updatedAt": "2026-09-13T18:01:23.110Z"
     }
   ],
   "rsvps": [],
