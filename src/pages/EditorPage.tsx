@@ -1387,6 +1387,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
               title
             }
           })}
+          currentMusicUrl={invitation.music?.audioUrl}
           openingScreen={invitation.openingScreen}
           onSelectOpeningScreen={() => {
             setSelectedPageIndex(-1);

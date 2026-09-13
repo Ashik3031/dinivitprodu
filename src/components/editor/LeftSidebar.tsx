@@ -70,6 +70,7 @@ interface LeftSidebarProps {
   openingScreen?: any;
   onSelectOpeningScreen?: () => void;
   onToggleOpeningScreen?: (enabled: boolean) => void;
+  currentMusicUrl?: string;
 }
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
@@ -96,7 +97,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   onSetAsMusic,
   openingScreen,
   onSelectOpeningScreen,
-  onToggleOpeningScreen
+  onToggleOpeningScreen,
+  currentMusicUrl
 }) => {
   const [activeTab, setActiveTab] = useState<'pages' | 'elements' | 'blocks' | 'templates' | 'media' | 'ai'>('pages');
   const [targetContainerOnly, setTargetContainerOnly] = useState(false);
@@ -968,6 +970,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               onSetAsBackground={onSetAsBackground}
               onSetAsMusic={onSetAsMusic}
               initialCategory={mediaCategory}
+              currentMusicUrl={currentMusicUrl}
             />
           </div>
         )}

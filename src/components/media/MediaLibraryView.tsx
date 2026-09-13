@@ -48,6 +48,7 @@ interface MediaLibraryViewProps {
   onSelectMedia?: (asset: MediaAsset) => void;
   initialScope?: 'public' | 'uploads' | 'all';
   initialCategory?: string;
+  currentMusicUrl?: string;
 }
 
 export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
@@ -60,8 +61,9 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
   onSetAsMusic,
   isModalView = false,
   onSelectMedia,
-  initialScope = 'public',
-  initialCategory = 'all'
+  initialScope = 'all',
+  initialCategory = 'all',
+  currentMusicUrl
 }) => {
   // State
   const [mediaList, setMediaList] = useState<MediaAsset[]>([]);
@@ -548,19 +550,28 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
               const isFramish = asset.type === 'frame' || (asset.category || '').toLowerCase().includes('frame');
               const isSticker = asset.type === 'sticker' || (asset.category || '').toLowerCase().includes('sticker') || (asset.category || '').toLowerCase().includes('seal');
               const isAdded = addedAssetId === asset.id;
+              const isActiveMusic = asset.type === 'audio' && asset.url === currentMusicUrl;
 
               return (
                 <div
                   key={asset.id}
                   onClick={(e) => handleInsertAsElement(asset, e)}
-                  title="Click to insert onto canvas"
-                  className="group relative rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-900 transition-all shadow-xs flex flex-col cursor-pointer text-left"
+                  title={isActiveMusic ? "Currently selected music" : "Click to use"}
+                  className={`group relative rounded-xl border ${isActiveMusic ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50' : 'border-slate-200 bg-white hover:border-slate-900'} overflow-hidden transition-all shadow-xs flex flex-col cursor-pointer text-left`}
                 >
+                  {/* Visual Active Music Overlay */}
+                  {isActiveMusic && !isAdded && (
+                    <div className="absolute top-1.5 right-1.5 px-2 py-1 rounded bg-emerald-600 text-white font-bold text-[9px] tracking-wider z-20 flex items-center gap-1 shadow-sm">
+                      <Music className="w-3 h-3" />
+                      <span>SELECTED</span>
+                    </div>
+                  )}
+
                   {/* Visual Added Confirmation Toast Overlay */}
                   {isAdded && (
                     <div className="absolute inset-0 bg-emerald-600/90 text-white font-bold flex items-center justify-center gap-1 z-30 animate-in fade-in duration-150">
                       <Check className="w-4 h-4" />
-                      <span className="text-xs">Added to Canvas!</span>
+                      <span className="text-xs">Added!</span>
                     </div>
                   )}
 

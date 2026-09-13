@@ -3791,8 +3791,8 @@
       },
       "music": {
         "enabled": true,
-        "audioUrl": "https://cdn.freesound.org/previews/612/612610_5674468-lq.mp3",
-        "title": "Acoustic Romance (Gentle Guitar)",
+        "audioUrl": "https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3",
+        "title": "Ethereal Bridal Strings",
         "artist": "Gentle Strings",
         "autoPlay": true,
         "loop": true,
@@ -3998,7 +3998,7 @@
       "authorName": "Super Admin",
       "createdBy": "usr-admin-1",
       "tags": [],
-      "updatedAt": "2026-09-13T18:34:11.377Z"
+      "updatedAt": "2026-09-13T18:37:49.234Z"
     },
     {
       "id": "template-modern-birthday",
