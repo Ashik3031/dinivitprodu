@@ -4,8 +4,7 @@ import {
   VideoPlayMode,
   ImageTransitionEffect,
   ImageAdvanceTrigger,
-  OpeningCoverType,
-  OuterDropEffectType
+  OpeningCoverType
 } from '../../../types';
 import { GOOGLE_FONTS_LIST } from '../../../data/stockAssets';
 import {
@@ -124,14 +123,14 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
     (config.style === 'card-flip' || config.background?.type === 'image' || page?.background?.type === 'image'
       ? 'image'
       : config.style === 'video-cover' || config.background?.type === 'video' || page?.background?.type === 'video'
-      ? 'video'
-      : config.style === 'custom-page'
-      ? 'custom-page'
-      : config.imageUrl && !config.videoUrl
-      ? 'image'
-      : config.videoUrl
-      ? 'video'
-      : 'envelope');
+        ? 'video'
+        : config.style === 'custom-page'
+          ? 'custom-page'
+          : config.imageUrl && !config.videoUrl
+            ? 'image'
+            : config.videoUrl
+              ? 'video'
+              : 'envelope');
 
   // Centralized updater that strictly guarantees activeCoverType is never lost
   const updateConfig = (updates: Partial<OpeningScreenConfig>) => {
@@ -215,11 +214,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 videoAutoAdvanceOnEnd: config.videoAutoAdvanceOnEnd !== false
               });
             }}
-            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${
-              activeCoverType === 'video'
-                ? 'bg-white text-amber-900 font-bold shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${activeCoverType === 'video'
+              ? 'bg-white text-amber-900 font-bold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             <Video className="w-4 h-4 text-amber-600" />
             <span className="text-[10px]">Video</span>
@@ -246,11 +244,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 imageAdvanceTrigger: config.imageAdvanceTrigger || 'click-button'
               });
             }}
-            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${
-              activeCoverType === 'image'
-                ? 'bg-white text-amber-900 font-bold shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${activeCoverType === 'image'
+              ? 'bg-white text-amber-900 font-bold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             <ImageIcon className="w-4 h-4 text-pink-600" />
             <span className="text-[10px]">Image</span>
@@ -272,11 +269,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 imageTransitionEffect: globalTransitionEffect
               });
             }}
-            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${
-              activeCoverType === 'envelope'
-                ? 'bg-white text-amber-900 font-bold shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${activeCoverType === 'envelope'
+              ? 'bg-white text-amber-900 font-bold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             <Mail className="w-4 h-4 text-emerald-600" />
             <span className="text-[10px]">Envelope</span>
@@ -292,11 +288,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 imageTransitionEffect: globalTransitionEffect
               });
             }}
-            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${
-              activeCoverType === 'custom-page'
-                ? 'bg-white text-purple-900 font-bold shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`py-2 px-1 flex flex-col items-center gap-1 rounded-lg text-center transition-all cursor-pointer ${activeCoverType === 'custom-page'
+              ? 'bg-white text-purple-900 font-bold shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             <Layers className="w-4 h-4 text-purple-600" />
             <span className="text-[10px]">Blank / Custom</span>
@@ -350,11 +345,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                   });
                   handleTriggerMiniPreview(t.id as any);
                 }}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                  globalTransitionEffect === t.id
-                    ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 shadow-xs font-medium'
-                    : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
-                }`}
+                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${globalTransitionEffect === t.id
+                  ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 shadow-xs font-medium'
+                  : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                  }`}
               >
                 <span className="font-bold text-[11px] block text-indigo-950">{t.name}</span>
                 <span className="text-[9px] text-slate-500 leading-tight block mt-0.5">
@@ -386,27 +380,25 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
 
               {/* Animating Cover Simulator */}
               <div
-                className={`absolute inset-0 flex flex-col items-center justify-center text-white transition-all duration-700 ${
-                  activeCoverType === 'image'
-                    ? 'bg-gradient-to-b from-rose-950/90 to-slate-950/90'
-                    : activeCoverType === 'video'
+                className={`absolute inset-0 flex flex-col items-center justify-center text-white transition-all duration-700 ${activeCoverType === 'image'
+                  ? 'bg-gradient-to-b from-rose-950/90 to-slate-950/90'
+                  : activeCoverType === 'video'
                     ? 'bg-gradient-to-b from-amber-950/90 to-slate-950/90'
                     : 'bg-gradient-to-b from-emerald-950/95 to-slate-950/95'
-                } ${
-                  animatingPreview
+                  } ${animatingPreview
                     ? globalTransitionEffect === 'slide-up'
                       ? '-translate-y-full opacity-0 duration-700 ease-out'
                       : globalTransitionEffect === 'curtain-split'
-                      ? 'scale-110 opacity-0 blur-xs duration-700 [clip-path:inset(0%_50%_0%_50%)]'
-                      : globalTransitionEffect === 'blur-dissolve'
-                      ? 'blur-md opacity-0 scale-105 duration-700'
-                      : globalTransitionEffect === 'book-flip'
-                      ? '-rotate-y-90 -translate-x-1/4 opacity-0 duration-700 origin-left'
-                      : globalTransitionEffect === 'envelope-unfold'
-                      ? '-translate-y-3/4 rotate-x-30 opacity-0 duration-700 origin-bottom'
-                      : 'scale-125 opacity-0 blur-xs duration-700'
+                        ? 'scale-110 opacity-0 blur-xs duration-700 [clip-path:inset(0%_50%_0%_50%)]'
+                        : globalTransitionEffect === 'blur-dissolve'
+                          ? 'blur-md opacity-0 scale-105 duration-700'
+                          : globalTransitionEffect === 'book-flip'
+                            ? '-rotate-y-90 -translate-x-1/4 opacity-0 duration-700 origin-left'
+                            : globalTransitionEffect === 'envelope-unfold'
+                              ? '-translate-y-3/4 rotate-x-30 opacity-0 duration-700 origin-bottom'
+                              : 'scale-125 opacity-0 blur-xs duration-700'
                     : 'translate-y-0 scale-100 opacity-100 rotate-0 blur-none [clip-path:inset(0%_0%_0%_0%)]'
-                }`}
+                  }`}
               >
                 <span className="text-[10px] font-bold tracking-wider uppercase text-amber-300">
                   {activeCoverType === 'image' ? '📸 Image Cover' : activeCoverType === 'video' ? '🎬 Video Cover' : '💌 Envelope Cover'}
@@ -424,15 +416,14 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
           <label className="text-[10px] font-bold uppercase tracking-wider text-slate-700 block mb-1.5">
             Advance Trigger (How Viewer Moves to First Page)
           </label>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
             <button
               type="button"
               onClick={() => onUpdate({ imageAdvanceTrigger: 'click-button' })}
-              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${
-                imageAdvanceTrigger === 'click-button'
-                  ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
-                  : 'border-slate-200 bg-white/70 text-slate-700'
-              }`}
+              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${imageAdvanceTrigger === 'click-button'
+                ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
+                : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                }`}
             >
               <div className="text-[10.5px]">🔘 Click Button</div>
               <div className="text-[8.5px] text-slate-500 font-normal mt-0.5">Taps 'Open'</div>
@@ -441,24 +432,34 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
             <button
               type="button"
               onClick={() => onUpdate({ imageAdvanceTrigger: 'click-anywhere' })}
-              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${
-                imageAdvanceTrigger === 'click-anywhere'
-                  ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
-                  : 'border-slate-200 bg-white/70 text-slate-700'
-              }`}
+              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${imageAdvanceTrigger === 'click-anywhere'
+                ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
+                : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                }`}
             >
               <div className="text-[10.5px]">👆 Tap Anywhere</div>
-              <div className="text-[8.5px] text-slate-500 font-normal mt-0.5">Taps anywhere</div>
+              <div className="text-[8.5px] text-slate-500 font-normal mt-0.5">Taps screen</div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onUpdate({ imageAdvanceTrigger: 'scroll-swipe' })}
+              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${imageAdvanceTrigger === 'scroll-swipe'
+                ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
+                : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                }`}
+            >
+              <div className="text-[10.5px]">📜 Scroll / Swipe</div>
+              <div className="text-[8.5px] text-slate-500 font-normal mt-0.5">Scrolls or swipes</div>
             </button>
 
             <button
               type="button"
               onClick={() => onUpdate({ imageAdvanceTrigger: 'auto-timer', imageTimerSeconds: config.imageTimerSeconds || 3.5 })}
-              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${
-                imageAdvanceTrigger === 'auto-timer'
-                  ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
-                  : 'border-slate-200 bg-white/70 text-slate-700'
-              }`}
+              className={`p-1.5 rounded-lg border text-left transition-all cursor-pointer ${imageAdvanceTrigger === 'auto-timer'
+                ? 'border-indigo-500 bg-white ring-1 ring-indigo-500 text-slate-900 font-bold shadow-xs'
+                : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                }`}
             >
               <div className="text-[10.5px]">⏱️ Auto-Timer</div>
               <div className="text-[8.5px] text-slate-500 font-normal mt-0.5">Auto delay</div>
@@ -510,11 +511,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
               <button
                 type="button"
                 onClick={() => onUpdate({ videoPlayMode: 'autoplay', videoAutoAdvanceOnEnd: true })}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                  videoPlayMode === 'autoplay'
-                    ? 'border-amber-500 bg-white ring-1 ring-amber-500 text-slate-900 shadow-xs'
-                    : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
-                }`}
+                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${videoPlayMode === 'autoplay'
+                  ? 'border-amber-500 bg-white ring-1 ring-amber-500 text-slate-900 shadow-xs'
+                  : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                  }`}
               >
                 <div className="flex items-center gap-1.5 font-bold text-[11px] text-amber-900">
                   <Play className="w-3 h-3 text-amber-600" />
@@ -525,15 +525,32 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 </p>
               </button>
 
-              {/* Mode 2: Click to play video -> First Page */}
+              {/* Mode 2: Scroll-Based Scrub Video -> First Page */}
+              <button
+                type="button"
+                onClick={() => onUpdate({ videoPlayMode: 'scroll-based', videoAutoAdvanceOnEnd: true, videoMuted: true })}
+                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${videoPlayMode === 'scroll-based'
+                  ? 'border-amber-500 bg-white ring-1 ring-amber-500 text-slate-900 shadow-xs'
+                  : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                  }`}
+              >
+                <div className="flex items-center gap-1.5 font-bold text-[11px] text-amber-900">
+                  <MoveUp className="w-3 h-3 text-amber-600 rotate-180" />
+                  <span>Scroll to Scrub & Open</span>
+                </div>
+                <p className="text-[9.5px] text-slate-500 mt-1 leading-tight">
+                  Video scrubs frame-by-frame as visitor scrolls/swipes; opens on finish
+                </p>
+              </button>
+
+              {/* Mode 3: Click to play video -> First Page */}
               <button
                 type="button"
                 onClick={() => onUpdate({ videoPlayMode: 'click-to-play', videoAutoAdvanceOnEnd: true, videoMuted: false })}
-                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
-                  videoPlayMode === 'click-to-play'
-                    ? 'border-amber-500 bg-white ring-1 ring-amber-500 text-slate-900 shadow-xs'
-                    : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
-                }`}
+                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${videoPlayMode === 'click-to-play'
+                  ? 'border-amber-500 bg-white ring-1 ring-amber-500 text-slate-900 shadow-xs'
+                  : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                  }`}
               >
                 <div className="flex items-center gap-1.5 font-bold text-[11px] text-amber-900">
                   <MousePointer className="w-3 h-3 text-amber-600" />
@@ -541,6 +558,24 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 </div>
                 <p className="text-[9.5px] text-slate-500 mt-1 leading-tight">
                   Tap to start video with sound, transitions to first page on finish
+                </p>
+              </button>
+
+              {/* Mode 4: Ambient Loop + Button */}
+              <button
+                type="button"
+                onClick={() => onUpdate({ videoPlayMode: 'click-to-open', videoAutoAdvanceOnEnd: false, videoLoop: true })}
+                className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${videoPlayMode === 'click-to-open'
+                  ? 'border-amber-500 bg-white ring-1 ring-amber-500 text-slate-900 shadow-xs'
+                  : 'border-slate-200 bg-white/70 hover:bg-white text-slate-700'
+                  }`}
+              >
+                <div className="flex items-center gap-1.5 font-bold text-[11px] text-amber-900">
+                  <RotateCcw className="w-3 h-3 text-amber-600" />
+                  <span>Ambient Loop + Button</span>
+                </div>
+                <p className="text-[9.5px] text-slate-500 mt-1 leading-tight">
+                  Video loops continuously; visitor clicks button or seal to enter
                 </p>
               </button>
             </div>
@@ -575,11 +610,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                         videoPosterUrl: v.poster
                       })
                     }
-                    className={`text-[10px] px-2 py-1 rounded-md border transition-colors cursor-pointer ${
-                      config.videoUrl === v.url
-                        ? 'bg-amber-100 border-amber-400 text-amber-900 font-bold'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}
+                    className={`text-[10px] px-2 py-1 rounded-md border transition-colors cursor-pointer ${config.videoUrl === v.url
+                      ? 'bg-amber-100 border-amber-400 text-amber-900 font-bold'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
                   >
                     {v.name}
                   </button>
@@ -739,11 +773,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                         }
                       });
                     }}
-                    className={`text-[10px] px-2 py-1 rounded-md border transition-colors cursor-pointer ${
-                      config.imageUrl === img.url
-                        ? 'bg-pink-100 border-pink-400 text-pink-900 font-bold'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}
+                    className={`text-[10px] px-2 py-1 rounded-md border transition-colors cursor-pointer ${config.imageUrl === img.url
+                      ? 'bg-pink-100 border-pink-400 text-pink-900 font-bold'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
                   >
                     {img.name}
                   </button>
@@ -985,11 +1018,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                       onUpdatePage({ elements: updatedElements });
                     }
                   }}
-                  className={`py-1.5 px-0.5 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
-                    (config.sealIcon || 'heart') === emblem.id
-                      ? 'border-emerald-500 bg-emerald-100 text-emerald-900 font-bold ring-1 ring-emerald-500'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                  }`}
+                  className={`py-1.5 px-0.5 rounded-lg border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${(config.sealIcon || 'heart') === emblem.id
+                    ? 'border-emerald-500 bg-emerald-100 text-emerald-900 font-bold ring-1 ring-emerald-500'
+                    : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                    }`}
                 >
                   <span className="text-sm">{emblem.icon}</span>
                   <span className="text-[7.5px] leading-tight truncate w-full">{emblem.label}</span>
@@ -1128,11 +1160,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 onChange={(e) => onUpdate({ title: e.target.value })}
                 disabled={config.showOverline === false}
                 placeholder="e.g. YOU ARE CORDIALLY INVITED"
-                className={`w-full text-xs border rounded p-1.5 focus:outline-none focus:border-slate-900 ${
-                  config.showOverline === false
-                    ? 'bg-slate-100 border-slate-200 text-slate-400 line-through'
-                    : 'bg-white border-slate-200 text-slate-800'
-                }`}
+                className={`w-full text-xs border rounded p-1.5 focus:outline-none focus:border-slate-900 ${config.showOverline === false
+                  ? 'bg-slate-100 border-slate-200 text-slate-400 line-through'
+                  : 'bg-white border-slate-200 text-slate-800'
+                  }`}
               />
             </div>
 
@@ -1155,11 +1186,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 onChange={(e) => onUpdate({ coupleNames: e.target.value })}
                 disabled={config.showCoupleNames === false}
                 placeholder="e.g. Alexander & Sophia"
-                className={`w-full text-xs border rounded p-1.5 focus:outline-none focus:border-slate-900 ${
-                  config.showCoupleNames === false
-                    ? 'bg-slate-100 border-slate-200 text-slate-400 line-through'
-                    : 'bg-white border-slate-200 text-slate-800'
-                }`}
+                className={`w-full text-xs border rounded p-1.5 focus:outline-none focus:border-slate-900 ${config.showCoupleNames === false
+                  ? 'bg-slate-100 border-slate-200 text-slate-400 line-through'
+                  : 'bg-white border-slate-200 text-slate-800'
+                  }`}
               />
             </div>
 
@@ -1182,11 +1212,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 onChange={(e) => onUpdate({ subtitle: e.target.value })}
                 disabled={config.showDateSubtitle === false}
                 placeholder="e.g. Saturday, October 24, 2026"
-                className={`w-full text-xs border rounded p-1.5 focus:outline-none focus:border-slate-900 ${
-                  config.showDateSubtitle === false
-                    ? 'bg-slate-100 border-slate-200 text-slate-400 line-through'
-                    : 'bg-white border-slate-200 text-slate-800'
-                }`}
+                className={`w-full text-xs border rounded p-1.5 focus:outline-none focus:border-slate-900 ${config.showDateSubtitle === false
+                  ? 'bg-slate-100 border-slate-200 text-slate-400 line-through'
+                  : 'bg-white border-slate-200 text-slate-800'
+                  }`}
               />
             </div>
           </div>
@@ -1392,11 +1421,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                 onClick={() => {
                   handleDimensionUpdate({ width: preset.val });
                 }}
-                className={`py-1 px-1.5 rounded border transition-colors text-center cursor-pointer ${
-                  (page?.width || config.page?.width || DEFAULT_COVER_WIDTH) === preset.val
-                    ? 'bg-blue-50 border-blue-400 text-blue-800 font-bold'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
+                className={`py-1 px-1.5 rounded border transition-colors text-center cursor-pointer ${(page?.width || config.page?.width || DEFAULT_COVER_WIDTH) === preset.val
+                  ? 'bg-blue-50 border-blue-400 text-blue-800 font-bold'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
               >
                 {preset.label}
               </button>
@@ -1412,8 +1440,8 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
               {page?.heightMode === 'viewport'
                 ? 'Viewport'
                 : page?.heightMode === 'auto'
-                ? 'Auto'
-                : `${page?.height || config.page?.height || DEFAULT_COVER_HEIGHT}px`}
+                  ? 'Auto'
+                  : `${page?.height || config.page?.height || DEFAULT_COVER_HEIGHT}px`}
             </span>
           </div>
 
@@ -1427,11 +1455,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                   height: typeof window !== 'undefined' ? window.innerHeight : 844
                 });
               }}
-              className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                page?.heightMode === 'viewport' || (page?.isFullHeight && page?.heightMode !== 'custom' && page?.heightMode !== 'auto')
-                  ? 'bg-blue-600 text-white font-bold'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${page?.heightMode === 'viewport' || (page?.isFullHeight && page?.heightMode !== 'custom' && page?.heightMode !== 'auto')
+                ? 'bg-blue-600 text-white font-bold'
+                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
             >
               Viewport
             </button>
@@ -1440,11 +1467,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
               onClick={() => {
                 handleDimensionUpdate({ heightMode: 'auto', isFullHeight: false });
               }}
-              className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                page?.heightMode === 'auto'
-                  ? 'bg-blue-600 text-white font-bold'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${page?.heightMode === 'auto'
+                ? 'bg-blue-600 text-white font-bold'
+                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
             >
               Auto
             </button>
@@ -1457,11 +1483,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                   height: page?.height || config.page?.height || DEFAULT_COVER_HEIGHT
                 });
               }}
-              className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${
-                page?.heightMode === 'custom' || (!page?.heightMode && page?.height)
-                  ? 'bg-blue-600 text-white font-bold'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer text-center ${page?.heightMode === 'custom' || (!page?.heightMode && page?.height)
+                ? 'bg-blue-600 text-white font-bold'
+                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                }`}
             >
               Custom Px
             </button>
@@ -1508,11 +1533,10 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
                     onClick={() => {
                       handleDimensionUpdate({ height: presetH.val, heightMode: 'custom', isFullHeight: false });
                     }}
-                    className={`py-1 px-1.5 rounded border transition-colors text-center cursor-pointer ${
-                      (page?.height || config.page?.height || DEFAULT_COVER_HEIGHT) === presetH.val
-                        ? 'bg-blue-50 border-blue-400 text-blue-800 font-bold'
-                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-                    }`}
+                    className={`py-1 px-1.5 rounded border transition-colors text-center cursor-pointer ${(page?.height || config.page?.height || DEFAULT_COVER_HEIGHT) === presetH.val
+                      ? 'bg-blue-50 border-blue-400 text-blue-800 font-bold'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
                   >
                     {presetH.label}
                   </button>
@@ -1523,180 +1547,6 @@ export const OpeningScreenInspector: React.FC<OpeningScreenInspectorProps> = ({
         </div>
       </div>
 
-      {/* ======================= OUTER BACKDROP & HEART DROPS ======================= */}
-      <div className="space-y-3 p-3 rounded-xl bg-gradient-to-br from-rose-50/70 to-pink-50/40 border border-rose-200/80">
-        <div className="flex items-center justify-between pb-1 border-b border-rose-200">
-          <div className="flex items-center gap-1.5 font-bold text-rose-950 text-xs">
-            <Heart className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
-            <span>Outer Backdrop & Heart Drops</span>
-          </div>
-          <span className="text-[9.5px] font-semibold text-rose-700 bg-white px-2 py-0.5 rounded-full border border-rose-200">
-            Outside Canvas
-          </span>
-        </div>
-
-        {/* Outer Background Color */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="font-semibold text-slate-700">Outer Background Color:</span>
-            <span className="font-mono text-xs font-semibold text-slate-800">
-              {config.outerBackgroundColor || '#0a0a0a'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="color"
-              value={config.outerBackgroundColor || '#0a0a0a'}
-              onChange={(e) => onUpdate({ outerBackgroundColor: e.target.value })}
-              className="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white shadow-xs"
-            />
-            <input
-              type="text"
-              value={config.outerBackgroundColor || '#0a0a0a'}
-              onChange={(e) => onUpdate({ outerBackgroundColor: e.target.value })}
-              placeholder="#0a0a0a"
-              className="flex-1 text-xs bg-white border border-slate-200 rounded px-2 py-1.5 font-mono text-slate-800 focus:outline-none focus:border-rose-500"
-            />
-          </div>
-
-          {/* Quick Outer Color Presets */}
-          <div className="flex flex-wrap gap-1.5 pt-0.5">
-            {[
-              { name: 'Midnight Dark', color: '#0a0a0a' },
-              { name: 'Charcoal', color: '#171717' },
-              { name: 'Slate Navy', color: '#0f172a' },
-              { name: 'Espresso', color: '#1c1917' },
-              { name: 'Deep Wine', color: '#2a080c' },
-              { name: 'Deep Emerald', color: '#071912' },
-              { name: 'Warm Ivory', color: '#fdfbf7' },
-              { name: 'Light Slate', color: '#f1f5f9' }
-            ].map((p) => (
-              <button
-                key={p.color}
-                type="button"
-                onClick={() => onUpdate({ outerBackgroundColor: p.color })}
-                title={p.name}
-                className="w-5 h-5 rounded-full border border-slate-300 shadow-xs transition-transform hover:scale-110 cursor-pointer"
-                style={{ backgroundColor: p.color }}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Heart Drops Toggle */}
-        <div className="pt-2 border-t border-rose-200/80 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
-              <span className="text-[11px] font-semibold text-rose-950">
-                Floating Heart Drops Animation
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={config.showOuterDrops !== false && config.outerDropEffect !== 'none'}
-              onChange={(e) => {
-                const enable = e.target.checked;
-                onUpdate({
-                  showOuterDrops: enable,
-                  outerDropEffect: enable ? (config.outerDropEffect === 'none' || !config.outerDropEffect ? 'hearts' : config.outerDropEffect) : 'none'
-                });
-              }}
-              className="rounded text-rose-600 focus:ring-rose-500 w-4 h-4 cursor-pointer"
-            />
-          </div>
-
-          {(config.showOuterDrops !== false && config.outerDropEffect !== 'none') && (
-            <div className="space-y-2 bg-white/80 p-2.5 rounded-lg border border-rose-200/80">
-              {/* Drop Symbol Style Dropdown & Quick Selector */}
-              <div className="space-y-1">
-                <span className="text-[10px] font-semibold text-slate-700 block">Drop Symbol Style:</span>
-                <select
-                  value={config.outerDropEffect || 'hearts'}
-                  onChange={(e) => onUpdate({ outerDropEffect: e.target.value as OuterDropEffectType, showOuterDrops: true })}
-                  className="w-full text-xs bg-white border border-rose-200 rounded-lg p-1.5 font-medium text-slate-800 focus:outline-none focus:border-rose-500 cursor-pointer"
-                >
-                  <option value="hearts">❤️ Floating Hearts</option>
-                  <option value="petals">🌸 Rose Petals</option>
-                  <option value="sparkles">✨ Magical Sparkles</option>
-                  <option value="stars">⭐ Shimmering Stars</option>
-                  <option value="butterflies">🦋 Ethereal Butterflies</option>
-                  <option value="leaves">🍃 Botanical Leaves</option>
-                  <option value="snow">❄️ Winter Snowflakes</option>
-                  <option value="confetti">🎉 Celebration Confetti</option>
-                  <option value="bubbles">🫧 Golden Bubbles</option>
-                  <option value="rings">💍 Wedding Rings</option>
-                </select>
-
-                <div className="grid grid-cols-5 gap-1 pt-1 text-[11px]">
-                  {[
-                    { id: 'hearts', icon: '❤️', label: 'Hearts' },
-                    { id: 'petals', icon: '🌸', label: 'Petals' },
-                    { id: 'sparkles', icon: '✨', label: 'Sparkles' },
-                    { id: 'stars', icon: '⭐', label: 'Stars' },
-                    { id: 'butterflies', icon: '🦋', label: 'Flutter' },
-                    { id: 'leaves', icon: '🍃', label: 'Leaves' },
-                    { id: 'snow', icon: '❄️', label: 'Snow' },
-                    { id: 'confetti', icon: '🎉', label: 'Confetti' },
-                    { id: 'bubbles', icon: '🫧', label: 'Bubbles' },
-                    { id: 'rings', icon: '💍', label: 'Rings' }
-                  ].map((eff) => (
-                    <button
-                      key={eff.id}
-                      type="button"
-                      onClick={() => onUpdate({ outerDropEffect: eff.id as OuterDropEffectType, showOuterDrops: true })}
-                      title={eff.label}
-                      className={`py-1 px-0.5 rounded border text-center transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
-                        (config.outerDropEffect || 'hearts') === eff.id
-                          ? 'border-rose-500 bg-rose-100 text-rose-900 font-bold'
-                          : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <span className="text-xs">{eff.icon}</span>
-                      <span className="text-[7.5px] leading-none truncate w-full">{eff.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Heart Drop Color */}
-              <div className="space-y-1 pt-1 border-t border-rose-100">
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="font-semibold text-slate-700">Drop Element Color:</span>
-                  <span className="font-mono text-slate-800 font-semibold">{config.outerDropColor || '#f43f5e'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={config.outerDropColor || '#f43f5e'}
-                    onChange={(e) => onUpdate({ outerDropColor: e.target.value })}
-                    className="w-7 h-7 rounded border border-rose-300 cursor-pointer p-0.5 bg-white shadow-xs"
-                  />
-                  <div className="flex items-center gap-1 flex-1">
-                    {[
-                      { name: 'Rose Pink', color: '#f43f5e' },
-                      { name: 'Gilded Gold', color: '#d4af37' },
-                      { name: 'Ruby Red', color: '#e11d48' },
-                      { name: 'Soft Blush', color: '#fda4af' },
-                      { name: 'Velvet White', color: '#ffffff' }
-                    ].map((c) => (
-                      <button
-                        key={c.color}
-                        type="button"
-                        onClick={() => onUpdate({ outerDropColor: c.color })}
-                        title={c.name}
-                        className="w-4 h-4 rounded-full border border-slate-300 shadow-xs cursor-pointer hover:scale-110 transition-transform"
-                        style={{ backgroundColor: c.color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 };

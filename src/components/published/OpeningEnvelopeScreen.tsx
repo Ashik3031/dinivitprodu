@@ -9,7 +9,7 @@ import {
   ImageTransitionEffect,
   ImageAdvanceTrigger
 } from '../../types';
-import { Play, Volume2, VolumeX, ArrowRight } from 'lucide-react';
+import { Play, Volume2, VolumeX, ArrowRight, MoveUp, Sliders } from 'lucide-react';
 import { ElementRenderer } from '../canvas/ElementRenderer';
 import { resolveElementForViewport } from '../../utils/responsiveUtils';
 import { getOrCreateOpeningScreenPage } from '../../utils/openingScreenUtils';
@@ -83,14 +83,14 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     (config.style === 'video-cover' || pageBg?.type === 'video'
       ? 'video'
       : config.style === 'card-flip' || pageBg?.type === 'image'
-      ? 'image'
-      : config.style === 'custom-page'
-      ? 'custom-page'
-      : config.videoUrl
-      ? 'video'
-      : config.imageUrl
-      ? 'image'
-      : 'envelope');
+        ? 'image'
+        : config.style === 'custom-page'
+          ? 'custom-page'
+          : config.videoUrl
+            ? 'video'
+            : config.imageUrl
+              ? 'image'
+              : 'envelope');
 
   const videoPlayMode: VideoPlayMode = config.videoPlayMode || 'autoplay';
   // Global transition effect for all cover types (video, image, envelope, custom)
@@ -112,7 +112,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           origin: { y: 0.6 },
           colors: [theme?.primaryColor || config.sealColor || '#d4af37', '#ffffff', '#fbbf24', '#f43f5e', '#38bdf8']
         });
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const delay = immediate ? 200 : 900;
@@ -126,6 +126,8 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     if (coverType !== 'video' && pageBg?.type !== 'video') return;
 
     if (videoPlayMode === 'autoplay' && videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = isMuted;
       videoRef.current.play().then(() => {
         setIsVideoPlaying(true);
       }).catch(() => {
@@ -133,9 +135,20 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
         if (videoRef.current) {
           videoRef.current.muted = true;
           setIsMuted(true);
-          videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => {});
+          videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => { });
         }
       });
+    } else if (videoPlayMode === 'scroll-based' && videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      setIsVideoPlaying(false);
+      setVideoProgress(0);
+    } else if (videoPlayMode === 'click-to-open' && videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().then(() => setIsVideoPlaying(true)).catch(() => { });
     }
   }, [coverType, videoPlayMode, pageBg?.type]);
 
@@ -150,7 +163,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
   };
 
   const handleVideoEnded = () => {
-    if (config.videoAutoAdvanceOnEnd !== false) {
+    if (config.videoAutoAdvanceOnEnd !== false && videoPlayMode !== 'click-to-open') {
       triggerOpen();
     }
   };
@@ -163,6 +176,85 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     }).catch((err) => {
       console.warn('Video play error:', err);
     });
+  };
+
+  // ========================== GESTURE & SCROLL LOGIC ==========================
+  const touchStartYRef = useRef<number | null>(null);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (isOpening) return;
+
+    if (coverType === 'video' && videoPlayMode === 'scroll-based') {
+      e.stopPropagation();
+      const v = videoRef.current;
+      if (!v) return;
+
+      const duration = v.duration || (config.videoDurationSeconds || 6);
+      if (duration <= 0 || isNaN(duration)) return;
+
+      // Wheel scrub: scrolling down advances video, scrolling up rewinds
+      const scrubStep = (e.deltaY / 280) * (duration / 4);
+      const targetTime = Math.max(0, Math.min(duration, (v.currentTime || 0) + scrubStep));
+      v.currentTime = targetTime;
+      const progress = (targetTime / duration) * 100;
+      setVideoProgress(progress);
+
+      // If user reaches end of video (or >97%), trigger opening
+      if (targetTime >= duration - 0.12 || progress >= 97) {
+        triggerOpen();
+      }
+    } else if (imageTrigger === 'scroll-swipe') {
+      if (e.deltaY > 25) {
+        e.stopPropagation();
+        triggerOpen();
+      }
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      touchStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isOpening || touchStartYRef.current === null || e.touches.length === 0) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = touchStartYRef.current - currentY; // positive = swiping up
+
+    if (coverType === 'video' && videoPlayMode === 'scroll-based') {
+      const v = videoRef.current;
+      if (!v) return;
+      const duration = v.duration || (config.videoDurationSeconds || 6);
+      if (duration <= 0 || isNaN(duration)) return;
+
+      const scrubStep = (deltaY / 200) * (duration / 3);
+      const targetTime = Math.max(0, Math.min(duration, (v.currentTime || 0) + scrubStep));
+      v.currentTime = targetTime;
+      const progress = (targetTime / duration) * 100;
+      setVideoProgress(progress);
+      touchStartYRef.current = currentY; // update for continuous smooth scrubbing
+
+      if (targetTime >= duration - 0.12 || progress >= 97) {
+        triggerOpen();
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current === null || isOpening) {
+      touchStartYRef.current = null;
+      return;
+    }
+    const currentY = e.changedTouches[0]?.clientY ?? touchStartYRef.current;
+    const deltaY = touchStartYRef.current - currentY; // positive = swipe up
+    touchStartYRef.current = null;
+
+    if (imageTrigger === 'scroll-swipe') {
+      if (deltaY > 35) {
+        triggerOpen();
+      }
+    }
   };
 
   // Fallback timer for autoplay if video doesn't end or loops
@@ -271,93 +363,113 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
   return (
     <motion.div
       key="opening-screen-overlay"
-        initial={{
-          opacity: 1,
-          scale: 1,
-          x: 0,
-          y: 0,
-          rotateY: 0,
-          rotateX: 0,
-          filter: 'blur(0px)',
-          clipPath: 'inset(0% 0% 0% 0%)'
-        }}
-        animate={
-          isOpening
-            ? (getExitAnimation() as any)
-            : {
-                opacity: 1,
-                scale: 1,
-                x: 0,
-                y: 0,
-                rotateY: 0,
-                rotateX: 0,
-                filter: 'blur(0px)',
-                clipPath: 'inset(0% 0% 0% 0%)'
-              }
-        }
-        exit={getExitAnimation() as any}
-        onAnimationComplete={() => {
-          if (isOpening) {
-            handleOpenCallback();
+      initial={{
+        opacity: 1,
+        scale: 1,
+        x: 0,
+        y: 0,
+        rotateY: 0,
+        rotateX: 0,
+        filter: 'blur(0px)',
+        clipPath: 'inset(0% 0% 0% 0%)'
+      }}
+      animate={
+        isOpening
+          ? (getExitAnimation() as any)
+          : {
+            opacity: 1,
+            scale: 1,
+            x: 0,
+            y: 0,
+            rotateY: 0,
+            rotateX: 0,
+            filter: 'blur(0px)',
+            clipPath: 'inset(0% 0% 0% 0%)'
           }
-        }}
-        onClick={handleContainerClick}
-        className={`${
-          isContained ? 'absolute' : 'fixed'
-        } inset-0 z-40 flex flex-col items-center justify-center select-none overflow-hidden ${
-          !hasButtonOnCanvas || (coverType === 'image' && imageTrigger === 'click-anywhere') ? 'cursor-pointer' : ''
+      }
+      exit={getExitAnimation() as any}
+      onAnimationComplete={() => {
+        if (isOpening) {
+          handleOpenCallback();
+        }
+      }}
+      onClick={handleContainerClick}
+      onWheel={handleWheel}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className={`${isContained ? 'absolute' : 'fixed'
+        } inset-0 z-40 flex flex-col items-center justify-center select-none overflow-hidden ${videoPlayMode === 'scroll-based' || imageTrigger === 'scroll-swipe' ? 'touch-none' : ''
+        } ${!hasButtonOnCanvas || (coverType === 'image' && imageTrigger === 'click-anywhere') ? 'cursor-pointer' : ''
         }`}
-        style={{
-          perspective: 1400,
-          transformStyle: 'preserve-3d',
-          backgroundColor: !isVideoBg && !isImageBg && pageBg?.type === 'color' ? pageBg.color : '#07120d'
-        }}
-      >
-        {/* Skip to Invitation Button (Top-Right) */}
-        {config.showSkipButton !== false && (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              triggerOpen(true);
+      style={{
+        perspective: 1400,
+        transformStyle: 'preserve-3d',
+        backgroundColor: !isVideoBg && !isImageBg && pageBg?.type === 'color' ? pageBg.color : '#07120d'
+      }}
+    >
+      {/* Skip to Invitation Button (Top-Right) */}
+      {config.showSkipButton !== false && (
+        <motion.button
+          type="button"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerOpen(true);
+          }}
+          className="absolute top-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white/90 hover:text-white border border-white/20 backdrop-blur-md text-[11px] font-semibold flex items-center gap-1.5 shadow-xl transition-all cursor-pointer group"
+        >
+          <span>{config.skipButtonText || 'Skip'}</span>
+          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+        </motion.button>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 1. BACKGROUND LAYER (Video, Image, or Gradient/Color)                    */}
+      {/* ========================================================================= */}
+      {isVideoBg ? (
+        <>
+          <video
+            ref={videoRef}
+            src={videoSrc}
+            poster={config.videoPosterUrl}
+            playsInline
+            preload="auto"
+            autoPlay={videoPlayMode === 'autoplay' || videoPlayMode === 'click-to-open'}
+            muted={videoPlayMode === 'scroll-based' ? true : isMuted}
+            loop={videoPlayMode === 'click-to-open' || (config.videoLoop && videoPlayMode !== 'scroll-based')}
+            onTimeUpdate={handleVideoTimeUpdate}
+            onEnded={handleVideoEnded}
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              v.defaultMuted = true;
+              if (videoPlayMode === 'autoplay' || videoPlayMode === 'click-to-open') {
+                v.muted = isMuted;
+                v.play().then(() => setIsVideoPlaying(true)).catch(() => {
+                  v.muted = true;
+                  setIsMuted(true);
+                  v.play().then(() => setIsVideoPlaying(true)).catch(() => { });
+                });
+              } else if (videoPlayMode === 'scroll-based') {
+                v.pause();
+                v.currentTime = 0;
+              }
             }}
-            className="absolute top-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/50 hover:bg-black/75 text-white/90 hover:text-white border border-white/20 backdrop-blur-md text-[11px] font-semibold flex items-center gap-1.5 shadow-xl transition-all cursor-pointer group"
-          >
-            <span>{config.skipButtonText || 'Skip'}</span>
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-          </motion.button>
-        )}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+          {/* Scrim Overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundColor: pageBg?.overlayColor || '#000000',
+              opacity: pageBg?.overlayOpacity ?? 0.35
+            }}
+          />
 
-        {/* ========================================================================= */}
-        {/* 1. BACKGROUND LAYER (Video, Image, or Gradient/Color)                    */}
-        {/* ========================================================================= */}
-        {isVideoBg ? (
-          <>
-            <video
-              ref={videoRef}
-              src={videoSrc}
-              poster={config.videoPosterUrl}
-              playsInline
-              autoPlay
-              muted={isMuted}
-              loop={videoPlayMode === 'click-to-open' || config.videoLoop}
-              onTimeUpdate={handleVideoTimeUpdate}
-              onEnded={handleVideoEnded}
-              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            />
-            {/* Scrim Overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundColor: pageBg?.overlayColor || '#000000',
-                opacity: pageBg?.overlayOpacity ?? 0.35
-              }}
-            />
-
-            {/* Video Audio Control (Top-Left) */}
+          {/* Video Audio Control (Top-Left) */}
+          {videoPlayMode !== 'scroll-based' && (
             <button
               type="button"
               onClick={(e) => {
@@ -372,126 +484,170 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
             >
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-amber-400" />}
             </button>
+          )}
 
-            {/* Video Progress Bar for Autoplay & Click-to-Play */}
-            {(videoPlayMode === 'autoplay' || videoPlayMode === 'click-to-play') && (
-              <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-40">
-                <div
-                  className="h-full bg-gradient-to-r from-amber-400 to-amber-200 transition-all duration-200"
-                  style={{ width: `${videoProgress}%` }}
-                />
-              </div>
-            )}
-
-            {/* Mode: Click to Play - Center Play Button */}
-            {videoPlayMode === 'click-to-play' && !isVideoPlaying && (
+          {/* Video Progress Bar for Autoplay, Click-to-Play, and Scroll-Based */}
+          {(videoPlayMode === 'autoplay' || videoPlayMode === 'click-to-play' || videoPlayMode === 'scroll-based') && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-white/20 z-40">
               <div
-                className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer pointer-events-auto"
+                className="h-full bg-gradient-to-r from-amber-400 to-amber-200 transition-all duration-150"
+                style={{ width: `${videoProgress}%` }}
+              />
+            </div>
+          )}
+
+          {/* Scroll-to-Scrub Floating Cue & Progress */}
+          {videoPlayMode === 'scroll-based' && !isOpening && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1.5 pointer-events-none"
+            >
+              <div className="px-4 py-2 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white shadow-2xl flex items-center gap-2.5 text-xs font-semibold">
+                <motion.div
+                  animate={{ y: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                >
+                  <MoveUp className="w-3.5 h-3.5 text-amber-400 rotate-180" />
+                </motion.div>
+                <span>Scroll or swipe up to scrub video</span>
+                <span className="font-mono text-[10.5px] text-amber-300 bg-amber-500/25 px-2 py-0.5 rounded-full border border-amber-400/30">
+                  {Math.round(videoProgress)}%
+                </span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Mode: Click to Play - Center Play Button */}
+          {videoPlayMode === 'click-to-play' && !isVideoPlaying && (
+            <div
+              className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer pointer-events-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleManualVideoPlay();
+              }}
+            >
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleManualVideoPlay();
                 }}
+                className="w-20 h-20 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow-2xl border-2 border-white/40 cursor-pointer group ring-8 ring-amber-500/25 transition-all"
               >
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleManualVideoPlay();
-                  }}
-                  className="w-20 h-20 rounded-full bg-amber-500 text-neutral-950 flex items-center justify-center shadow-2xl border-2 border-white/40 cursor-pointer group ring-8 ring-amber-500/25 transition-all"
-                >
-                  <Play className="w-8 h-8 fill-neutral-950 ml-1 group-hover:scale-110 transition-transform" />
-                </motion.button>
-              </div>
-            )}
-          </>
-        ) : isImageBg ? (
-          <>
-            <img
-              src={imageSrc}
-              alt="Invitation Cover"
-              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-            />
-            {/* Overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                backgroundColor: pageBg?.overlayColor || '#000000',
-                opacity: pageBg?.overlayOpacity ?? (config.imageOverlayOpacity ?? 0.4)
-              }}
-            />
-          </>
-        ) : (
-          /* Gradient / Radial Envelope Background */
+                <Play className="w-8 h-8 fill-neutral-950 ml-1 group-hover:scale-110 transition-transform" />
+              </motion.button>
+            </div>
+          )}
+        </>
+      ) : isImageBg ? (
+        <>
+          <img
+            src={imageSrc}
+            alt="Invitation Cover"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+          {/* Overlay */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background:
-                pageBg?.type === 'gradient' && pageBg.gradient
-                  ? `radial-gradient(circle at 50% 40%, ${pageBg.gradient.colors[0] || '#172520'}, ${pageBg.gradient.colors[1] || '#07120d'})`
-                  : 'radial-gradient(circle at 50% 40%, #172520 0%, #07120d 100%)'
+              backgroundColor: pageBg?.overlayColor || '#000000',
+              opacity: pageBg?.overlayOpacity ?? (config.imageOverlayOpacity ?? 0.4)
             }}
           />
-        )}
+        </>
+      ) : (
+        /* Gradient / Radial Envelope Background */
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              pageBg?.type === 'gradient' && pageBg.gradient
+                ? `radial-gradient(circle at 50% 40%, ${pageBg.gradient.colors[0] || '#172520'}, ${pageBg.gradient.colors[1] || '#07120d'})`
+                : 'radial-gradient(circle at 50% 40%, #172520 0%, #07120d 100%)'
+          }}
+        />
+      )}
 
-        {/* ========================================================================= */}
-        {/* 2. WYSIWYG CANVAS ELEMENTS (100% Matching Editor Canvas Dimensions)        */}
-        {/* ========================================================================= */}
-        <div className="relative w-full h-full inset-0 overflow-hidden flex items-center justify-center pointer-events-auto">
-          <div
-            className="relative mx-auto overflow-hidden"
-            style={{
-              width: `${page?.width || 520}px`,
-              height: page?.heightMode === 'viewport' ? '100%' : `${page?.height || 400}px`,
-              maxWidth: '100%',
-              maxHeight: page?.heightMode === 'viewport' ? '100%' : undefined
-            }}
-          >
-            {topLevelElements.map((el) => {
-              const { style: resolvedStyle } = resolveElementForViewport(el, 'mobile');
-              const rotationTransform = resolvedStyle.rotation ? `rotate(${resolvedStyle.rotation}deg)` : '';
-
-              const isButtonOrAction =
-                el.id === 'open-elem-button' ||
-                el.id === 'open-elem-icon' ||
-                el.id === 'open-elem-seal-hint' ||
-                el.type === 'button';
-
-              return (
-                <div
-                  key={el.id}
-                  className={`absolute ${isButtonOrAction ? 'cursor-pointer' : ''}`}
-                  style={{
-                    left: `${resolvedStyle.x}px`,
-                    top: `${resolvedStyle.y}px`,
-                    width: `${resolvedStyle.width}px`,
-                    height: `${resolvedStyle.height}px`,
-                    transform: rotationTransform || undefined,
-                    zIndex: resolvedStyle.zIndex || 1
-                  }}
-                  onClick={(e) => {
-                    if (isButtonOrAction) {
-                      e.stopPropagation();
-                      triggerOpen();
-                    }
-                  }}
-                >
-                  <ElementRenderer
-                    element={el}
-                    isEditor={false}
-                    viewportMode="mobile"
-                    allElements={elements}
-                    onActionClick={() => {
-                      triggerOpen();
-                    }}
-                  />
-                </div>
-              );
-            })}
+      {/* Scroll/Swipe-to-Open Floating Cue for Non-Video Cover */}
+      {imageTrigger === 'scroll-swipe' && !isVideoBg && !isOpening && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1.5 pointer-events-none"
+        >
+          <div className="px-4 py-2 rounded-full bg-black/65 backdrop-blur-md border border-white/20 text-white shadow-2xl flex items-center gap-2.5 text-xs font-semibold">
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+            >
+              <MoveUp className="w-3.5 h-3.5 text-amber-400" />
+            </motion.div>
+            <span>Scroll or swipe up to open invitation</span>
           </div>
+        </motion.div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2. WYSIWYG CANVAS ELEMENTS (100% Matching Editor Canvas Dimensions)        */}
+      {/* ========================================================================= */}
+      <div className="relative w-full h-full inset-0 overflow-hidden flex items-center justify-center pointer-events-auto">
+        <div
+          className="relative mx-auto overflow-hidden"
+          style={{
+            width: `${page?.width || 520}px`,
+            height: page?.heightMode === 'viewport' ? '100%' : `${page?.height || 400}px`,
+            maxWidth: '100%',
+            maxHeight: page?.heightMode === 'viewport' ? '100%' : undefined
+          }}
+        >
+          {topLevelElements.map((el) => {
+            const { style: resolvedStyle } = resolveElementForViewport(el, 'mobile');
+            const rotationTransform = resolvedStyle.rotation ? `rotate(${resolvedStyle.rotation}deg)` : '';
+
+            const isButtonOrAction =
+              el.id === 'open-elem-button' ||
+              el.id === 'open-elem-icon' ||
+              el.id === 'open-elem-seal-hint' ||
+              el.type === 'button';
+
+            return (
+              <div
+                key={el.id}
+                className={`absolute ${isButtonOrAction ? 'cursor-pointer' : ''}`}
+                style={{
+                  left: `${resolvedStyle.x}px`,
+                  top: `${resolvedStyle.y}px`,
+                  width: `${resolvedStyle.width}px`,
+                  height: `${resolvedStyle.height}px`,
+                  transform: rotationTransform || undefined,
+                  zIndex: resolvedStyle.zIndex || 1
+                }}
+                onClick={(e) => {
+                  if (isButtonOrAction) {
+                    e.stopPropagation();
+                    triggerOpen();
+                  }
+                }}
+              >
+                <ElementRenderer
+                  element={el}
+                  isEditor={false}
+                  viewportMode="mobile"
+                  allElements={elements}
+                  onActionClick={() => {
+                    triggerOpen();
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
-      </motion.div>
+      </div>
+    </motion.div>
   );
 };

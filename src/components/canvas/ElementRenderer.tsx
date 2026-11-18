@@ -21,7 +21,10 @@ import {
   Pause,
   Volume2,
   VolumeX,
-  Navigation
+  Navigation,
+  Gift,
+  Plane,
+  Shirt
 } from 'lucide-react';
 import { CanvasElement, AnimationConfig, ElementStyle, ViewportMode } from '../../types';
 import { getElementMotionProps } from '../../utils/animationUtils';
@@ -117,7 +120,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
           dark: content.qrFgColor || style.color || '#000000',
           light: content.qrBgColor || '#ffffff'
         }
-      }).then(url => setQrCodeDataUrl(url)).catch(() => {});
+      }).then(url => setQrCodeDataUrl(url)).catch(() => { });
     }
   }, [type, content.qrCodeValue, content.qrFgColor, content.qrBgColor, style.color]);
 
@@ -128,7 +131,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       const audio = new Audio(content.audioUrl);
       audio.loop = content.audioLoop !== false;
       audio.volume = content.audioVolume !== undefined ? content.audioVolume : 1;
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
       setAudioElement(audio);
       setIsPlayingAudio(true);
     } else {
@@ -136,7 +139,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
         audioElement.pause();
         setIsPlayingAudio(false);
       } else {
-        audioElement.play().catch(() => {});
+        audioElement.play().catch(() => { });
         setIsPlayingAudio(true);
       }
     }
@@ -192,8 +195,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
           style.verticalAlign === 'top'
             ? 'flex-start'
             : style.verticalAlign === 'bottom'
-            ? 'flex-end'
-            : 'center';
+              ? 'flex-end'
+              : 'center';
 
         return (
           <div
@@ -204,10 +207,10 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                 style.textAlign === 'center'
                   ? 'center'
                   : style.textAlign === 'right'
-                  ? 'flex-end'
-                  : style.textAlign === 'justify'
-                  ? 'stretch'
-                  : 'flex-start',
+                    ? 'flex-end'
+                    : style.textAlign === 'justify'
+                      ? 'stretch'
+                      : 'flex-start',
               padding: style.padding ? `${style.padding}px` : undefined
             }}
           >
@@ -268,6 +271,23 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               muted={content.videoMuted !== false}
               controls={!isEditor && content.videoControls}
               playsInline
+              preload="auto"
+              ref={(el) => {
+                if (el && content.videoMuted !== false) {
+                  el.defaultMuted = true;
+                  el.muted = true;
+                }
+              }}
+              onLoadedMetadata={(e) => {
+                const v = e.currentTarget;
+                if (content.videoMuted !== false) {
+                  v.defaultMuted = true;
+                  v.muted = true;
+                }
+                if (content.videoAutoplay !== false) {
+                  v.play().catch(() => { });
+                }
+              }}
               className="w-full h-full object-cover pointer-events-none"
               style={{
                 borderRadius: style.borderRadius ? `${style.borderRadius}px` : '8px'
@@ -332,10 +352,10 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
           content.buttonShape === 'pill'
             ? '9999px'
             : content.buttonShape === 'rounded'
-            ? '12px'
-            : content.buttonShape === 'square'
-            ? '0px'
-            : style.borderRadius ? `${style.borderRadius}px` : '8px';
+              ? '12px'
+              : content.buttonShape === 'square'
+                ? '0px'
+                : style.borderRadius ? `${style.borderRadius}px` : '8px';
 
         const bg = isHovered && style.hoverBackgroundColor ? style.hoverBackgroundColor : (style.backgroundColor || '#d4af37');
         const textColor = isHovered && style.hoverColor ? style.hoverColor : (style.color || '#ffffff');
@@ -658,6 +678,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       // 22. DRESS CODE
       case 'dress-code': {
         const colors = content.dressCodeColors || ['#000000', '#ffffff', '#d4af37'];
+        const dressType = content.dressCodeType || 'Black Tie';
         return (
           <div
             className="w-full h-full flex flex-col items-center justify-center p-3 text-center select-none transition-all"
@@ -673,40 +694,195 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               color: style.color || 'inherit'
             }}
           >
-            <div
-              className="text-xs uppercase tracking-widest font-semibold mb-1"
-              style={{ color: style.color || '#fbbf24' }}
-            >
-              Dress Code
+            <div className="flex items-center gap-1.5 mb-1">
+              <Shirt className="w-3.5 h-3.5 text-amber-500" />
+              <span
+                className="text-[11px] uppercase tracking-widest font-semibold"
+                style={{ color: style.color || '#fbbf24' }}
+              >
+                {content.dressCodeTitle || 'Dress Code'}
+              </span>
             </div>
-            <div
-              className="text-sm font-bold mb-2"
-              style={{
-                color: style.color || '#f1f5f9',
-                fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
-                fontWeight: style.fontWeight || 'bold',
-                fontFamily: style.fontFamily,
-                letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
-              }}
-            >
-              {content.dressCodeTitle || 'Black Tie Preferred'}
-            </div>
-            <div className="flex items-center justify-center gap-2 my-2">
-              {colors.map((c, i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full border border-white/20 shadow-sm"
-                  style={{ backgroundColor: c }}
-                  title={c}
-                />
-              ))}
-            </div>
+            {dressType && (
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 mb-2">
+                {dressType}
+              </span>
+            )}
+            {colors.length > 0 && (
+              <div className="flex items-center justify-center gap-2 my-1.5">
+                {colors.map((c, i) => (
+                  <div
+                    key={i}
+                    className="w-5 h-5 rounded-full border border-white/30 shadow-sm"
+                    style={{ backgroundColor: c }}
+                    title={c}
+                  />
+                ))}
+              </div>
+            )}
             {content.dressCodeDescription && (
               <p
-                className="text-xs text-neutral-400 max-w-xs mt-1 leading-relaxed"
+                className="text-xs text-neutral-300 max-w-xs mt-1 leading-relaxed opacity-90"
                 style={{ fontFamily: style.fontFamily }}
               >
                 {content.dressCodeDescription}
+              </p>
+            )}
+            {content.dressCodeNote && (
+              <span className="text-[10px] text-amber-300/80 mt-1 italic block">
+                {content.dressCodeNote}
+              </span>
+            )}
+          </div>
+        );
+      }
+
+      // 23. GIFT REGISTRY
+      case 'gift-registry': {
+        const registries = content.giftRegistries && content.giftRegistries.length > 0
+          ? content.giftRegistries
+          : [
+            { name: 'Amazon Registry', url: 'https://amazon.com' },
+            { name: 'Honeyfund', url: 'https://honeyfund.com' }
+          ];
+
+        return (
+          <div
+            className="w-full h-full flex flex-col items-center justify-center p-4 text-center select-none transition-all"
+            style={{
+              backgroundColor: style.backgroundColor || 'transparent',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : undefined,
+              fontFamily: style.fontFamily || "'Playfair Display', serif",
+              color: style.color || 'inherit'
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              <Gift className="w-4 h-4 text-amber-500" />
+              <span
+                className="text-xs uppercase tracking-widest font-semibold"
+                style={{ color: style.color || '#fbbf24' }}
+              >
+                {content.giftRegistryTitle || 'Gift Registry'}
+              </span>
+            </div>
+            {content.giftRegistryDescription && (
+              <p className="text-xs text-neutral-300 max-w-sm mt-1 mb-3 leading-relaxed opacity-90">
+                {content.giftRegistryDescription}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {registries.map((reg, idx) => (
+                <a
+                  key={idx}
+                  href={reg.url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (isEditor) e.preventDefault();
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                >
+                  <span>{reg.name || 'Registry Link'}</span>
+                  <ExternalLink className="w-3 h-3 opacity-70" />
+                </a>
+              ))}
+            </div>
+            {content.giftRegistryCashInfo && (
+              <p className="text-[10.5px] text-neutral-400 mt-2.5 max-w-xs italic">
+                {content.giftRegistryCashInfo}
+              </p>
+            )}
+          </div>
+        );
+      }
+
+      // 24. TRAVEL & ACCOMMODATION
+      case 'travel-accommodation': {
+        const accommodations = content.accommodations && content.accommodations.length > 0
+          ? content.accommodations
+          : [
+            {
+              name: 'The Grand Luxury Hotel',
+              address: '100 Luxury Blvd, Asheville, NC',
+              bookingUrl: 'https://hotel.example.com',
+              rateCode: 'WEDDING2026'
+            }
+          ];
+
+        return (
+          <div
+            className="w-full h-full flex flex-col items-center justify-center p-4 text-center select-none transition-all"
+            style={{
+              backgroundColor: style.backgroundColor || 'transparent',
+              borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
+              borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
+              borderColor: style.borderColor,
+              borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
+              boxShadow: style.boxShadow,
+              padding: style.padding ? `${style.padding}px` : undefined,
+              fontFamily: style.fontFamily || "'Playfair Display', serif",
+              color: style.color || 'inherit'
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              <Plane className="w-4 h-4 text-amber-500" />
+              <span
+                className="text-xs uppercase tracking-widest font-semibold"
+                style={{ color: style.color || '#fbbf24' }}
+              >
+                {content.travelTitle || 'Travel & Accommodations'}
+              </span>
+            </div>
+            {content.travelDescription && (
+              <p className="text-xs text-neutral-300 max-w-sm mt-1 mb-2.5 leading-relaxed opacity-90">
+                {content.travelDescription}
+              </p>
+            )}
+            <div className="w-full max-w-sm space-y-2">
+              {accommodations.map((hotel, idx) => (
+                <div
+                  key={idx}
+                  className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left flex items-center justify-between gap-2"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-bold text-white truncate">{hotel.name}</div>
+                    {hotel.address && (
+                      <div className="text-[10px] text-neutral-400 flex items-center gap-1 truncate mt-0.5">
+                        <MapPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                        <span className="truncate">{hotel.address}</span>
+                      </div>
+                    )}
+                    {hotel.rateCode && (
+                      <div className="text-[9.5px] text-amber-300 mt-1 font-mono">
+                        Code: {hotel.rateCode}
+                      </div>
+                    )}
+                  </div>
+                  {hotel.bookingUrl && (
+                    <a
+                      href={hotel.bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (isEditor) e.preventDefault();
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-neutral-950 font-semibold text-[10.5px] shrink-0 flex items-center gap-1 transition-colors"
+                    >
+                      <span>Book</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+            {content.travelFlightsInfo && (
+              <p className="text-[10px] text-neutral-400 mt-2 max-w-xs italic">
+                {content.travelFlightsInfo}
               </p>
             )}
           </div>
@@ -731,13 +907,12 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                 return (
                   <div
                     key={child.id}
-                    className={`cursor-pointer transition-shadow ${
-                      isEditor
+                    className={`cursor-pointer transition-shadow ${isEditor
                         ? isChildSelected
                           ? 'ring-2 ring-indigo-600 rounded-[2px] z-50'
                           : 'hover:ring-1 hover:ring-indigo-400/50'
                         : ''
-                    }`}
+                      }`}
                     style={{
                       position: 'absolute',
                       left: `${childStyle.x}px`,

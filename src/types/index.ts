@@ -161,6 +161,8 @@ export type ElementType =
   | 'google-maps'
   | 'directions-button'
   | 'dress-code'
+  | 'gift-registry'
+  | 'travel-accommodation'
   | 'photo-gallery'
   | 'rsvp-form'
   | 'guestbook'
@@ -294,6 +296,30 @@ export interface ElementContent {
   dressCodeTitle?: string;
   dressCodeColors?: string[];
   dressCodeDescription?: string;
+  dressCodeType?: 'Formal' | 'Black Tie' | 'Semi-Formal' | 'Smart Casual' | 'Traditional' | 'Beach / Casual' | 'Custom';
+  dressCodeImageUrl?: string;
+  dressCodeNote?: string;
+
+  // Gift Registry
+  giftRegistryTitle?: string;
+  giftRegistryDescription?: string;
+  giftRegistryButtonText?: string;
+  giftRegistries?: Array<{ name: string; url: string; note?: string; icon?: string }>;
+  giftRegistryCashInfo?: string;
+
+  // Travel & Accommodation
+  travelTitle?: string;
+  travelDescription?: string;
+  accommodations?: Array<{
+    name: string;
+    address?: string;
+    bookingUrl?: string;
+    rateCode?: string;
+    phone?: string;
+    notes?: string;
+  }>;
+  travelFlightsInfo?: string;
+  travelShuttleInfo?: string;
   
   timelineEvents?: Array<{ time: string; title: string; description: string; icon?: string }>;
   timelineLayout?: 'vertical' | 'split' | 'cards';

@@ -18,7 +18,7 @@ async function startServer() {
   await initMongo();
 
   const app = express();
-  const PORT = 3000;
+  const PORT = 3005;
 
   // JSON Body Parser with reasonable payload limit for canvas designs
   app.use(express.json({ limit: '15mb' }));

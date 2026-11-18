@@ -1,7 +1,7 @@
 import React from 'react';
 import { CanvasElement, ElementStyle } from '../../../types';
 import { GOOGLE_FONTS_LIST } from '../../../data/stockAssets';
-import { Plus, Trash2, Calendar, Clock, MapPin, MessageCircle, QrCode, Heart, Sparkles, Image as ImageIcon, Palette, Type } from 'lucide-react';
+import { Plus, Trash2, Calendar, Clock, MapPin, MessageCircle, QrCode, Heart, Sparkles, Image as ImageIcon, Palette, Type, Gift, Plane, Shirt, ExternalLink } from 'lucide-react';
 
 interface InvitationElementsInspectorProps {
   element: CanvasElement;
@@ -150,9 +150,8 @@ export const InvitationElementsInspector: React.FC<InvitationElementsInspectorPr
                 key={c}
                 type="button"
                 onClick={() => updateStyle({ color: c })}
-                className={`w-4 h-4 rounded-full border cursor-pointer hover:scale-110 transition-transform ${
-                  style.color === c ? 'ring-2 ring-slate-900 ring-offset-1 border-white' : 'border-slate-300'
-                }`}
+                className={`w-4 h-4 rounded-full border cursor-pointer hover:scale-110 transition-transform ${style.color === c ? 'ring-2 ring-slate-900 ring-offset-1 border-white' : 'border-slate-300'
+                  }`}
                 style={{ backgroundColor: c }}
                 title={c}
               />
@@ -167,11 +166,10 @@ export const InvitationElementsInspector: React.FC<InvitationElementsInspectorPr
             <button
               type="button"
               onClick={() => updateStyle({ backgroundColor: 'transparent' })}
-              className={`text-[9px] px-1.5 py-0.5 rounded cursor-pointer font-bold ${
-                !style.backgroundColor || style.backgroundColor === 'transparent'
+              className={`text-[9px] px-1.5 py-0.5 rounded cursor-pointer font-bold ${!style.backgroundColor || style.backgroundColor === 'transparent'
                   ? 'bg-slate-900 text-white'
                   : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-              }`}
+                }`}
             >
               Transparent
             </button>
@@ -199,712 +197,1095 @@ export const InvitationElementsInspector: React.FC<InvitationElementsInspectorPr
   const renderContent = () => {
     // 1. EVENT DATE
     if (type === 'event-date') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Event Date Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Header Label</label>
-          <input
-            type="text"
-            value={content.text || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Celebration Date"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Formatted Date Text</label>
-          <input
-            type="text"
-            value={content.eventDate || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, eventDate: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Saturday, October 24, 2026"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // 2. EVENT TIME
-  if (type === 'event-time') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Event Time Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Header Label</label>
-          <input
-            type="text"
-            value={content.text || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Reception Time"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Formatted Time Text</label>
-          <input
-            type="text"
-            value={content.eventTime || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, eventTime: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. 04:00 PM – 10:00 PM"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // 3. COUNTDOWN
-  if (type === 'countdown') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Countdown Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Target Date & Time</label>
-          <input
-            type="datetime-local"
-            value={content.countdownTarget ? content.countdownTarget.substring(0, 16) : ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, countdownTarget: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Visual Style</label>
-          <div className="grid grid-cols-3 gap-1">
-            {[
-              { id: 'boxes', label: 'Cards' },
-              { id: 'minimal', label: 'Minimal' },
-              { id: 'circles', label: 'Badges' }
-            ].map((st) => (
-              <button
-                key={st.id}
-                type="button"
-                onClick={() => onUpdateElement(element.id, { content: { ...content, countdownStyle: st.id as any } })}
-                className={`py-1.5 rounded border text-[11px] font-medium transition-colors cursor-pointer text-center ${
-                  (content.countdownStyle || 'boxes') === st.id
-                    ? 'bg-slate-900 text-white border-slate-900 font-bold'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                {st.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 4. CALENDAR
-  if (type === 'calendar') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Calendar Sync Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Target Event Date</label>
-          <input
-            type="date"
-            value={content.eventDate || '2026-10-24'}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, eventDate: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Calendar Event Title</label>
-          <input
-            type="text"
-            value={content.calendarEventTitle || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, calendarEventTitle: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Alexander & Sophia Wedding"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Calendar Location</label>
-          <input
-            type="text"
-            value={content.calendarEventLocation || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, calendarEventLocation: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. The Grand Biltmore Estate"
-          />
-        </div>
-        <label className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200 cursor-pointer">
-          <span className="text-xs font-medium text-slate-800">Show 'Add to Calendar' Button</span>
-          <input
-            type="checkbox"
-            checked={content.calendarShowAddToCal !== false}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, calendarShowAddToCal: e.target.checked } })}
-            className="w-4 h-4 accent-slate-900"
-          />
-        </label>
-      </div>
-    );
-  }
-
-  // 5. VENUE
-  if (type === 'venue') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Venue Details
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Venue Name</label>
-          <input
-            type="text"
-            value={content.venueName || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, venueName: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. The Grand Ballroom"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Full Physical Address</label>
-          <textarea
-            rows={2}
-            value={content.venueAddress || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, venueAddress: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. 1 Lodge St, Asheville, NC 28803"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // 6. MAP
-  if (type === 'google-maps') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Map Embed Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Venue / Pin Label</label>
-          <input
-            type="text"
-            value={content.venueName || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, venueName: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Biltmore Estate"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Location / Search Query</label>
-          <input
-            type="text"
-            value={content.venueAddress || ''}
-            onChange={(e) =>
-              onUpdateElement(element.id, {
-                content: {
-                  ...content,
-                  venueAddress: e.target.value,
-                  mapQuery: encodeURIComponent(e.target.value)
-                }
-              })
-            }
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. 1 Lodge St, Asheville, NC"
-          />
-        </div>
-        <div>
-          <div className="flex justify-between text-[10px] text-slate-500 mb-1">
-            <span>Zoom Level</span>
-            <span className="font-mono">{content.mapZoom || 14}</span>
-          </div>
-          <input
-            type="range"
-            min="10"
-            max="18"
-            value={content.mapZoom || 14}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, mapZoom: Number(e.target.value) } })}
-            className="w-full accent-slate-900"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // 7. TIMELINE
-  if (type === 'timeline') {
-    const events = content.timelineEvents || [];
-
-    const handleAddEvent = () => {
-      const updated = [...events, { time: '08:00 PM', title: 'Celebration Event', description: 'Description of event' }];
-      onUpdateElement(element.id, { content: { ...content, timelineEvents: updated } });
-    };
-
-    const handleUpdateEvent = (index: number, key: string, val: string) => {
-      const updated = events.map((ev, i) => (i === index ? { ...ev, [key]: val } : ev));
-      onUpdateElement(element.id, { content: { ...content, timelineEvents: updated } });
-    };
-
-    const handleDeleteEvent = (index: number) => {
-      const updated = events.filter((_, i) => i !== index);
-      onUpdateElement(element.id, { content: { ...content, timelineEvents: updated } });
-    };
-
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <div className="flex items-center justify-between">
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-            Timeline Itinerary
+            Event Date Settings
           </span>
-          <button
-            type="button"
-            onClick={handleAddEvent}
-            className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-semibold flex items-center gap-1 cursor-pointer"
-          >
-            <Plus className="w-3 h-3" />
-            <span>Add Step</span>
-          </button>
-        </div>
-
-        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-          {events.map((ev, idx) => (
-            <div key={idx} className="p-2 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5 relative group">
-              <div className="flex items-center justify-between gap-1.5">
-                <input
-                  type="text"
-                  value={ev.time}
-                  onChange={(e) => handleUpdateEvent(idx, 'time', e.target.value)}
-                  className="w-24 bg-white border border-slate-200 rounded p-1 text-[11px] font-mono font-semibold text-slate-900"
-                  placeholder="04:00 PM"
-                />
-                <select
-                  value={ev.icon || 'Clock'}
-                  onChange={(e) => handleUpdateEvent(idx, 'icon', e.target.value)}
-                  className="flex-1 bg-white border border-slate-200 rounded p-1 text-[11px] text-slate-800"
-                >
-                  <option value="Clock">Clock</option>
-                  <option value="Church">Ceremony / Church</option>
-                  <option value="Heart">Vows / Rings</option>
-                  <option value="Wine">Cocktail / Wine</option>
-                  <option value="Utensils">Banquet / Dinner</option>
-                  <option value="Cake">Cake Cutting</option>
-                  <option value="Music">Dance / Music</option>
-                  <option value="Camera">Photo Session</option>
-                  <option value="Sparkles">Party / Sparkles</option>
-                  <option value="Car">Departure / Car</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteEvent(idx)}
-                  className="p-1 text-slate-400 hover:text-red-600 rounded cursor-pointer"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              </div>
-              <input
-                type="text"
-                value={ev.title}
-                onChange={(e) => handleUpdateEvent(idx, 'title', e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold text-slate-900"
-                placeholder="Ceremony Title"
-              />
-              <input
-                type="text"
-                value={ev.description}
-                onChange={(e) => handleUpdateEvent(idx, 'description', e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded p-1 text-[11px] text-slate-600"
-                placeholder="Brief description"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // 8. PHOTO GALLERY
-  if (type === 'photo-gallery') {
-    const images = content.galleryImages || [];
-    const layouts = [
-      { id: 'coverflow', label: '3D Coverflow ✨' },
-      { id: 'stack', label: '3D Stack Deck ✨' },
-      { id: 'cylinder', label: '3D Rotary Reel' },
-      { id: 'carousel', label: 'Carousel Slider' },
-      { id: 'grid', label: 'Photo Grid' },
-      { id: 'masonry', label: 'Masonry Wall' },
-      { id: 'polaroid', label: 'Polaroid Frame' }
-    ];
-
-    const handleAddPhoto = () => {
-      const samplePhotos = [
-        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80'
-      ];
-      const updated = [...images, { url: samplePhotos[images.length % samplePhotos.length], caption: 'Precious Memory' }];
-      onUpdateElement(element.id, { content: { ...content, galleryImages: updated } });
-    };
-
-    const handleUpdatePhoto = (index: number, key: string, val: string) => {
-      const updated = images.map((img, i) => (i === index ? { ...img, [key]: val } : img));
-      onUpdateElement(element.id, { content: { ...content, galleryImages: updated } });
-    };
-
-    const handleDeletePhoto = (index: number) => {
-      const updated = images.filter((_, i) => i !== index);
-      onUpdateElement(element.id, { content: { ...content, galleryImages: updated } });
-    };
-
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Gallery Layout & Photos
-        </span>
-
-        {/* Layout selector */}
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Layout Mode</label>
-          <div className="grid grid-cols-2 gap-1.5">
-            {layouts.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => onUpdateElement(element.id, { content: { ...content, galleryLayout: l.id as any } })}
-                className={`py-1.5 px-2 rounded border text-[11px] font-medium transition-colors cursor-pointer text-center ${
-                  (content.galleryLayout || 'carousel') === l.id
-                    ? 'bg-slate-900 text-white border-slate-900 font-bold'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                {l.label}
-              </button>
-            ))}
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Header Label</label>
+            <input
+              type="text"
+              value={content.text || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Celebration Date"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Formatted Date Text</label>
+            <input
+              type="text"
+              value={content.eventDate || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, eventDate: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Saturday, October 24, 2026"
+            />
           </div>
         </div>
+      );
+    }
 
-        {/* Photos List */}
-        <div className="space-y-2 pt-2 border-t border-slate-200">
+    // 2. EVENT TIME
+    if (type === 'event-time') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Event Time Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Header Label</label>
+            <input
+              type="text"
+              value={content.text || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Reception Time"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Formatted Time Text</label>
+            <input
+              type="text"
+              value={content.eventTime || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, eventTime: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. 04:00 PM – 10:00 PM"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // 3. COUNTDOWN
+    if (type === 'countdown') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Countdown Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Target Date & Time</label>
+            <input
+              type="datetime-local"
+              value={content.countdownTarget ? content.countdownTarget.substring(0, 16) : ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, countdownTarget: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Visual Style</label>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { id: 'boxes', label: 'Cards' },
+                { id: 'minimal', label: 'Minimal' },
+                { id: 'circles', label: 'Badges' }
+              ].map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => onUpdateElement(element.id, { content: { ...content, countdownStyle: st.id as any } })}
+                  className={`py-1.5 rounded border text-[11px] font-medium transition-colors cursor-pointer text-center ${(content.countdownStyle || 'boxes') === st.id
+                      ? 'bg-slate-900 text-white border-slate-900 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                >
+                  {st.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 4. CALENDAR
+    if (type === 'calendar') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Calendar Sync Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Target Event Date</label>
+            <input
+              type="date"
+              value={content.eventDate || '2026-10-24'}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, eventDate: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Calendar Event Title</label>
+            <input
+              type="text"
+              value={content.calendarEventTitle || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, calendarEventTitle: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Alexander & Sophia Wedding"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Calendar Location</label>
+            <input
+              type="text"
+              value={content.calendarEventLocation || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, calendarEventLocation: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. The Grand Biltmore Estate"
+            />
+          </div>
+          <label className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200 cursor-pointer">
+            <span className="text-xs font-medium text-slate-800">Show 'Add to Calendar' Button</span>
+            <input
+              type="checkbox"
+              checked={content.calendarShowAddToCal !== false}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, calendarShowAddToCal: e.target.checked } })}
+              className="w-4 h-4 accent-slate-900"
+            />
+          </label>
+        </div>
+      );
+    }
+
+    // 5. VENUE
+    if (type === 'venue') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Venue Details
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Venue Name</label>
+            <input
+              type="text"
+              value={content.venueName || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, venueName: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. The Grand Ballroom"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Full Physical Address</label>
+            <textarea
+              rows={2}
+              value={content.venueAddress || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, venueAddress: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. 1 Lodge St, Asheville, NC 28803"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // 6. MAP
+    if (type === 'google-maps') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Map Embed Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Venue / Pin Label</label>
+            <input
+              type="text"
+              value={content.venueName || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, venueName: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Biltmore Estate"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Location / Search Query</label>
+            <input
+              type="text"
+              value={content.venueAddress || ''}
+              onChange={(e) =>
+                onUpdateElement(element.id, {
+                  content: {
+                    ...content,
+                    venueAddress: e.target.value,
+                    mapQuery: encodeURIComponent(e.target.value)
+                  }
+                })
+              }
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. 1 Lodge St, Asheville, NC"
+            />
+          </div>
+          <div>
+            <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+              <span>Zoom Level</span>
+              <span className="font-mono">{content.mapZoom || 14}</span>
+            </div>
+            <input
+              type="range"
+              min="10"
+              max="18"
+              value={content.mapZoom || 14}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, mapZoom: Number(e.target.value) } })}
+              className="w-full accent-slate-900"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // 7. TIMELINE
+    if (type === 'timeline') {
+      const events = content.timelineEvents || [];
+
+      const handleAddEvent = () => {
+        const updated = [...events, { time: '08:00 PM', title: 'Celebration Event', description: 'Description of event' }];
+        onUpdateElement(element.id, { content: { ...content, timelineEvents: updated } });
+      };
+
+      const handleUpdateEvent = (index: number, key: string, val: string) => {
+        const updated = events.map((ev, i) => (i === index ? { ...ev, [key]: val } : ev));
+        onUpdateElement(element.id, { content: { ...content, timelineEvents: updated } });
+      };
+
+      const handleDeleteEvent = (index: number) => {
+        const updated = events.filter((_, i) => i !== index);
+        onUpdateElement(element.id, { content: { ...content, timelineEvents: updated } });
+      };
+
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 block">
-              Photos ({images.length})
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+              Timeline Itinerary
             </span>
             <button
               type="button"
-              onClick={handleAddPhoto}
+              onClick={handleAddEvent}
               className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-semibold flex items-center gap-1 cursor-pointer"
             >
               <Plus className="w-3 h-3" />
-              <span>Add Photo</span>
+              <span>Add Step</span>
             </button>
           </div>
 
-          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-            {images.map((img, idx) => (
-              <div key={idx} className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex gap-2 items-center">
-                <img src={img.url} alt="Thumbnail" className="w-10 h-10 object-cover rounded" referrerPolicy="no-referrer" />
-                <div className="flex-1 space-y-1">
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {events.map((ev, idx) => (
+              <div key={idx} className="p-2 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5 relative group">
+                <div className="flex items-center justify-between gap-1.5">
                   <input
                     type="text"
-                    value={img.url}
-                    onChange={(e) => handleUpdatePhoto(idx, 'url', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded p-1 text-[10px] font-mono text-slate-700"
-                    placeholder="https://..."
+                    value={ev.time}
+                    onChange={(e) => handleUpdateEvent(idx, 'time', e.target.value)}
+                    className="w-24 bg-white border border-slate-200 rounded p-1 text-[11px] font-mono font-semibold text-slate-900"
+                    placeholder="04:00 PM"
                   />
-                  <input
-                    type="text"
-                    value={img.caption || ''}
-                    onChange={(e) => handleUpdatePhoto(idx, 'caption', e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded p-1 text-[10px] text-slate-800"
-                    placeholder="Caption"
-                  />
+                  <select
+                    value={ev.icon || 'Clock'}
+                    onChange={(e) => handleUpdateEvent(idx, 'icon', e.target.value)}
+                    className="flex-1 bg-white border border-slate-200 rounded p-1 text-[11px] text-slate-800"
+                  >
+                    <option value="Clock">Clock</option>
+                    <option value="Church">Ceremony / Church</option>
+                    <option value="Heart">Vows / Rings</option>
+                    <option value="Wine">Cocktail / Wine</option>
+                    <option value="Utensils">Banquet / Dinner</option>
+                    <option value="Cake">Cake Cutting</option>
+                    <option value="Music">Dance / Music</option>
+                    <option value="Camera">Photo Session</option>
+                    <option value="Sparkles">Party / Sparkles</option>
+                    <option value="Car">Departure / Car</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteEvent(idx)}
+                    className="p-1 text-slate-400 hover:text-red-600 rounded cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleDeletePhoto(idx)}
-                  className="p-1 text-slate-400 hover:text-red-600 rounded cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <input
+                  type="text"
+                  value={ev.title}
+                  onChange={(e) => handleUpdateEvent(idx, 'title', e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold text-slate-900"
+                  placeholder="Ceremony Title"
+                />
+                <input
+                  type="text"
+                  value={ev.description}
+                  onChange={(e) => handleUpdateEvent(idx, 'description', e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded p-1 text-[11px] text-slate-600"
+                  placeholder="Brief description"
+                />
               </div>
             ))}
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // 9. WHATSAPP BUTTON
-  if (type === 'whatsapp-button') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          WhatsApp RSVP Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
-          <input
-            type="text"
-            value={content.buttonText || 'RSVP via WhatsApp'}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, buttonText: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Phone Number (with Country Code)</label>
-          <input
-            type="text"
-            value={content.whatsappPhone || '+1234567890'}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, whatsappPhone: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="+1234567890"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Pre-filled Message</label>
-          <textarea
-            rows={3}
-            value={content.whatsappMessage || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, whatsappMessage: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="Hi! I am delighted to accept your invitation..."
-          />
-        </div>
-      </div>
-    );
-  }
+    // 8. PHOTO GALLERY
+    if (type === 'photo-gallery') {
+      const images = content.galleryImages || [];
+      const layouts = [
+        { id: 'coverflow', label: '3D Coverflow ✨' },
+        { id: 'stack', label: '3D Stack Deck ✨' },
+        { id: 'cylinder', label: '3D Rotary Reel' },
+        { id: 'carousel', label: 'Carousel Slider' },
+        { id: 'grid', label: 'Photo Grid' },
+        { id: 'masonry', label: 'Masonry Wall' },
+        { id: 'polaroid', label: 'Polaroid Frame' }
+      ];
 
-  // 10. QR CODE
-  if (type === 'qr-code') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          QR Code Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Encoded Value / Link</label>
-          <input
-            type="text"
-            value={content.qrCodeValue || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrCodeValue: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 font-mono text-[11px] text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="https://..."
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Label below QR (Optional)</label>
-          <input
-            type="text"
-            value={content.qrLabel || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrLabel: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Scan to Check-In"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-2">
+      const handleAddPhoto = () => {
+        const samplePhotos = [
+          'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80'
+        ];
+        const updated = [...images, { url: samplePhotos[images.length % samplePhotos.length], caption: 'Precious Memory' }];
+        onUpdateElement(element.id, { content: { ...content, galleryImages: updated } });
+      };
+
+      const handleUpdatePhoto = (index: number, key: string, val: string) => {
+        const updated = images.map((img, i) => (i === index ? { ...img, [key]: val } : img));
+        onUpdateElement(element.id, { content: { ...content, galleryImages: updated } });
+      };
+
+      const handleDeletePhoto = (index: number) => {
+        const updated = images.filter((_, i) => i !== index);
+        onUpdateElement(element.id, { content: { ...content, galleryImages: updated } });
+      };
+
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Gallery Layout & Photos
+          </span>
+
+          {/* Layout selector */}
           <div>
-            <label className="text-[10px] text-slate-500 block mb-1">Pattern Color</label>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="color"
-                value={content.qrFgColor || style.color || '#000000'}
-                onChange={(e) =>
-                  onUpdateElement(element.id, {
-                    content: { ...content, qrFgColor: e.target.value },
-                    style: { ...style, color: e.target.value }
-                  })
-                }
-                className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
-              />
-              <input
-                type="text"
-                value={content.qrFgColor || style.color || '#000000'}
-                onChange={(e) =>
-                  onUpdateElement(element.id, {
-                    content: { ...content, qrFgColor: e.target.value },
-                    style: { ...style, color: e.target.value }
-                  })
-                }
-                className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-              />
+            <label className="text-[10px] text-slate-500 block mb-1">Layout Mode</label>
+            <div className="grid grid-cols-2 gap-1.5">
+              {layouts.map((l) => (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => onUpdateElement(element.id, { content: { ...content, galleryLayout: l.id as any } })}
+                  className={`py-1.5 px-2 rounded border text-[11px] font-medium transition-colors cursor-pointer text-center ${(content.galleryLayout || 'carousel') === l.id
+                      ? 'bg-slate-900 text-white border-slate-900 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                >
+                  {l.label}
+                </button>
+              ))}
             </div>
           </div>
-          <div>
-            <label className="text-[10px] text-slate-500 block mb-1">Background</label>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="color"
-                value={content.qrBgColor || '#ffffff'}
-                onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrBgColor: e.target.value } })}
-                className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
-              />
-              <input
-                type="text"
-                value={content.qrBgColor || '#ffffff'}
-                onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrBgColor: e.target.value } })}
-                className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-              />
+
+          {/* Photos List */}
+          <div className="space-y-2 pt-2 border-t border-slate-200">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 block">
+                Photos ({images.length})
+              </span>
+              <button
+                type="button"
+                onClick={handleAddPhoto}
+                className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Photo</span>
+              </button>
+            </div>
+
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              {images.map((img, idx) => (
+                <div key={idx} className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex gap-2 items-center">
+                  <img src={img.url} alt="Thumbnail" className="w-10 h-10 object-cover rounded" referrerPolicy="no-referrer" />
+                  <div className="flex-1 space-y-1">
+                    <input
+                      type="text"
+                      value={img.url}
+                      onChange={(e) => handleUpdatePhoto(idx, 'url', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded p-1 text-[10px] font-mono text-slate-700"
+                      placeholder="https://..."
+                    />
+                    <input
+                      type="text"
+                      value={img.caption || ''}
+                      onChange={(e) => handleUpdatePhoto(idx, 'caption', e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded p-1 text-[10px] text-slate-800"
+                      placeholder="Caption"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePhoto(idx)}
+                    className="p-1 text-slate-400 hover:text-red-600 rounded cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // 11. RSVP FORM / GUESTBOOK
-  if (type === 'rsvp-form' || type === 'guestbook') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          {type === 'rsvp-form' ? 'RSVP Form Card' : 'Guestbook Widget'}
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Instruction Text</label>
-          <textarea
-            rows={3}
-            value={content.text || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="Prompt message for guests..."
-          />
+    // 9. WHATSAPP BUTTON
+    if (type === 'whatsapp-button') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            WhatsApp RSVP Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
+            <input
+              type="text"
+              value={content.buttonText || 'RSVP via WhatsApp'}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, buttonText: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Phone Number (with Country Code)</label>
+            <input
+              type="text"
+              value={content.whatsappPhone || '+1234567890'}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, whatsappPhone: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="+1234567890"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Pre-filled Message</label>
+            <textarea
+              rows={3}
+              value={content.whatsappMessage || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, whatsappMessage: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="Hi! I am delighted to accept your invitation..."
+            />
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // 12. COUPLE NAMES
-  if (type === 'couple-names') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Couple Names
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">First Person / Groom</label>
-          <input
-            type="text"
-            value={content.coupleName1 || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, coupleName1: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          />
+    // 10. QR CODE
+    if (type === 'qr-code') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            QR Code Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Encoded Value / Link</label>
+            <input
+              type="text"
+              value={content.qrCodeValue || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrCodeValue: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 font-mono text-[11px] text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="https://..."
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Label below QR (Optional)</label>
+            <input
+              type="text"
+              value={content.qrLabel || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrLabel: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Scan to Check-In"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-[10px] text-slate-500 block mb-1">Pattern Color</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="color"
+                  value={content.qrFgColor || style.color || '#000000'}
+                  onChange={(e) =>
+                    onUpdateElement(element.id, {
+                      content: { ...content, qrFgColor: e.target.value },
+                      style: { ...style, color: e.target.value }
+                    })
+                  }
+                  className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={content.qrFgColor || style.color || '#000000'}
+                  onChange={(e) =>
+                    onUpdateElement(element.id, {
+                      content: { ...content, qrFgColor: e.target.value },
+                      style: { ...style, color: e.target.value }
+                    })
+                  }
+                  className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] text-slate-500 block mb-1">Background</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="color"
+                  value={content.qrBgColor || '#ffffff'}
+                  onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrBgColor: e.target.value } })}
+                  className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
+                />
+                <input
+                  type="text"
+                  value={content.qrBgColor || '#ffffff'}
+                  onChange={(e) => onUpdateElement(element.id, { content: { ...content, qrBgColor: e.target.value } })}
+                  className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Connector</label>
-          <input
-            type="text"
-            value={content.andConnector || '&'}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, andConnector: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          />
-        </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Second Person / Bride</label>
-          <input
-            type="text"
-            value={content.coupleName2 || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, coupleName2: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-          />
-        </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // 13. DRESS CODE
-  if (type === 'dress-code') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Dress Code Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Dress Code Title</label>
-          <input
-            type="text"
-            value={content.dressCodeTitle || content.text || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeTitle: e.target.value, text: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Formal Black Tie"
-          />
+    // 11. RSVP FORM / GUESTBOOK
+    if (type === 'rsvp-form' || type === 'guestbook') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            {type === 'rsvp-form' ? 'RSVP Form Card' : 'Guestbook Widget'}
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Instruction Text</label>
+            <textarea
+              rows={3}
+              value={content.text || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="Prompt message for guests..."
+            />
+          </div>
         </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Description / Guidelines</label>
-          <textarea
-            rows={2}
-            value={content.dressCodeDescription || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeDescription: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Tuxedos and evening gowns are kindly requested."
-          />
-        </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // 14. DIRECTIONS BUTTON
-  if (type === 'directions-button') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Directions Button Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
-          <input
-            type="text"
-            value={content.text || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Get Driving Directions"
-          />
+    // 12. COUPLE NAMES
+    if (type === 'couple-names') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Couple Names
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">First Person / Groom</label>
+            <input
+              type="text"
+              value={content.coupleName1 || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, coupleName1: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Connector</label>
+            <input
+              type="text"
+              value={content.andConnector || '&'}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, andConnector: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Second Person / Bride</label>
+            <input
+              type="text"
+              value={content.coupleName2 || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, coupleName2: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+            />
+          </div>
         </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Maps URL / Query</label>
-          <input
-            type="text"
-            value={content.mapQuery || content.url || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, mapQuery: e.target.value, url: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. https://maps.google.com/?q=..."
-          />
-        </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  // 15. CONTACT BUTTON
-  if (type === 'contact-button') {
-    return (
-      <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-          Contact Button Settings
-        </span>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
-          <input
-            type="text"
-            value={content.text || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. Contact Organizer"
-          />
+    // 13. DRESS CODE
+    if (type === 'dress-code') {
+      const colors = content.dressCodeColors || ['#000000', '#ffffff', '#d4af37'];
+      const DRESS_TYPES = ['Formal', 'Black Tie', 'Semi-Formal', 'Smart Casual', 'Traditional', 'Beach / Casual', 'Custom'];
+      const PALETTE_PRESETS = [
+        { name: 'Black Tie Luxe', colors: ['#000000', '#d4af37', '#ffffff'] },
+        { name: 'Emerald & Gold', colors: ['#071912', '#d4af37', '#fdfbf7'] },
+        { name: 'Rose Romance', colors: ['#e11d48', '#fda4af', '#ffffff'] },
+        { name: 'Earth & Terracotta', colors: ['#78350f', '#d97706', '#fef3c7'] },
+        { name: 'Midnight Navy', colors: ['#0f172a', '#38bdf8', '#ffffff'] }
+      ];
+
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block flex items-center gap-1.5">
+            <Shirt className="w-3.5 h-3.5 text-purple-600" />
+            <span>Dress Code Settings</span>
+          </span>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Section Title</label>
+            <input
+              type="text"
+              value={content.dressCodeTitle || content.text || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeTitle: e.target.value, text: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Dress Code / Attire"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Attire Style</label>
+            <select
+              value={content.dressCodeType || 'Black Tie'}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeType: e.target.value as any } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs font-medium cursor-pointer"
+            >
+              {DRESS_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Description / Guidelines</label>
+            <textarea
+              rows={2}
+              value={content.dressCodeDescription || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeDescription: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Tuxedos and evening gowns are kindly requested."
+            />
+          </div>
+
+          {/* Suggested Color Palette Swatches */}
+          <div className="space-y-1.5 pt-1 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-semibold text-slate-700">Suggested Attire Colors</label>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = [...colors, '#d4af37'];
+                  onUpdateElement(element.id, { content: { ...content, dressCodeColors: next } });
+                }}
+                className="text-[10px] text-purple-600 hover:text-purple-700 font-semibold cursor-pointer"
+              >
+                + Add Color
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {colors.map((c, i) => (
+                <div key={i} className="flex items-center gap-1 bg-slate-100 p-1 rounded-md border border-slate-200">
+                  <input
+                    type="color"
+                    value={c}
+                    onChange={(e) => {
+                      const next = [...colors];
+                      next[i] = e.target.value;
+                      onUpdateElement(element.id, { content: { ...content, dressCodeColors: next } });
+                    }}
+                    className="w-5 h-5 rounded cursor-pointer p-0 bg-transparent border-0"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = colors.filter((_, idx) => idx !== i);
+                      onUpdateElement(element.id, { content: { ...content, dressCodeColors: next } });
+                    }}
+                    className="text-slate-400 hover:text-rose-500 p-0.5 cursor-pointer"
+                    title="Remove color"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick presets */}
+            <div className="space-y-1 pt-1">
+              <span className="text-[9px] text-slate-400 uppercase font-medium">Quick Palettes:</span>
+              <div className="flex flex-wrap gap-1">
+                {PALETTE_PRESETS.map((p) => (
+                  <button
+                    key={p.name}
+                    type="button"
+                    onClick={() => onUpdateElement(element.id, { content: { ...content, dressCodeColors: p.colors } })}
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 text-[9.5px] text-slate-700 cursor-pointer"
+                  >
+                    <div className="flex -space-x-1">
+                      {p.colors.map((col, idx) => (
+                        <span key={idx} className="w-2.5 h-2.5 rounded-full border border-white" style={{ backgroundColor: col }} />
+                      ))}
+                    </div>
+                    <span>{p.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Additional Note / Footnote</label>
+            <input
+              type="text"
+              value={content.dressCodeNote || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, dressCodeNote: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Please avoid white, ivory, and cream shades."
+            />
+          </div>
         </div>
-        <div>
-          <label className="text-[10px] text-slate-500 block mb-1">Phone / WhatsApp / Email</label>
-          <input
-            type="text"
-            value={content.contactInfo || content.phoneNumber || ''}
-            onChange={(e) => onUpdateElement(element.id, { content: { ...content, contactInfo: e.target.value, phoneNumber: e.target.value } })}
-            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-            placeholder="e.g. +1 555-0199 or name@example.com"
-          />
+      );
+    }
+
+    // 14. GIFT REGISTRY
+    if (type === 'gift-registry') {
+      const registries = content.giftRegistries && content.giftRegistries.length > 0
+        ? content.giftRegistries
+        : [
+          { name: 'Amazon Registry', url: 'https://amazon.com' },
+          { name: 'Honeyfund', url: 'https://honeyfund.com' }
+        ];
+
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block flex items-center gap-1.5">
+            <Gift className="w-3.5 h-3.5 text-amber-600" />
+            <span>Gift Registry Settings</span>
+          </span>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Section Title</label>
+            <input
+              type="text"
+              value={content.giftRegistryTitle || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, giftRegistryTitle: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Gift Registry / Wishing Well"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Message to Guests</label>
+            <textarea
+              rows={2}
+              value={content.giftRegistryDescription || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, giftRegistryDescription: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Your presence at our wedding is the greatest gift of all..."
+            />
+          </div>
+
+          {/* Registry Links List */}
+          <div className="space-y-2 pt-1 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-semibold text-slate-700">Registry Links & Stores</label>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = [...registries, { name: 'New Registry', url: 'https://' }];
+                  onUpdateElement(element.id, { content: { ...content, giftRegistries: next } });
+                }}
+                className="text-[10px] text-amber-700 hover:text-amber-800 font-semibold cursor-pointer"
+              >
+                + Add Registry
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {registries.map((reg, idx) => (
+                <div key={idx} className="p-2 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-slate-600">Store #{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = registries.filter((_, i) => i !== idx);
+                        onUpdateElement(element.id, { content: { ...content, giftRegistries: next } });
+                      }}
+                      className="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={reg.name}
+                    onChange={(e) => {
+                      const next = [...registries];
+                      next[idx] = { ...next[idx], name: e.target.value };
+                      onUpdateElement(element.id, { content: { ...content, giftRegistries: next } });
+                    }}
+                    className="w-full bg-white border border-slate-200 rounded p-1 text-slate-800 text-xs"
+                    placeholder="Store Name (e.g. Amazon, Zola)"
+                  />
+                  <input
+                    type="text"
+                    value={reg.url}
+                    onChange={(e) => {
+                      const next = [...registries];
+                      next[idx] = { ...next[idx], url: e.target.value };
+                      onUpdateElement(element.id, { content: { ...content, giftRegistries: next } });
+                    }}
+                    className="w-full bg-white border border-slate-200 rounded p-1 text-slate-800 text-xs font-mono"
+                    placeholder="https://..."
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Quick preset suggestions */}
+            <div className="flex flex-wrap gap-1 pt-1">
+              {['Amazon', 'Honeyfund (Cash)', 'Target', 'Zola', 'Crate & Barrel'].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    const next = [...registries, { name: preset, url: `https://www.${preset.toLowerCase().split(' ')[0]}.com` }];
+                    onUpdateElement(element.id, { content: { ...content, giftRegistries: next } });
+                  }}
+                  className="text-[9.5px] px-2 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 cursor-pointer"
+                >
+                  + {preset}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cash Fund / Bank Details */}
+          <div className="pt-1 border-t border-slate-100">
+            <label className="text-[10px] text-slate-500 block mb-1">Cash Fund / Bank / UPI Details (Optional)</label>
+            <textarea
+              rows={2}
+              value={content.giftRegistryCashInfo || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, giftRegistryCashInfo: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Bank Account / Venmo / UPI details for monetary contributions"
+            />
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
+
+    // 15. TRAVEL & ACCOMMODATION
+    if (type === 'travel-accommodation') {
+      const accommodations = content.accommodations && content.accommodations.length > 0
+        ? content.accommodations
+        : [
+          {
+            name: 'The Grand Luxury Hotel',
+            address: '100 Luxury Blvd, Asheville, NC',
+            bookingUrl: 'https://hotel.example.com',
+            rateCode: 'WEDDING2026'
+          }
+        ];
+
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block flex items-center gap-1.5">
+            <Plane className="w-3.5 h-3.5 text-sky-600" />
+            <span>Travel & Accommodation Settings</span>
+          </span>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Section Title</label>
+            <input
+              type="text"
+              value={content.travelTitle || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, travelTitle: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Travel & Accommodations"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">General Description</label>
+            <textarea
+              rows={2}
+              value={content.travelDescription || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, travelDescription: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Room blocks have been reserved for our guests under the wedding party."
+            />
+          </div>
+
+          {/* Accommodations List */}
+          <div className="space-y-2 pt-1 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-semibold text-slate-700">Hotel & Lodging Entries</label>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = [...accommodations, { name: 'New Hotel', address: '', bookingUrl: '', rateCode: '' }];
+                  onUpdateElement(element.id, { content: { ...content, accommodations: next } });
+                }}
+                className="text-[10px] text-sky-700 hover:text-sky-800 font-semibold cursor-pointer"
+              >
+                + Add Hotel
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {accommodations.map((hotel, idx) => (
+                <div key={idx} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold text-slate-700">Hotel #{idx + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = accommodations.filter((_, i) => i !== idx);
+                        onUpdateElement(element.id, { content: { ...content, accommodations: next } });
+                      }}
+                      className="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-400 block mb-0.5">Hotel Name</label>
+                    <input
+                      type="text"
+                      value={hotel.name}
+                      onChange={(e) => {
+                        const next = [...accommodations];
+                        next[idx] = { ...next[idx], name: e.target.value };
+                        onUpdateElement(element.id, { content: { ...content, accommodations: next } });
+                      }}
+                      className="w-full bg-white border border-slate-200 rounded p-1 text-slate-800 text-xs"
+                      placeholder="e.g. The Grand Hotel"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] text-slate-400 block mb-0.5">Address</label>
+                    <input
+                      type="text"
+                      value={hotel.address || ''}
+                      onChange={(e) => {
+                        const next = [...accommodations];
+                        next[idx] = { ...next[idx], address: e.target.value };
+                        onUpdateElement(element.id, { content: { ...content, accommodations: next } });
+                      }}
+                      className="w-full bg-white border border-slate-200 rounded p-1 text-slate-800 text-xs"
+                      placeholder="123 Main St, City, State"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <div>
+                      <label className="text-[9px] text-slate-400 block mb-0.5">Booking URL</label>
+                      <input
+                        type="text"
+                        value={hotel.bookingUrl || ''}
+                        onChange={(e) => {
+                          const next = [...accommodations];
+                          next[idx] = { ...next[idx], bookingUrl: e.target.value };
+                          onUpdateElement(element.id, { content: { ...content, accommodations: next } });
+                        }}
+                        className="w-full bg-white border border-slate-200 rounded p-1 text-slate-800 text-xs font-mono"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-slate-400 block mb-0.5">Discount / Rate Code</label>
+                      <input
+                        type="text"
+                        value={hotel.rateCode || ''}
+                        onChange={(e) => {
+                          const next = [...accommodations];
+                          next[idx] = { ...next[idx], rateCode: e.target.value };
+                          onUpdateElement(element.id, { content: { ...content, accommodations: next } });
+                        }}
+                        className="w-full bg-white border border-slate-200 rounded p-1 text-slate-800 text-xs font-mono"
+                        placeholder="e.g. WED2026"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Transportation / Flights Note */}
+          <div className="pt-1 border-t border-slate-100">
+            <label className="text-[10px] text-slate-500 block mb-1">Flights, Airport & Shuttle Info</label>
+            <textarea
+              rows={2}
+              value={content.travelFlightsInfo || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, travelFlightsInfo: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900 text-xs"
+              placeholder="e.g. Complimentary shuttle provided from Asheville Regional Airport (AVL)."
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // 14. DIRECTIONS BUTTON
+    if (type === 'directions-button') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Directions Button Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
+            <input
+              type="text"
+              value={content.text || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Get Driving Directions"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Maps URL / Query</label>
+            <input
+              type="text"
+              value={content.mapQuery || content.url || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, mapQuery: e.target.value, url: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. https://maps.google.com/?q=..."
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // 15. CONTACT BUTTON
+    if (type === 'contact-button') {
+      return (
+        <div className="space-y-3 pt-3 border-t border-slate-200 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+            Contact Button Settings
+          </span>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Button Label</label>
+            <input
+              type="text"
+              value={content.text || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, text: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. Contact Organizer"
+            />
+          </div>
+          <div>
+            <label className="text-[10px] text-slate-500 block mb-1">Phone / WhatsApp / Email</label>
+            <input
+              type="text"
+              value={content.contactInfo || content.phoneNumber || ''}
+              onChange={(e) => onUpdateElement(element.id, { content: { ...content, contactInfo: e.target.value, phoneNumber: e.target.value } })}
+              className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+              placeholder="e.g. +1 555-0199 or name@example.com"
+            />
+          </div>
+        </div>
+      );
+    }
 
     return null;
   };

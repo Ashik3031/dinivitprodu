@@ -28,8 +28,6 @@ import {
   Calendar,
   LogOut,
   ShieldAlert,
-  ArrowRight,
-  ArrowLeft,
   Globe,
   FileEdit,
   Layers,
@@ -71,19 +69,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [invToDelete, setInvToDelete] = useState<Invitation | null>(null);
   const [isDeletingInv, setIsDeletingInv] = useState(false);
 
-  // Multi-step Creation Wizard State
+  // Invitation Creation Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [creationStep, setCreationStep] = useState<1 | 2 | 3>(1);
-  
-  // Step 1: Type Selection
   const [selectedEventType, setSelectedEventType] = useState<EventType>('wedding');
-  
-  // Step 2: Creation Mode Selection
-  const [creationMode, setCreationMode] = useState<'blank' | 'template' | 'duplicate'>('template');
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
-  const [selectedDuplicateId, setSelectedDuplicateId] = useState<string>('');
-  
-  // Step 3: Metadata Details
   const [newTitle, setNewTitle] = useState('');
   const [newCustomerName, setNewCustomerName] = useState('');
   const [newEventDate, setNewEventDate] = useState('');
@@ -115,9 +103,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       ]);
       setInvitations(invRes.invitations || []);
       setTemplates(tmplRes.templates || []);
-      if (tmplRes.templates && tmplRes.templates.length > 0 && !selectedTemplateId) {
-        setSelectedTemplateId(tmplRes.templates[0].id);
-      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -129,20 +114,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     loadDashboardData();
   }, []);
 
-  const openCreateWizard = () => {
-    setCreationStep(1);
+  const openCreateModal = () => {
     setSelectedEventType('wedding');
-    setCreationMode('template');
-    if (templates.length > 0) {
-      setSelectedTemplateId(templates[0].id);
-    }
-    setSelectedDuplicateId(invitations.length > 0 ? invitations[0].id : '');
     setNewTitle('');
     setNewCustomerName('');
     setNewEventDate('');
     setCreateError('');
     setIsCreateModalOpen(true);
   };
+  const openCreateWizard = openCreateModal;
 
   // Filtered invitations
   const filteredInvitations = invitations.filter((inv) => {
@@ -161,30 +141,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     (a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
   ).slice(0, 5);
 
-  // Step 1 to Step 2 transition
-  const handleNextFromStep1 = (type: EventType) => {
-    setSelectedEventType(type);
-    // Find a matching template if possible
-    const match = templates.find(t => t.category.toLowerCase() === type.toLowerCase());
-    if (match) {
-      setSelectedTemplateId(match.id);
-    } else if (templates.length > 0) {
-      setSelectedTemplateId(templates[0].id);
-    }
-    setCreationStep(2);
-  };
-
-  // Step 2 to Step 3 transition
-  const handleNextFromStep2 = () => {
-    // Generate an intelligent placeholder name based on step 1 & 2
-    if (!newTitle) {
-      const typeLabel = selectedEventType.charAt(0).toUpperCase() + selectedEventType.slice(1).replace('-', ' ');
-      setNewTitle(`${typeLabel} Invitation`);
-    }
-    setCreationStep(3);
-  };
-
-  // Handle Final Create Invitation
+  // Handle Create Invitation - directly creates and launches a clean blank canvas
   const handleCreateInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) {
@@ -200,16 +157,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         customerName: newCustomerName.trim(),
         eventDate: newEventDate,
         eventType: selectedEventType,
-        category: selectedEventType
+        category: selectedEventType,
+        templateId: 'blank' // directly start with a clean blank canvas
       };
-
-      if (creationMode === 'template') {
-        payload.templateId = selectedTemplateId;
-      } else if (creationMode === 'duplicate' && selectedDuplicateId) {
-        payload.duplicateFromId = selectedDuplicateId;
-      } else {
-        payload.templateId = 'blank'; // explicitly start with a clean blank canvas
-      }
 
       const res = await api.createInvitation(payload);
 
@@ -863,49 +813,28 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         )}
       </main>
 
-      {/* 3-STEP INVITATION CREATION WIZARD MODAL */}
+      {/* CREATE INVITATION MODAL */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <div className="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer"
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Stepper Header */}
             <div className="mb-6">
-              <div className="flex items-center justify-between max-w-xs mx-auto mb-3">
-                <div className={`flex items-center gap-1.5 text-xs font-bold ${creationStep >= 1 ? 'text-slate-900' : 'text-slate-300'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${creationStep >= 1 ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>1</div>
-                  <span>Type</span>
-                </div>
-                <div className={`h-[2px] flex-1 mx-2 ${creationStep >= 2 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                <div className={`flex items-center gap-1.5 text-xs font-bold ${creationStep >= 2 ? 'text-slate-900' : 'text-slate-300'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${creationStep >= 2 ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>2</div>
-                  <span>Template</span>
-                </div>
-                <div className={`h-[2px] flex-1 mx-2 ${creationStep >= 3 ? 'bg-slate-900' : 'bg-slate-200'}`} />
-                <div className={`flex items-center gap-1.5 text-xs font-bold ${creationStep >= 3 ? 'text-slate-900' : 'text-slate-300'}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${creationStep >= 3 ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>3</div>
-                  <span>Details</span>
-                </div>
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-900 mb-3">
+                <Layout className="w-6 h-6 text-slate-800" />
               </div>
-
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">
-                  {creationStep === 1 && 'Step 1: Choose Invitation Type'}
-                  {creationStep === 2 && 'Step 2: Choose Starting Canvas'}
-                  {creationStep === 3 && 'Step 3: Enter Customer & Event Details'}
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  {creationStep === 1 && 'Select the occasion category for the digital invitation card.'}
-                  {creationStep === 2 && 'Start from blank, select a luxury template, or clone an existing invitation.'}
-                  {creationStep === 3 && 'Specify the invitation title, customer name, and optional event date.'}
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                Create New Invitation
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Enter your invitation details to start designing directly on a clean blank canvas.
+              </p>
             </div>
 
             {createError && (
@@ -915,278 +844,93 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               </div>
             )}
 
-            {/* STEP 1: CHOOSE INVITATION TYPE */}
-            {creationStep === 1 && (
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {eventTypeOptions.map((opt) => {
-                    const Icon = opt.icon;
-                    const isSelected = selectedEventType === opt.id;
-                    return (
-                      <div
-                        key={opt.id}
-                        onClick={() => handleNextFromStep1(opt.id)}
-                        className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-start gap-3.5 group hover:scale-[1.01] ${
-                          isSelected
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                            : 'bg-white border-slate-200 hover:border-slate-400 text-slate-800'
-                        }`}
-                      >
-                        <div className={`p-2.5 rounded-xl shrink-0 ${isSelected ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-700 group-hover:bg-slate-200'}`}>
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-xs font-bold flex items-center justify-between">
-                            <span>{opt.label}</span>
-                            <ArrowRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'opacity-100 text-amber-300' : 'text-slate-400'}`} />
-                          </div>
-                          <div className={`text-[11px] mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                            {opt.desc}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+            <form onSubmit={handleCreateInvitation} className="space-y-4 text-xs">
+              <div>
+                <label className="text-slate-700 font-bold block mb-1">
+                  Invitation Title / Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  placeholder="e.g. Alexander & Sophia Royal Wedding"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 placeholder-slate-400 focus:outline-none transition-colors"
+                />
               </div>
-            )}
 
-            {/* STEP 2: CHOOSE STARTING CANVAS */}
-            {creationStep === 2 && (
-              <div className="space-y-5">
-                {/* 3 Starting Mode Tabs */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div
-                    onClick={() => setCreationMode('template')}
-                    className={`p-3.5 rounded-2xl border text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
-                      creationMode === 'template'
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    <div className="text-xs font-bold">Start from Template</div>
-                    <div className={`text-[10px] ${creationMode === 'template' ? 'text-slate-300' : 'text-slate-400'}`}>
-                      Pre-designed layout
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setCreationMode('blank')}
-                    className={`p-3.5 rounded-2xl border text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
-                      creationMode === 'blank'
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Layout className="w-5 h-5" />
-                    <div className="text-xs font-bold">Start from Blank</div>
-                    <div className={`text-[10px] ${creationMode === 'blank' ? 'text-slate-300' : 'text-slate-400'}`}>
-                      Blank canvas
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => setCreationMode('duplicate')}
-                    className={`p-3.5 rounded-2xl border text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1.5 ${
-                      creationMode === 'duplicate'
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Copy className="w-5 h-5" />
-                    <div className="text-xs font-bold">Duplicate Existing</div>
-                    <div className={`text-[10px] ${creationMode === 'duplicate' ? 'text-slate-300' : 'text-slate-400'}`}>
-                      Clone prior client work
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sub-options based on mode */}
-                {creationMode === 'template' && (
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-2">
-                      Choose Starting Template:
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto p-1">
-                      {templates.map((tmpl) => (
-                        <div
-                          key={tmpl.id}
-                          onClick={() => setSelectedTemplateId(tmpl.id)}
-                          className={`p-2 rounded-2xl border cursor-pointer transition-all overflow-hidden relative group ${
-                            selectedTemplateId === tmpl.id
-                              ? 'bg-slate-100 border-slate-900 ring-2 ring-slate-900 shadow-sm'
-                              : 'bg-slate-50 border-slate-200 hover:bg-slate-100/70'
-                          }`}
-                        >
-                          <img
-                            src={tmpl.thumbnail}
-                            alt={tmpl.title}
-                            className="w-full h-24 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform"
-                            referrerPolicy="no-referrer"
-                          />
-                          <div className="text-xs font-bold truncate px-1 text-slate-900">{tmpl.title}</div>
-                          <div className="text-[10px] text-slate-500 px-1">{tmpl.pages.length} Pages • {tmpl.category}</div>
-                          {selectedTemplateId === tmpl.id && (
-                            <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md">
-                              <Check className="w-3 h-3" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {creationMode === 'duplicate' && (
-                  <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-2">
-                      Select Existing Invitation to Clone:
-                    </label>
-                    {invitations.length === 0 ? (
-                      <div className="p-4 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-slate-200">
-                        No previous invitations found. You can start from blank or a template.
-                      </div>
-                    ) : (
-                      <select
-                        value={selectedDuplicateId}
-                        onChange={(e) => setSelectedDuplicateId(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl p-3 text-xs text-slate-900"
-                      >
-                        {invitations.map(inv => (
-                          <option key={inv.id} value={inv.id}>
-                            {inv.title} {inv.customerName ? `(${inv.customerName})` : ''} - {inv.category}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-                )}
-
-                {creationMode === 'blank' && (
-                  <div className="p-6 text-center rounded-2xl bg-slate-50 border border-slate-200">
-                    <Layout className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <div className="text-xs font-bold text-slate-900">Clean Blank Canvas</div>
-                    <p className="text-[11px] text-slate-500 max-w-sm mx-auto mt-1">
-                      You will begin with an empty mobile-responsive artboard to add your custom background, text typography, envelope opening, and multimedia elements.
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setCreationStep(1)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleNextFromStep2}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm cursor-pointer"
-                  >
-                    <span>Continue to Details</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: ENTER INVITATION METADATA & CUSTOMER DETAILS */}
-            {creationStep === 3 && (
-              <form onSubmit={handleCreateInvitation} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-slate-700 font-bold block mb-1">
-                    Invitation Name / Project Title *
+                    Event Type
+                  </label>
+                  <select
+                    value={selectedEventType}
+                    onChange={(e) => setSelectedEventType(e.target.value as EventType)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 capitalize focus:outline-none transition-colors"
+                  >
+                    {eventTypeOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-700 font-bold block mb-1">
+                    Customer / Client Name (Optional)
                   </label>
                   <input
                     type="text"
-                    required
-                    placeholder="e.g. Alexander & Sophia Royal Wedding Invitation"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 placeholder-slate-400 focus:outline-none"
+                    placeholder="e.g. John Doe / Smith Family"
+                    value={newCustomerName}
+                    onChange={(e) => setNewCustomerName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 placeholder-slate-400 focus:outline-none transition-colors"
                   />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-slate-700 font-bold block mb-1">
-                      Customer / Client Name (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. John Doe / Smith Family"
-                      value={newCustomerName}
-                      onChange={(e) => setNewCustomerName(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 placeholder-slate-400 focus:outline-none"
-                    />
-                  </div>
+              <div>
+                <label className="text-slate-700 font-bold block mb-1">
+                  Event Date (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={newEventDate}
+                  onChange={(e) => setNewEventDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 focus:outline-none transition-colors"
+                />
+              </div>
 
-                  <div>
-                    <label className="text-slate-700 font-bold block mb-1">
-                      Event Type
-                    </label>
-                    <select
-                      value={selectedEventType}
-                      onChange={(e) => setSelectedEventType(e.target.value as EventType)}
-                      className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl p-3 text-slate-900 capitalize"
-                    >
-                      <option value="wedding">Wedding</option>
-                      <option value="birthday">Birthday</option>
-                      <option value="engagement">Engagement</option>
-                      <option value="anniversary">Anniversary</option>
-                      <option value="baby-shower">Baby Shower</option>
-                      <option value="business-event">Business Event</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <div>
-                  <label className="text-slate-700 font-bold block mb-1">
-                    Event Date (Optional)
-                  </label>
-                  <input
-                    type="date"
-                    value={newEventDate}
-                    onChange={(e) => setNewEventDate(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 focus:outline-none"
-                  />
+                  <strong>Clean Blank Canvas: </strong>
+                  Launches immediately with an empty responsive canvas ready for your custom layouts, typography, images, and interactive widgets.
                 </div>
+              </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 flex items-start gap-2.5">
-                  <Sparkles className="w-4 h-4 text-slate-800 shrink-0 mt-0.5" />
-                  <div>
-                    <strong>After creation: </strong>
-                    The visual canvas editor will launch immediately with full multi-page support, typography controls, and interactive envelope openers.
-                  </div>
-                </div>
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setCreationStep(2)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Back</span>
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={isCreating}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-md cursor-pointer transition-all active:scale-95"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>{isCreating ? 'Creating & Launching...' : 'Create & Open Editor'}</span>
-                  </button>
-                </div>
-              </form>
-            )}
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-semibold text-xs rounded-xl shadow-md cursor-pointer transition-all active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{isCreating ? 'Creating & Launching...' : 'Create & Open Canvas'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

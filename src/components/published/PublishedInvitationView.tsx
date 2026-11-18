@@ -455,6 +455,20 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                     loop
                     muted
                     playsInline
+                    preload="auto"
+                    ref={(el) => {
+                      if (el) {
+                        el.defaultMuted = true;
+                        el.muted = true;
+                        el.play().catch(() => {});
+                      }
+                    }}
+                    onLoadedMetadata={(e) => {
+                      const v = e.currentTarget;
+                      v.defaultMuted = true;
+                      v.muted = true;
+                      v.play().catch(() => {});
+                    }}
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
                   />
                 )}

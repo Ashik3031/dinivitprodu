@@ -144,14 +144,20 @@ export function autoScaleElementForViewport(
  * Returns framer-motion page transition variants for smooth vertical page transitions.
  */
 export function getPageTransitionVariants(
-  type: 'fade' | 'slide-up' | 'slide-down' | 'zoom' | 'flip' | 'curtain' = 'fade',
+  type: string = 'fade',
   duration: number = 0.6
 ) {
   switch (type) {
+    case 'slide-vertical':
     case 'slide-up':
       return {
         initial: { opacity: 0, y: 60 },
         animate: { opacity: 1, y: 0, transition: { duration, ease: [0.25, 0.1, 0.25, 1] } }
+      };
+    case 'slide-horizontal':
+      return {
+        initial: { opacity: 0, x: 60 },
+        animate: { opacity: 1, x: 0, transition: { duration, ease: [0.25, 0.1, 0.25, 1] } }
       };
     case 'slide-down':
       return {
@@ -165,13 +171,23 @@ export function getPageTransitionVariants(
       };
     case 'flip':
       return {
-        initial: { opacity: 0, rotateX: 20 },
-        animate: { opacity: 1, rotateX: 0, transition: { duration, ease: 'easeOut' } }
+        initial: { opacity: 0, rotateY: 60, perspective: 1200 },
+        animate: { opacity: 1, rotateY: 0, perspective: 1200, transition: { duration, ease: [0.22, 1, 0.36, 1] } }
+      };
+    case 'cube':
+      return {
+        initial: { opacity: 0, rotateX: 30, scale: 0.96 },
+        animate: { opacity: 1, rotateX: 0, scale: 1, transition: { duration, ease: [0.22, 1, 0.36, 1] } }
       };
     case 'curtain':
       return {
         initial: { opacity: 0, scaleY: 0.95 },
         animate: { opacity: 1, scaleY: 1, transition: { duration, ease: 'easeInOut' } }
+      };
+    case 'none':
+      return {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 }
       };
     case 'fade':
     default:
@@ -196,8 +212,8 @@ export function getPageCalculatedHeight(
     currentWindowHeight !== undefined
       ? currentWindowHeight
       : typeof window !== 'undefined'
-      ? window.innerHeight
-      : 844;
+        ? window.innerHeight
+        : 844;
 
   // 1. Explicit Viewport Mode (or isFullHeight flag when not custom/auto)
   if (

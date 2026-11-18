@@ -27,7 +27,13 @@ import {
   Upload,
   Check,
   Wand2,
-  MailOpen
+  MailOpen,
+  Shirt,
+  Gift,
+  Plane,
+  Search,
+  X,
+  Video
 } from 'lucide-react';
 import {
   InvitationPage,
@@ -36,7 +42,10 @@ import {
   ContainerShape,
   InvitationTemplate,
   PrebuiltBlock,
-  TemplateCategory
+  TemplateCategory,
+  InvitationTheme,
+  OpeningScreenConfig,
+  OuterDropEffectType
 } from '../../types';
 import { STOCK_ASSETS } from '../../data/stockAssets';
 import { ALL_PREBUILT_BLOCKS, TEMPLATE_CATEGORIES } from '../../data/templates';
@@ -71,6 +80,12 @@ interface LeftSidebarProps {
   onSelectOpeningScreen?: () => void;
   onToggleOpeningScreen?: (enabled: boolean) => void;
   currentMusicUrl?: string;
+  theme?: InvitationTheme;
+  onUpdateTheme?: (updates: Partial<InvitationTheme>) => void;
+  openingScreenConfig?: OpeningScreenConfig;
+  onUpdateOpeningScreen?: (updates: Partial<OpeningScreenConfig>) => void;
+  onSelectCanvasDecorations?: () => void;
+  isCanvasDecorationsActive?: boolean;
 }
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
@@ -98,9 +113,16 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   openingScreen,
   onSelectOpeningScreen,
   onToggleOpeningScreen,
-  currentMusicUrl
+  currentMusicUrl,
+  theme,
+  onUpdateTheme,
+  openingScreenConfig,
+  onUpdateOpeningScreen,
+  onSelectCanvasDecorations,
+  isCanvasDecorationsActive
 }) => {
   const [activeTab, setActiveTab] = useState<'pages' | 'elements' | 'blocks' | 'templates' | 'media' | 'ai'>('pages');
+  const [elementSearchQuery, setElementSearchQuery] = useState('');
   const [targetContainerOnly, setTargetContainerOnly] = useState(false);
   const [selectedBlockCategory, setSelectedBlockCategory] = useState<TemplateCategory | 'all'>('all');
 
@@ -191,11 +213,10 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[10px] font-medium transition-all ${
-                isActive
-                  ? 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200/80'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60'
-              }`}
+              className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-[10px] font-medium transition-all ${isActive
+                ? 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60'
+                }`}
             >
               <Icon className="w-4 h-4 mb-1" />
               <span className="truncate w-full">{tab.label}</span>
@@ -225,514 +246,415 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         )}
 
         {/* ELEMENTS TAB */}
-        {activeTab === 'elements' && (
-          <div className="space-y-5">
-            {/* Opening / Cover Screen Elements (Highlighted when editing Opening Screen) */}
-            {activePageIndex === -1 && (
-              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/90 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-amber-950">
-                    <MailOpen className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Cover Screen Elements</span>
-                  </div>
-                  <span className="text-[10px] text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded font-medium">
-                    Optional Elements
-                  </span>
-                </div>
+        {activeTab === 'elements' && (() => {
+          const basicElementsList = [
+            {
+              id: 'text',
+              label: 'Text / Heading',
+              icon: <Type className="w-4 h-4 text-slate-600" />,
+              onClick: () => onAddElement('text', {
+                content: { text: 'Together with their families, we invite you to celebrate our union' },
+                style: { x: 30, y: 180, width: 330, height: 60, fontSize: 15, color: '#334155', textAlign: 'center', lineHeight: 1.6 }
+              })
+            },
+            {
+              id: 'image',
+              label: 'Photo / Image',
+              icon: <ImageIcon className="w-4 h-4 text-slate-600" />,
+              onClick: () => onAddElement('image', {
+                content: { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', alt: 'Wedding Couple' },
+                style: { x: 45, y: 180, width: 300, height: 280, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'video',
+              label: 'Video Clip',
+              icon: <Video className="w-4 h-4 text-purple-600" />,
+              onClick: () => onAddElement('video', {
+                content: {
+                  videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-wedding-rings-in-a-box-41589-large.mp4',
+                  videoAutoplay: true,
+                  videoLoop: true,
+                  videoMuted: true
+                },
+                style: { x: 40, y: 160, width: 310, height: 220, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'music',
+              label: 'Background Music',
+              icon: <Music className="w-4 h-4 text-amber-600" />,
+              onClick: () => {
+                setActiveTab('media');
+                setMediaCategory('audio');
+              }
+            },
+            {
+              id: 'button',
+              label: 'CTA Button',
+              icon: <Send className="w-4 h-4 text-slate-600" />,
+              onClick: () => onAddElement('button', {
+                content: { buttonText: 'Confirm Attendance', buttonAction: 'rsvp', buttonShape: 'pill' },
+                style: { x: 75, y: 350, width: 240, height: 48, backgroundColor: '#0f172a', color: '#ffffff', borderRadius: 24 }
+              })
+            },
+            {
+              id: 'icon',
+              label: 'Vector Icon',
+              icon: <Heart className="w-4 h-4 text-rose-500" />,
+              onClick: () => onAddElement('icon', {
+                content: { iconName: 'Heart', iconSize: 36, iconColor: '#e11d48' },
+                style: { x: 165, y: 120, width: 60, height: 60 }
+              })
+            },
+            {
+              id: 'divider',
+              label: 'Divider',
+              icon: <Sliders className="w-4 h-4 text-slate-600" />,
+              onClick: () => onAddElement('divider', {
+                style: { x: 45, y: 250, width: 300, height: 20, dividerStyle: 'ornamental', borderColor: '#d4af37' }
+              })
+            },
+            {
+              id: 'shape',
+              label: 'Vector Shape',
+              icon: <Shapes className="w-4 h-4 text-amber-500" />,
+              onClick: () => onAddElement('shape', {
+                style: { x: 145, y: 200, width: 100, height: 100, shapeType: 'star', fillColor: '#d4af37' }
+              })
+            }
+          ];
 
-                <div className="grid grid-cols-1 gap-1.5">
-                  {/* OPEN INVITATION BUTTON */}
+          const invitationElementsList = [
+            {
+              id: 'event-date',
+              label: 'Event Date',
+              icon: <Calendar className="w-4 h-4 text-amber-600" />,
+              onClick: () => onAddElement('event-date', {
+                content: { eventDate: 'Saturday, October 24, 2026', text: 'Celebration Date' },
+                style: { x: 20, y: 160, width: 350, height: 80, fontSize: 20, color: '#0f172a' }
+              })
+            },
+            {
+              id: 'event-time',
+              label: 'Event Time',
+              icon: <Clock className="w-4 h-4 text-amber-600" />,
+              onClick: () => onAddElement('event-time', {
+                content: { eventTime: '04:00 PM – 10:00 PM', text: 'Reception Time' },
+                style: { x: 20, y: 240, width: 350, height: 80, fontSize: 18, color: '#0f172a' }
+              })
+            },
+            {
+              id: 'countdown',
+              label: 'Countdown',
+              icon: <Clock className="w-4 h-4 text-slate-600" />,
+              onClick: () => onAddElement('countdown', {
+                content: { countdownTarget: '2026-10-24T16:00:00', countdownStyle: 'boxes' },
+                style: { x: 25, y: 280, width: 340, height: 84 }
+              })
+            },
+            {
+              id: 'calendar',
+              label: 'Calendar Sync',
+              icon: <Calendar className="w-4 h-4 text-indigo-600" />,
+              onClick: () => onAddElement('calendar', {
+                content: {
+                  eventDate: '2026-10-24',
+                  calendarMonth: 'October',
+                  calendarYear: 2026,
+                  calendarDay: 24,
+                  calendarShowAddToCal: true,
+                  calendarEventTitle: 'Alexander & Sophia Wedding'
+                },
+                style: { x: 30, y: 150, width: 330, height: 260, backgroundColor: '#0f172a', borderRadius: 16 }
+              })
+            },
+            {
+              id: 'venue',
+              label: 'Venue Info',
+              icon: <MapPin className="w-4 h-4 text-amber-500" />,
+              onClick: () => onAddElement('venue', {
+                content: { venueName: 'The Grand Biltmore Ballroom', venueAddress: '1 Lodge St, Asheville, NC 28803' },
+                style: { x: 25, y: 180, width: 340, height: 110 }
+              })
+            },
+            {
+              id: 'google-maps',
+              label: 'Map Embed',
+              icon: <MapPin className="w-4 h-4 text-emerald-600" />,
+              onClick: () => onAddElement('google-maps', {
+                content: { venueName: 'The Biltmore Estate', venueAddress: '1 Lodge St, Asheville, NC 28803', mapQuery: 'Biltmore+Estate', mapZoom: 14 },
+                style: { x: 25, y: 200, width: 340, height: 190, borderRadius: 12 }
+              })
+            },
+            {
+              id: 'timeline',
+              label: 'Timeline',
+              icon: <Calendar className="w-4 h-4 text-slate-600" />,
+              onClick: () => onAddElement('timeline', {
+                content: {
+                  timelineEvents: [
+                    { time: '4:00 PM', title: 'Solemn Ceremony', description: 'Exchange of vows at garden' },
+                    { time: '5:30 PM', title: 'Cocktail Hour', description: 'Canapés and fine wine' },
+                    { time: '7:00 PM', title: 'Grand Banquet', description: 'Dinner, toasts and dancing' }
+                  ]
+                },
+                style: { x: 25, y: 120, width: 340, height: 350, backgroundColor: '#0f172a', borderRadius: 16 }
+              })
+            },
+            {
+              id: 'photo-gallery',
+              label: 'Photo Gallery',
+              icon: <ImageIcon className="w-4 h-4 text-pink-500" />,
+              onClick: () => onAddElement('photo-gallery', {
+                content: {
+                  galleryLayout: 'coverflow',
+                  galleryImages: [
+                    { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', caption: 'The Proposal' },
+                    { url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80', caption: 'Engagement Memories' },
+                    { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80', caption: 'Forever & Always' },
+                    { url: 'https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80', caption: 'Celebration of Love' },
+                    { url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80', caption: 'Sacred Vows' }
+                  ]
+                },
+                style: { x: 25, y: 140, width: 340, height: 290, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'rsvp-form',
+              label: 'RSVP Form',
+              icon: <Check className="w-4 h-4 text-emerald-600" />,
+              onClick: () => onAddElement('rsvp-form', {
+                style: { x: 20, y: 150, width: 350, height: 250, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'guestbook',
+              label: 'Guestbook',
+              icon: <MessageCircle className="w-4 h-4 text-indigo-500" />,
+              onClick: () => onAddElement('guestbook', {
+                style: { x: 20, y: 150, width: 350, height: 250, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'whatsapp-button',
+              label: 'WhatsApp RSVP',
+              icon: <MessageCircle className="w-4 h-4 text-emerald-600" />,
+              onClick: () => onAddElement('whatsapp-button', {
+                content: { buttonText: 'RSVP via WhatsApp', whatsappPhone: '+1234567890', whatsappMessage: 'Hi! I am delighted to accept your wedding invitation!' },
+                style: { x: 45, y: 250, width: 300, height: 46, borderRadius: 12 }
+              })
+            },
+            {
+              id: 'qr-code',
+              label: 'QR Code',
+              icon: <QrCode className="w-4 h-4 text-slate-700" />,
+              onClick: () => onAddElement('qr-code', {
+                content: { qrCodeValue: 'https://example.com', qrLabel: 'Scan for Details' },
+                style: { x: 120, y: 220, width: 150, height: 165, borderRadius: 12 }
+              })
+            },
+            {
+              id: 'dress-code',
+              label: 'Dress Code',
+              icon: <Shirt className="w-4 h-4 text-purple-600" />,
+              onClick: () => onAddElement('dress-code', {
+                content: {
+                  dressCodeTitle: 'Dress Code',
+                  dressCodeType: 'Black Tie',
+                  dressCodeDescription: 'Formal evening wear requested. Tuxedos and evening gowns.',
+                  dressCodeColors: ['#000000', '#d4af37', '#ffffff']
+                },
+                style: { x: 25, y: 180, width: 340, height: 160, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'gift-registry',
+              label: 'Gift Registry',
+              icon: <Gift className="w-4 h-4 text-amber-600" />,
+              onClick: () => onAddElement('gift-registry', {
+                content: {
+                  giftRegistryTitle: 'Gift Registry',
+                  giftRegistryDescription: 'Your presence is our greatest gift. Should you wish to honor us with a gift, our registries are linked below.',
+                  giftRegistries: [
+                    { name: 'Amazon Registry', url: 'https://amazon.com' },
+                    { name: 'Honeyfund', url: 'https://honeyfund.com' }
+                  ]
+                },
+                style: { x: 25, y: 180, width: 340, height: 180, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'travel-accommodation',
+              label: 'Travel & Accommodation',
+              icon: <Plane className="w-4 h-4 text-sky-600" />,
+              onClick: () => onAddElement('travel-accommodation', {
+                content: {
+                  travelTitle: 'Travel & Accommodations',
+                  travelDescription: 'Room blocks have been reserved for our guests:',
+                  accommodations: [
+                    {
+                      name: 'The Grand Luxury Hotel',
+                      address: '100 Luxury Blvd, Asheville, NC',
+                      bookingUrl: 'https://hotel.example.com',
+                      rateCode: 'WEDDING2026'
+                    }
+                  ]
+                },
+                style: { x: 25, y: 160, width: 340, height: 210, borderRadius: 16 }
+              })
+            },
+            {
+              id: 'open-invitation-button',
+              label: 'Open Button',
+              icon: <MailOpen className="w-4 h-4 text-amber-600" />,
+              onClick: () => onAddElement('button', {
+                id: 'open-elem-button',
+                name: 'Open Invitation Button',
+                content: {
+                  buttonText: openingScreen?.openButtonText || 'Open Invitation',
+                  buttonAction: 'open-invitation',
+                  buttonShape: 'pill'
+                },
+                style: {
+                  x: 45,
+                  y: 580,
+                  width: 300,
+                  height: 52,
+                  backgroundColor: openingScreen?.sealColor || '#d4af37',
+                  color: '#07120d',
+                  fontSize: 13,
+                  fontWeight: 800,
+                  borderRadius: 9999,
+                  boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.4)',
+                  letterSpacing: 1.5,
+                  zIndex: 20
+                },
+                animation: {
+                  type: 'bounce',
+                  duration: 1.5,
+                  delay: 0.6,
+                  repeat: 'infinite'
+                }
+              })
+            },
+            {
+              id: 'canvas-decorations',
+              label: 'Canvas Decorations',
+              icon: <Sparkles className="w-4 h-4 text-rose-500" />,
+              isActive: isCanvasDecorationsActive,
+              onClick: () => onSelectCanvasDecorations?.()
+            }
+          ];
+
+          const normalizedQuery = elementSearchQuery.trim().toLowerCase();
+
+          const filteredBasic = normalizedQuery
+            ? basicElementsList.filter(el => el.label.toLowerCase().includes(normalizedQuery))
+            : basicElementsList;
+
+          const filteredInvitation = normalizedQuery
+            ? invitationElementsList.filter(el => el.label.toLowerCase().includes(normalizedQuery))
+            : invitationElementsList;
+
+          const hasMatches = filteredBasic.length > 0 || filteredInvitation.length > 0;
+
+          return (
+            <div className="space-y-4">
+              {/* Compact Search Bar */}
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={elementSearchQuery}
+                  onChange={(e) => setElementSearchQuery(e.target.value)}
+                  placeholder="Search elements..."
+                  className="w-full text-xs bg-slate-50 focus:bg-white border border-slate-200 rounded-lg pl-8 pr-7 py-1.5 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                />
+                {elementSearchQuery && (
                   <button
                     type="button"
-                    onClick={() =>
-                      onAddElement('button', {
-                        id: 'open-elem-button',
-                        name: 'Open Invitation Button',
-                        content: {
-                          buttonText: openingScreen?.openButtonText || 'Open Invitation',
-                          buttonAction: 'open-invitation',
-                          buttonShape: 'pill'
-                        },
-                        style: {
-                          x: 45,
-                          y: 580,
-                          width: 300,
-                          height: 52,
-                          backgroundColor: openingScreen?.sealColor || '#d4af37',
-                          color: '#07120d',
-                          fontSize: 13,
-                          fontWeight: 800,
-                          borderRadius: 9999,
-                          boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.4)',
-                          letterSpacing: 1.5,
-                          zIndex: 20
-                        },
-                        animation: {
-                          type: 'bounce',
-                          duration: 1.5,
-                          delay: 0.6,
-                          repeat: 'infinite'
-                        }
-                      })
-                    }
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-white hover:bg-amber-100/60 border border-amber-300 text-slate-800 text-xs font-semibold transition-all cursor-pointer shadow-xs group text-left"
+                    onClick={() => setElementSearchQuery('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    title="Clear search"
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                        <MailOpen className="w-3.5 h-3.5" />
-                      </div>
-                      <div>
-                        <div className="text-slate-900 font-bold">Open Invitation Button</div>
-                        <div className="text-[10px] text-slate-500 font-normal">Editable CTA to unfold & enter</div>
-                      </div>
-                    </div>
-                    <Plus className="w-4 h-4 text-amber-600" />
+                    <X className="w-3 h-3" />
                   </button>
+                )}
+              </div>
 
-                  {/* WAX SEAL BADGE */}
+              {!hasMatches ? (
+                <div className="py-8 text-center text-slate-400 text-xs">
+                  <Search className="w-6 h-6 text-slate-300 mx-auto mb-2" />
+                  <p className="font-semibold text-slate-700">No elements found</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">No results matching "{elementSearchQuery}"</p>
                   <button
                     type="button"
-                    onClick={() =>
-                      onAddElement('icon', {
-                        id: `open-seal-${Date.now()}`,
-                        name: 'Wax Seal Emblem',
-                        content: { iconName: 'heart', iconSize: 40, iconColor: '#07120d' },
-                        style: {
-                          x: 162,
-                          y: 340,
-                          width: 65,
-                          height: 65,
-                          backgroundColor: openingScreen?.sealColor || '#d4af37',
-                          borderRadius: 9999,
-                          zIndex: 15
-                        }
-                      })
-                    }
-                    className="flex items-center justify-between p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
+                    onClick={() => setElementSearchQuery('')}
+                    className="mt-3 px-3 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center gap-2">
-                      <Heart className="w-4 h-4 text-rose-500" />
-                      <span>Wax Seal Badge</span>
-                    </div>
-                    <Plus className="w-3.5 h-3.5 text-slate-400" />
+                    Clear Search
                   </button>
                 </div>
-              </div>
-            )}
+              ) : (
+                <>
+                  {/* A. BASIC ELEMENTS */}
+                  {filteredBasic.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                        <span>Basic Elements</span>
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          {normalizedQuery ? `${filteredBasic.length} found` : '8 Core Types'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {filteredBasic.map((el) => (
+                          <button
+                            key={el.id}
+                            type="button"
+                            onClick={el.onClick}
+                            className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50/80 hover:bg-slate-100/90 border border-slate-200 text-slate-800 text-xs font-medium transition-all cursor-pointer text-left h-[42px] overflow-hidden group shadow-2xs"
+                          >
+                            <div className="shrink-0 group-hover:scale-110 transition-transform">{el.icon}</div>
+                            <span className="truncate">{el.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-            {/* Basic Elements */}
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center justify-between">
-                <span>Basic Elements</span>
-                <span className="text-[10px] text-slate-400 font-normal">8 Core Types</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {/* 1. TEXT */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('text', {
-                    content: { text: 'Together with their families, we invite you to celebrate our union' },
-                    style: { x: 30, y: 180, width: 330, height: 60, fontSize: 15, color: '#334155', textAlign: 'center', lineHeight: 1.6 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Type className="w-4 h-4 text-slate-600" />
-                  <span>Text / Heading</span>
-                </button>
-
-                {/* 2. IMAGE */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('image', {
-                    content: { src: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', alt: 'Wedding Couple' },
-                    style: { x: 45, y: 180, width: 300, height: 280, borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <ImageIcon className="w-4 h-4 text-slate-600" />
-                  <span>Photo / Image</span>
-                </button>
-
-                {/* 3. VIDEO */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('video', {
-                    content: {
-                      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-wedding-rings-in-a-box-41589-large.mp4',
-                      videoAutoplay: true,
-                      videoLoop: true,
-                      videoMuted: true
-                    },
-                    style: { x: 40, y: 160, width: 310, height: 220, borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span>Video Clip</span>
-                </button>
-
-                {/* 4. BACKGROUND MUSIC */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('media');
-                    setMediaCategory('audio');
-                  }}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  <Music className="w-4 h-4 text-amber-600" />
-                  <span>Background Music</span>
-                </button>
-
-                {/* 5. BUTTON */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('button', {
-                    content: { buttonText: 'Confirm Attendance', buttonAction: 'rsvp', buttonShape: 'pill' },
-                    style: { x: 75, y: 350, width: 240, height: 48, backgroundColor: '#0f172a', color: '#ffffff', borderRadius: 24 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Send className="w-4 h-4 text-slate-600" />
-                  <span>CTA Button</span>
-                </button>
-
-                {/* 6. ICON */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('icon', {
-                    content: { iconName: 'Heart', iconSize: 36, iconColor: '#e11d48' },
-                    style: { x: 165, y: 120, width: 60, height: 60 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Heart className="w-4 h-4 text-rose-500" />
-                  <span>Vector Icon</span>
-                </button>
-
-                {/* 7. DIVIDER */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('divider', {
-                    style: { x: 45, y: 250, width: 300, height: 20, dividerStyle: 'ornamental', borderColor: '#d4af37' }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Sliders className="w-4 h-4 text-slate-600" />
-                  <span>Divider</span>
-                </button>
-
-                {/* 8. SHAPE */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('shape', {
-                    style: { x: 145, y: 200, width: 100, height: 100, shapeType: 'star', fillColor: '#d4af37' }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Shapes className="w-4 h-4 text-amber-500" />
-                  <span>Vector Shape</span>
-                </button>
-              </div>
+                  {/* B. INVITATION ELEMENTS */}
+                  {filteredInvitation.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                        <span>Invitation Elements</span>
+                        <span className="text-[10px] text-slate-400 font-normal">
+                          {normalizedQuery ? `${filteredInvitation.length} found` : '17 Event Modules'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {filteredInvitation.map((el) => (
+                          <button
+                            key={el.id}
+                            type="button"
+                            onClick={el.onClick}
+                            className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs transition-all cursor-pointer text-left h-[42px] overflow-hidden group shadow-2xs ${el.isActive
+                                ? 'bg-rose-50 border-rose-300 text-rose-950 font-semibold ring-1 ring-rose-400/50'
+                                : 'bg-slate-50/80 hover:bg-slate-100/90 border-slate-200 text-slate-800 font-medium'
+                              }`}
+                          >
+                            <div className="shrink-0 group-hover:scale-110 transition-transform">{el.icon}</div>
+                            <span className="truncate">{el.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-
-            {/* Frames, Stickers & Stock Assets Shortcuts */}
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
-              <div className="flex items-center justify-between">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Frames & Library Assets</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaCategory('all');
-                    setActiveTab('media');
-                  }}
-                  className="text-[10px] text-slate-600 hover:text-slate-900 font-semibold cursor-pointer underline"
-                >
-                  View All
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaCategory('frames');
-                    setActiveTab('media');
-                  }}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
-                >
-                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Frames & Borders</div>
-                  <div className="text-[9px] text-slate-500">Arch, floral, gold borders</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaCategory('gif');
-                    setActiveTab('media');
-                  }}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
-                >
-                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Animated GIFs</div>
-                  <div className="text-[9px] text-slate-500">Rings, sparkles, confetti</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaCategory('stickers');
-                    setActiveTab('media');
-                  }}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
-                >
-                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Stickers & Seals</div>
-                  <div className="text-[9px] text-slate-500">Wax seals, monograms, flora</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMediaCategory('video');
-                    setActiveTab('media');
-                  }}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:border-slate-900 text-left transition-all cursor-pointer shadow-2xs group"
-                >
-                  <div className="text-[11px] font-bold text-slate-800 group-hover:text-slate-950">Stock Videos</div>
-                  <div className="text-[9px] text-slate-500">Ambient loops & motion</div>
-                </button>
-              </div>
-            </div>
-
-            {/* Invitation Specific Elements */}
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center justify-between">
-                <span>Invitation Elements</span>
-                <span className="text-[10px] text-slate-400 font-normal">12 Event Modules</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {/* 1. EVENT DATE */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('event-date', {
-                    content: { eventDate: 'Saturday, October 24, 2026', text: 'Celebration Date' },
-                    style: { x: 20, y: 160, width: 350, height: 80, fontSize: 20, color: '#0f172a' }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-amber-600" />
-                  <span>Event Date</span>
-                </button>
-
-                {/* 2. EVENT TIME */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('event-time', {
-                    content: { eventTime: '04:00 PM – 10:00 PM', text: 'Reception Time' },
-                    style: { x: 20, y: 240, width: 350, height: 80, fontSize: 18, color: '#0f172a' }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Clock className="w-4 h-4 text-amber-600" />
-                  <span>Event Time</span>
-                </button>
-
-                {/* 3. COUNTDOWN */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('countdown', {
-                    content: { countdownTarget: '2026-10-24T16:00:00', countdownStyle: 'boxes' },
-                    style: { x: 25, y: 280, width: 340, height: 84 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Clock className="w-4 h-4 text-slate-600" />
-                  <span>Countdown</span>
-                </button>
-
-                {/* 4. CALENDAR */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('calendar', {
-                    content: {
-                      eventDate: '2026-10-24',
-                      calendarMonth: 'October',
-                      calendarYear: 2026,
-                      calendarDay: 24,
-                      calendarShowAddToCal: true,
-                      calendarEventTitle: 'Alexander & Sophia Wedding'
-                    },
-                    style: { x: 30, y: 150, width: 330, height: 260, backgroundColor: '#0f172a', borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-indigo-600" />
-                  <span>Calendar Sync</span>
-                </button>
-
-                {/* 5. VENUE */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('venue', {
-                    content: { venueName: 'The Grand Biltmore Ballroom', venueAddress: '1 Lodge St, Asheville, NC 28803' },
-                    style: { x: 25, y: 180, width: 340, height: 110 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <MapPin className="w-4 h-4 text-amber-500" />
-                  <span>Venue Info</span>
-                </button>
-
-                {/* 6. MAP */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('google-maps', {
-                    content: { venueName: 'The Biltmore Estate', venueAddress: '1 Lodge St, Asheville, NC 28803', mapQuery: 'Biltmore+Estate', mapZoom: 14 },
-                    style: { x: 25, y: 200, width: 340, height: 190, borderRadius: 12 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <MapPin className="w-4 h-4 text-emerald-600" />
-                  <span>Map Embed</span>
-                </button>
-
-                {/* 7. TIMELINE */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('timeline', {
-                    content: {
-                      timelineEvents: [
-                        { time: '4:00 PM', title: 'Solemn Ceremony', description: 'Exchange of vows at garden' },
-                        { time: '5:30 PM', title: 'Cocktail Hour', description: 'Canapés and fine wine' },
-                        { time: '7:00 PM', title: 'Grand Banquet', description: 'Dinner, toasts and dancing' }
-                      ]
-                    },
-                    style: { x: 25, y: 120, width: 340, height: 350, backgroundColor: '#0f172a', borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4 text-slate-600" />
-                  <span>Timeline</span>
-                </button>
-
-                {/* 8. PHOTO GALLERY */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('photo-gallery', {
-                    content: {
-                      galleryLayout: 'coverflow',
-                      galleryImages: [
-                        { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80', caption: 'The Proposal' },
-                        { url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80', caption: 'Engagement Memories' },
-                        { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80', caption: 'Forever & Always' },
-                        { url: 'https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80', caption: 'Celebration of Love' },
-                        { url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80', caption: 'Sacred Vows' }
-                      ]
-                    },
-                    style: { x: 25, y: 140, width: 340, height: 290, borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <ImageIcon className="w-4 h-4 text-pink-500" />
-                  <span>Photo Gallery</span>
-                </button>
-
-                {/* 9. RSVP FORM */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('rsvp-form', {
-                    style: { x: 20, y: 150, width: 350, height: 250, borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  <span>RSVP Form</span>
-                </button>
-
-                {/* 10. GUESTBOOK */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('guestbook', {
-                    style: { x: 20, y: 150, width: 350, height: 250, borderRadius: 16 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4 text-indigo-500" />
-                  <span>Guestbook</span>
-                </button>
-
-                {/* 11. WHATSAPP BUTTON */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('whatsapp-button', {
-                    content: { buttonText: 'RSVP via WhatsApp', whatsappPhone: '+1234567890', whatsappMessage: 'Hi! I am delighted to accept your wedding invitation!' },
-                    style: { x: 45, y: 250, width: 300, height: 46, borderRadius: 12 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4 text-emerald-600" />
-                  <span>WhatsApp RSVP</span>
-                </button>
-
-                {/* 12. QR CODE */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('qr-code', {
-                    content: { qrCodeValue: 'https://example.com', qrLabel: 'Scan for Details' },
-                    style: { x: 120, y: 220, width: 150, height: 165, borderRadius: 12 }
-                  })}
-                  className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                >
-                  <QrCode className="w-4 h-4 text-slate-700" />
-                  <span>QR Code</span>
-                </button>
-
-                {/* 13. OPEN INVITATION BUTTON */}
-                <button
-                  type="button"
-                  onClick={() => onAddElement('button', {
-                    id: 'open-elem-button',
-                    name: 'Open Invitation Button',
-                    content: {
-                      buttonText: openingScreen?.openButtonText || 'Open Invitation',
-                      buttonAction: 'open-invitation',
-                      buttonShape: 'pill'
-                    },
-                    style: {
-                      x: 45,
-                      y: 580,
-                      width: 300,
-                      height: 52,
-                      backgroundColor: openingScreen?.sealColor || '#d4af37',
-                      color: '#07120d',
-                      fontSize: 13,
-                      fontWeight: 800,
-                      borderRadius: 9999,
-                      boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.4)',
-                      letterSpacing: 1.5,
-                      zIndex: 20
-                    },
-                    animation: {
-                      type: 'bounce',
-                      duration: 1.5,
-                      delay: 0.6,
-                      repeat: 'infinite'
-                    }
-                  })}
-                  className="col-span-2 flex items-center justify-between p-2.5 rounded-lg bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200/90 text-amber-950 text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <MailOpen className="w-4 h-4 text-amber-600" />
-                    <span>Open Invitation Button (Cover Action)</span>
-                  </div>
-                  <span className="text-[10px] text-amber-800 bg-amber-200/60 px-1.5 py-0.5 rounded font-medium">Interactive CTA</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* BLOCKS / CONTAINERS TAB */}
         {activeTab === 'blocks' && (
@@ -748,11 +670,10 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   <button
                     type="button"
                     onClick={() => setTargetContainerOnly(!targetContainerOnly)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer ${
-                      targetContainerOnly
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white text-indigo-700 border border-indigo-300 hover:bg-indigo-100'
-                    }`}
+                    className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer ${targetContainerOnly
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white text-indigo-700 border border-indigo-300 hover:bg-indigo-100'
+                      }`}
                   >
                     {targetContainerOnly ? 'Nesting Inside' : 'Insert to Page'}
                   </button>
@@ -784,11 +705,10 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                       key={cat.id}
                       type="button"
                       onClick={() => setSelectedBlockCategory(cat.id)}
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-medium whitespace-nowrap transition-colors cursor-pointer ${
-                        isSelected
-                          ? 'bg-slate-900 text-white font-semibold'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-medium whitespace-nowrap transition-colors cursor-pointer ${isSelected
+                        ? 'bg-slate-900 text-white font-semibold'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
                     >
                       {cat.label}
                     </button>
@@ -941,7 +861,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 <div className="p-3">
                   <div className="text-xs font-bold text-slate-900">{tmpl.title}</div>
                   <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{tmpl.description}</p>
-                  
+
                   <div className="flex items-center gap-2 mt-3">
                     <button
                       type="button"

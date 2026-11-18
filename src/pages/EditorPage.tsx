@@ -56,6 +56,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
+  const [activeSpecialInspector, setActiveSpecialInspector] = useState<'canvas-decorations' | null>(null);
   const [clipboard, setClipboard] = useState<CanvasElement[]>([]);
   const [viewportMode, setViewportMode] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
   const [zoomLevel, setZoomLevel] = useState(100);
@@ -381,6 +382,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       setSelectedElementIds([]);
       return;
     }
+    setActiveSpecialInspector(null);
     if (isMulti) {
       setSelectedElementIds(prev =>
         prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
@@ -566,6 +568,56 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     updateInvitationState({ ...invitation, openingScreen: finalizedOpening });
   };
 
+  const handleApplyThemeToAllPages = useCallback(() => {
+    if (!invitation) return;
+    const currentTheme = invitation.theme;
+    if (!currentTheme) return;
+
+    const updatedPages = invitation.pages.map((p) => {
+      const updatedBackground = {
+        ...p.background,
+        color: currentTheme.backgroundColor || p.background?.color || '#ffffff'
+      };
+
+      const updatedElements = p.elements.map((el) => {
+        if (el.type === 'text') {
+          return {
+            ...el,
+            style: {
+              ...el.style,
+              color: currentTheme.primaryColor || el.style.color,
+              fontFamily: currentTheme.fontBody || el.style.fontFamily
+            }
+          };
+        }
+        if (el.type === 'button') {
+          return {
+            ...el,
+            style: {
+              ...el.style,
+              backgroundColor: currentTheme.primaryColor || el.style.backgroundColor,
+              color: '#ffffff'
+            }
+          };
+        }
+        return el;
+      });
+
+      return {
+        ...p,
+        background: updatedBackground,
+        elements: updatedElements
+      };
+    });
+
+    updateInvitationState({
+      ...invitation,
+      pages: updatedPages
+    });
+
+    toast.success('Theme palette applied to all pages!');
+  }, [invitation, updateInvitationState, toast]);
+
   // ELEMENT OPERATIONS
   const handleAddElement = (
     type: ElementType,
@@ -616,6 +668,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     });
 
     setSelectedElementIds([newElement.id]);
+    setActiveSpecialInspector(null);
   };
 
   const handleUpdateElement = (id: string, updates: Partial<CanvasElement>) => {
@@ -1394,6 +1447,18 @@ export const EditorPage: React.FC<EditorPageProps> = ({
             setSelectedElementIds([]);
           }}
           onToggleOpeningScreen={handleToggleOpeningScreen}
+          theme={invitation.theme}
+          onUpdateTheme={(themeUpdates) => updateInvitationState({
+            ...invitation,
+            theme: { ...invitation.theme, ...themeUpdates }
+          })}
+          openingScreenConfig={invitation.openingScreen}
+          onUpdateOpeningScreen={handleUpdateOpeningScreen}
+          onSelectCanvasDecorations={() => {
+            setSelectedElementIds([]);
+            setActiveSpecialInspector('canvas-decorations');
+          }}
+          isCanvasDecorationsActive={activeSpecialInspector === 'canvas-decorations'}
         />
 
         {/* Center Free Visual Canvas */}
@@ -1482,12 +1547,15 @@ export const EditorPage: React.FC<EditorPageProps> = ({
             ...invitation,
             theme: { ...invitation.theme, ...themeUpdates }
           })}
+          onApplyThemeToAllPages={handleApplyThemeToAllPages}
           currentInvitationId={invitation.id}
           businessId={invitation.businessId}
           onPreviewAnimation={handlePreviewAnimation}
           onPreviewPageAnimations={handlePreviewPageAnimations}
           viewportMode={viewportMode}
           onChangeViewport={setViewportMode}
+          activeSpecialInspector={activeSpecialInspector}
+          onCloseSpecialInspector={() => setActiveSpecialInspector(null)}
         />
       </div>
 
