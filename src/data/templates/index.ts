@@ -1,35 +1,8 @@
 import { PageTemplate, PrebuiltBlock, TemplateCategory } from '../../types';
-import { openingTemplates, openingBlocks } from './openingTemplates';
-import { weddingTemplates, weddingBlocks } from './weddingTemplates';
-import { eventTemplates, eventBlocks } from './eventTemplates';
-import { mediaTemplates, mediaBlocks } from './mediaTemplates';
-import { interactionTemplates, interactionBlocks } from './interactionTemplates';
-import { finalTemplates, finalBlocks } from './finalTemplates';
 
-export * from './openingTemplates';
-export * from './weddingTemplates';
-export * from './eventTemplates';
-export * from './mediaTemplates';
-export * from './interactionTemplates';
-export * from './finalTemplates';
+export const ALL_PAGE_TEMPLATES: PageTemplate[] = [];
 
-export const ALL_PAGE_TEMPLATES: PageTemplate[] = [
-  ...openingTemplates,
-  ...weddingTemplates,
-  ...eventTemplates,
-  ...mediaTemplates,
-  ...interactionTemplates,
-  ...finalTemplates
-];
-
-export const ALL_PREBUILT_BLOCKS: PrebuiltBlock[] = [
-  ...openingBlocks,
-  ...weddingBlocks,
-  ...eventBlocks,
-  ...mediaBlocks,
-  ...interactionBlocks,
-  ...finalBlocks
-];
+export const ALL_PREBUILT_BLOCKS: PrebuiltBlock[] = [];
 
 export interface CategoryInfo {
   id: TemplateCategory | 'all';

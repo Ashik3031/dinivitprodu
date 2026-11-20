@@ -52,7 +52,7 @@ export interface ToastItem {
   duration?: number;
 }
 
-export type ContainerShape = 
+export type ContainerShape =
   | 'rectangle'
   | 'rounded-rectangle'
   | 'circle'
@@ -91,7 +91,7 @@ export interface BackgroundConfig {
   position?: string;
 }
 
-export type AnimationType = 
+export type AnimationType =
   | 'none'
   | 'fadeIn'
   | 'fadeOut'
@@ -128,16 +128,16 @@ export interface AnimationConfig {
   parallax?: ParallaxConfig;
 }
 
-export type PageTransitionType = 
-  | 'fade' 
-  | 'slide-vertical' 
-  | 'slide-horizontal' 
-  | 'zoom' 
-  | 'flip' 
-  | 'cube' 
+export type PageTransitionType =
+  | 'fade'
+  | 'slide-vertical'
+  | 'slide-horizontal'
+  | 'zoom'
+  | 'flip'
+  | 'cube'
   | 'none';
 
-export type ElementType = 
+export type ElementType =
   // Basic
   | 'text'
   | 'heading'
@@ -170,6 +170,30 @@ export type ElementType =
   | 'whatsapp-button'
   | 'qr-code';
 
+export interface ElementColorTokens {
+  heading?: string;
+  body?: string;
+  label?: string;
+  accent?: string;
+  cardBackground?: string;
+  border?: string;
+  buttonBackground?: string;
+  buttonText?: string;
+  acceptButtonBackground?: string;
+  acceptButtonText?: string;
+  declineButtonBackground?: string;
+  declineButtonText?: string;
+  inputBackground?: string;
+  inputText?: string;
+  placeholder?: string;
+  icon?: string;
+  numberColor?: string;
+  timelineLine?: string;
+  timelineMarker?: string;
+  badgeBackground?: string;
+  badgeText?: string;
+}
+
 export interface ElementStyle {
   // Positioning & Sizing
   x: number;
@@ -178,7 +202,7 @@ export interface ElementStyle {
   height: number;
   rotation?: number;
   zIndex?: number;
-  
+
   // Typography
   fontFamily?: string;
   fontSize?: number;
@@ -196,7 +220,7 @@ export interface ElementStyle {
   textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
   fontStyle?: 'normal' | 'italic';
   textDecoration?: 'none' | 'underline' | 'line-through';
-  
+
   // Box / Container
   shape?: ContainerShape;
   backgroundColor?: string;
@@ -213,7 +237,10 @@ export interface ElementStyle {
   overflow?: 'visible' | 'hidden';
   clipMask?: boolean;
   svgShapePath?: string;
-  
+
+  // Granular Element Color Tokens
+  colors?: ElementColorTokens;
+
   // Aspect Ratio & Object Fit
   objectFit?: 'cover' | 'contain' | 'fill';
   aspectRatioLock?: boolean;
@@ -265,7 +292,7 @@ export interface ElementContent {
   audioAutoplay?: boolean;
   audioLoop?: boolean;
   audioVolume?: number;
-  
+
   // Invitation fields
   coupleName1?: string;
   coupleName2?: string;
@@ -278,7 +305,7 @@ export interface ElementContent {
   mapEmbedUrl?: string;
   mapZoom?: number;
   mapInteractive?: boolean;
-  
+
   // Calendar specific
   calendarMonth?: string;
   calendarYear?: number;
@@ -292,7 +319,7 @@ export interface ElementContent {
   countdownTarget?: string;
   countdownLabels?: { days: string; hours: string; minutes: string; seconds: string };
   countdownStyle?: 'boxes' | 'minimal' | 'glass' | 'circles';
-  
+
   dressCodeTitle?: string;
   dressCodeColors?: string[];
   dressCodeDescription?: string;
@@ -320,34 +347,34 @@ export interface ElementContent {
   }>;
   travelFlightsInfo?: string;
   travelShuttleInfo?: string;
-  
+
   timelineEvents?: Array<{ time: string; title: string; description: string; icon?: string }>;
   timelineLayout?: 'vertical' | 'split' | 'cards';
-  
+
   galleryImages?: Array<{ url: string; caption?: string }>;
   galleryLayout?: 'grid' | 'carousel' | 'masonry' | 'polaroid' | 'coverflow' | 'stack' | 'cylinder';
   galleryColumns?: number;
-  
+
   buttonText?: string;
   buttonLink?: string;
   buttonAction?: 'link' | 'rsvp' | 'guestbook' | 'maps' | 'whatsapp' | 'calendar' | 'music-toggle' | 'next-page' | 'previous-page' | 'open-invitation';
   buttonShape?: 'pill' | 'rounded' | 'square' | 'soft';
-  
+
   whatsappPhone?: string;
   whatsappMessage?: string;
-  
+
   qrCodeValue?: string;
   qrFgColor?: string;
   qrBgColor?: string;
   qrLabel?: string;
-  
+
   iconName?: string;
   iconSize?: number;
   iconColor?: string;
   iconStrokeWidth?: number;
   iconBgColor?: string;
   iconBorderRadius?: number;
-  
+
   rsvpFields?: Array<{ name: string; label: string; type: 'text' | 'select' | 'radio' | 'number'; options?: string[]; required?: boolean }>;
 }
 
@@ -424,6 +451,14 @@ export interface PrebuiltBlock {
   thumbnail?: string;
   suggestedHeight?: number;
   elements: CanvasElement[];
+  createdBy?: string;
+  authorRole?: 'admin' | 'superadmin' | 'business';
+  authorName?: string;
+  isSuperAdmin?: boolean;
+  isPublic?: boolean;
+  verificationStatus?: 'pending' | 'approved' | 'rejected' | 'draft';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PageTemplate {
@@ -552,13 +587,13 @@ export interface MusicConfig {
   floatingBadge: boolean;
 }
 
-export type EventType = 
-  | 'wedding' 
-  | 'birthday' 
-  | 'engagement' 
-  | 'anniversary' 
-  | 'baby-shower' 
-  | 'business-event' 
+export type EventType =
+  | 'wedding'
+  | 'birthday'
+  | 'engagement'
+  | 'anniversary'
+  | 'baby-shower'
+  | 'business-event'
   | 'other'
   | 'gala'
   | 'save-the-date'
@@ -646,6 +681,12 @@ export interface InvitationTemplate {
   pages: InvitationPage[];
   isPremium?: boolean;
   isPublic?: boolean;
+  verificationStatus?: 'pending' | 'approved' | 'rejected' | 'draft';
+  rejectionReason?: string;
+  authorBusinessId?: string;
+  submittedAt?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
   tags?: string[];
   createdBy?: string;
   authorRole?: 'admin' | 'superadmin' | 'business';
@@ -655,7 +696,7 @@ export interface InvitationTemplate {
   updatedAt?: string;
 }
 
-export type MediaAssetType = 'image' | 'video' | 'audio' | 'pattern' | 'texture' | 'frame' | 'sticker' | 'decoration' | 'gif';
+export type MediaAssetType = 'image' | 'video' | 'audio' | 'pattern' | 'texture' | 'frame' | 'sticker' | 'decoration' | 'gif' | 'background';
 
 export interface MediaAsset {
   id: string;

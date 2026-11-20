@@ -113,7 +113,8 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   const [marqueeStart, setMarqueeStart] = useState({ x: 0, y: 0 });
   const [marqueeBox, setMarqueeBox] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
-  const selectedElements = page.elements.filter(el => selectedElementIds.includes(el.id));
+  const pageElements = page?.elements || [];
+  const selectedElements = pageElements.filter(el => selectedElementIds.includes(el.id));
   const isSingleSelection = selectedElements.length === 1;
   const singleElement = isSingleSelection ? selectedElements[0] : null;
 
@@ -143,12 +144,12 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     }
   };
 
-  const canvasWidth = page.width || getCanvasWidth();
-  const canvasHeight = getPageCalculatedHeight(page, viewportMode, windowHeight);
+  const canvasWidth = page?.width || getCanvasWidth();
+  const canvasHeight = page ? getPageCalculatedHeight(page, viewportMode, windowHeight) : 844;
 
   // Page background style
   const getPageBgStyle = () => {
-    const bg = page.background;
+    const bg = page?.background;
     if (!bg) return { backgroundColor: '#f8fafc' };
 
     switch (bg.type) {
@@ -250,7 +251,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
 
-    const activeElements = page.elements.filter(el => activeIds.includes(el.id) && !el.isLocked);
+    const activeElements = pageElements.filter(el => activeIds.includes(el.id) && !el.isLocked);
     const startMap: Record<string, { x: number; y: number; width: number; height: number; rotation: number }> = {};
 
     activeElements.forEach(el => {
@@ -345,7 +346,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
         setMarqueeBox(currentBox);
 
         // Find elements intersecting with marquee box
-        const topElements = page.elements.filter(el => !el.parentContainerId && !el.isHidden);
+        const topElements = pageElements.filter(el => !el.parentContainerId && !el.isHidden);
         const intersectingIds = topElements
           .filter(el => {
             const { style: resolved } = resolveElementForViewport(el, viewportMode);
@@ -384,7 +385,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
             newY = Math.round(newY / 8) * 8;
           }
 
-          const existing = page.elements.find(el => el.id === id);
+          const existing = pageElements.find(el => el.id === id);
           if (existing) {
             if (viewportMode === 'mobile') {
               updates[id] = {
@@ -502,14 +503,14 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     singleElement,
     zoomLevel,
     showGrid,
-    page.elements,
+    pageElements,
     onUpdateElement,
     onUpdateMultipleElements,
     onSelectMultipleElements
   ]);
 
   // Top level elements (not inside a container)
-  const topLevelElements = page.elements.filter(el => !el.parentContainerId && !el.isHidden);
+  const topLevelElements = pageElements.filter(el => !el.parentContainerId && !el.isHidden);
 
   // Calculate collective multi-selection bounding box
   const multiSelectionBounds = (() => {
@@ -586,14 +587,14 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
               if (el) {
                 el.defaultMuted = true;
                 el.muted = true;
-                el.play().catch(() => {});
+                el.play().catch(() => { });
               }
             }}
             onLoadedMetadata={(e) => {
               const v = e.currentTarget;
               v.defaultMuted = true;
               v.muted = true;
-              v.play().catch(() => {});
+              v.play().catch(() => { });
             }}
             className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
           />
@@ -620,9 +621,8 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
             <div
               key={element.id}
               id={`canvas-elem-${element.id}`}
-              className={`absolute cursor-move group transition-shadow ${
-                isSelected ? 'z-50' : 'hover:outline hover:outline-1 hover:outline-slate-400/50'
-              } ${isResolvedHidden ? 'opacity-40 ring-1 ring-rose-400/50 ring-dashed' : ''}`}
+              className={`absolute cursor-move group transition-shadow ${isSelected ? 'z-50' : 'hover:outline hover:outline-1 hover:outline-slate-400/50'
+                } ${isResolvedHidden ? 'opacity-40 ring-1 ring-rose-400/50 ring-dashed' : ''}`}
               style={{
                 left: `${resolvedStyle.x}px`,
                 top: `${resolvedStyle.y}px`,
@@ -653,7 +653,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 element={element}
                 isEditor={true}
                 viewportMode={viewportMode}
-                allElements={page.elements}
+                allElements={pageElements}
                 onSelectElement={(id) => onSelectElement(id, false)}
                 selectedElementId={selectedElementIds[0] || null}
                 previewKey={

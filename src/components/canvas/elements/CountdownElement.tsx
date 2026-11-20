@@ -15,7 +15,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
 }) => {
   // Target date & time (defaulting to 2026-10-24 16:00:00 or content.eventDate)
   const targetDateStr = content.countdownTarget || content.eventDate || '2026-10-24T16:00:00';
-  
+
   const calculateTimeLeft = () => {
     try {
       const target = new Date(targetDateStr).getTime();
@@ -41,7 +41,6 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
 
   useEffect(() => {
-    // Initial compute
     setTimeLeft(calculateTimeLeft());
 
     const interval = setInterval(() => {
@@ -59,7 +58,12 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
   };
 
   const cdStyle = content.countdownStyle || 'boxes';
-  const primaryColor = style.color || '#d4af37';
+  const colors = style.colors || {};
+  const primaryColor = colors.accent || style.color || '#d4af37';
+  const numberColor = colors.numberColor || colors.accent || primaryColor;
+  const labelColor = colors.label || (style.color ? `${style.color}cc` : '#94a3b8');
+  const cardBg = colors.cardBackground || (style.backgroundColor && style.backgroundColor !== 'transparent' ? style.backgroundColor : 'rgba(2, 6, 23, 0.55)');
+  const borderColor = colors.border || style.borderColor || 'rgba(255, 255, 255, 0.12)';
   const fontFamily = style.fontFamily || "'Cinzel', serif";
   const numFontSize = style.fontSize ? `${style.fontSize}px` : '22px';
 
@@ -80,7 +84,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
           borderRadius: style.borderRadius ? `${style.borderRadius}px` : '12px',
           backgroundColor: style.backgroundColor || 'transparent',
           borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
-          borderColor: style.borderColor,
+          borderColor,
           borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
           boxShadow: style.boxShadow,
           padding: style.padding ? `${style.padding}px` : '8px'
@@ -93,7 +97,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
                 <span
                   className="font-bold tabular-nums tracking-wider leading-none"
                   style={{
-                    color: primaryColor,
+                    color: numberColor,
                     fontSize: numFontSize,
                     fontWeight: style.fontWeight || 'bold',
                     letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
@@ -102,9 +106,9 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
                   {String(unit.value).padStart(2, '0')}
                 </span>
                 <span
-                  className="text-[9px] uppercase tracking-widest text-slate-400 mt-1 transition-colors"
+                  className="text-[9px] uppercase tracking-widest mt-1 transition-colors"
                   style={{
-                    color: style.color ? `${style.color}99` : undefined,
+                    color: labelColor,
                     fontFamily
                   }}
                 >
@@ -114,7 +118,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
               {idx < 3 && (
                 <span
                   className="font-bold -mt-3 text-sm opacity-50"
-                  style={{ color: primaryColor }}
+                  style={{ color: numberColor }}
                 >
                   :
                 </span>
@@ -145,7 +149,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
           borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
           backgroundColor: style.backgroundColor || 'transparent',
           borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
-          borderColor: style.borderColor,
+          borderColor,
           borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
           boxShadow: style.boxShadow,
           padding: style.padding ? `${style.padding}px` : '8px'
@@ -154,16 +158,18 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
         {units.map((unit, idx) => (
           <div
             key={idx}
-            className="flex-1 aspect-square max-w-[72px] flex flex-col items-center justify-center rounded-full border border-white/20 bg-slate-950/60 backdrop-blur-md shadow-md p-1"
+            className="flex-1 aspect-square max-w-[72px] flex flex-col items-center justify-center rounded-full backdrop-blur-md shadow-md p-1"
             style={{
-              borderColor: style.borderColor || `${primaryColor}40`,
-              backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}` : undefined
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor,
+              backgroundColor: cardBg
             }}
           >
             <span
               className="font-bold tabular-nums leading-none"
               style={{
-                color: primaryColor,
+                color: numberColor,
                 fontSize: numFontSize,
                 fontWeight: style.fontWeight || 'bold',
                 letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
@@ -172,9 +178,9 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
               {String(unit.value).padStart(2, '0')}
             </span>
             <span
-              className="text-[8px] uppercase tracking-wider text-slate-300 mt-0.5 transition-colors"
+              className="text-[8px] uppercase tracking-wider mt-0.5 transition-colors"
               style={{
-                color: style.color ? `${style.color}cc` : undefined,
+                color: labelColor,
                 fontFamily
               }}
             >
@@ -195,7 +201,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
         borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
         backgroundColor: style.backgroundColor || 'transparent',
         borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
-        borderColor: style.borderColor,
+        borderColor,
         borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
         boxShadow: style.boxShadow,
         padding: style.padding ? `${style.padding}px` : '8px'
@@ -204,17 +210,19 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
       {units.map((unit, idx) => (
         <div
           key={idx}
-          className="flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl border border-white/10 bg-slate-950/50 backdrop-blur-md shadow-md transition-colors"
+          className="flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl backdrop-blur-md shadow-md transition-colors"
           style={{
             borderRadius: style.borderRadius ? `${Math.max(6, Number(style.borderRadius) - 4)}px` : '12px',
-            borderColor: style.borderColor ? `${style.borderColor}60` : undefined,
-            backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}ee` : undefined
+            borderWidth: 1,
+            borderStyle: 'solid',
+            borderColor,
+            backgroundColor: cardBg
           }}
         >
           <span
             className="font-bold tabular-nums tracking-wider leading-none"
             style={{
-              color: primaryColor,
+              color: numberColor,
               fontSize: numFontSize,
               fontWeight: style.fontWeight || 'bold',
               letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
@@ -223,9 +231,9 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
             {String(unit.value).padStart(2, '0')}
           </span>
           <span
-            className="text-[9px] uppercase tracking-widest text-slate-300 font-semibold mt-1 transition-colors"
+            className="text-[9px] uppercase tracking-widest font-semibold mt-1 transition-colors"
             style={{
-              color: style.color ? `${style.color}bb` : undefined,
+              color: labelColor,
               fontFamily
             }}
           >

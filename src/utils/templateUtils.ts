@@ -54,9 +54,10 @@ export const cloneElementsWithNewIds = (
  * Converts a PrebuiltBlock into canvas elements ready to be inserted into an existing active page.
  */
 export const instantiatePrebuiltBlock = (
-  block: PrebuiltBlock,
+  block?: PrebuiltBlock | null,
   targetY?: number
 ): CanvasElement[] => {
+  if (!block || !block.elements || !Array.isArray(block.elements)) return [];
   let minY = Infinity;
   block.elements.forEach((el) => {
     if (!el.parentContainerId && el.style.y !== undefined) {
@@ -73,18 +74,30 @@ export const instantiatePrebuiltBlock = (
  * Converts a PageTemplate into a fully independent, editable InvitationPage with its own IDs.
  */
 export const instantiateTemplatePage = (
-  template: PageTemplate,
+  template?: PageTemplate | null,
   order = 0
 ): InvitationPage => {
   const newPageId = `page-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
-  const clonedElements = cloneElementsWithNewIds(template.page.elements, 0, 0);
+  if (!template || !template.page) {
+    return {
+      id: newPageId,
+      name: 'New Section',
+      order,
+      heightMode: 'viewport',
+      height: 844,
+      isFullHeight: true,
+      background: { type: 'color', color: '#f8fafc' },
+      elements: []
+    };
+  }
+  const clonedElements = cloneElementsWithNewIds(template.page.elements || [], 0, 0);
 
   return {
     ...template.page,
     id: newPageId,
     order,
-    name: template.name,
-    background: JSON.parse(JSON.stringify(template.page.background)),
+    name: template.name || 'New Section',
+    background: template.page.background ? JSON.parse(JSON.stringify(template.page.background)) : { type: 'color', color: '#f8fafc' },
     elements: clonedElements,
     animation: template.page.animation ? { ...template.page.animation } : undefined
   };

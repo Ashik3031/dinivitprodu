@@ -28,6 +28,10 @@ import {
   Calendar,
   LogOut,
   ShieldAlert,
+  FolderPlus,
+  ShieldCheck,
+  AlertCircle,
+  Store,
   Globe,
   FileEdit,
   Layers,
@@ -38,9 +42,7 @@ import {
   PartyPopper,
   CalendarDays,
   User as UserIcon,
-  FolderPlus,
-  Check,
-  AlertCircle
+  Check
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -61,6 +63,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [viewLayout, setViewLayout] = useState<'grid' | 'table'>('grid');
+  const [dashboardTab, setDashboardTab] = useState<'invitations' | 'templates'>('invitations');
+  const [templateFilter, setTemplateFilter] = useState<'all' | 'admin' | 'my-templates'>('all');
+
+  // Save as Template Modal State
+  const [saveAsTemplateInv, setSaveAsTemplateInv] = useState<Invitation | null>(null);
+  const [saveTemplateForm, setSaveTemplateForm] = useState({
+    title: '',
+    category: 'wedding',
+    description: '',
+    requestPublic: true
+  });
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 
   // User Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -188,6 +202,78 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       }
     } catch (err: any) {
       toast.error(err.message || 'Failed to update invitation status');
+    }
+  };
+
+  // Save as Template handlers
+  const handleOpenSaveAsTemplate = (inv: Invitation, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setSaveAsTemplateInv(inv);
+    setSaveTemplateForm({
+      title: `${inv.title} Template`,
+      category: inv.category || 'wedding',
+      description: '',
+      requestPublic: true
+    });
+  };
+
+  const handleSaveAsTemplateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!saveAsTemplateInv || !saveTemplateForm.title.trim()) return;
+
+    try {
+      setIsSavingTemplate(true);
+      const res = await api.saveAsTemplate(saveAsTemplateInv.id, {
+        title: saveTemplateForm.title.trim(),
+        category: saveTemplateForm.category,
+        description: saveTemplateForm.description.trim(),
+        requestPublic: saveTemplateForm.requestPublic,
+        isPublic: saveTemplateForm.requestPublic
+      });
+
+      if (user?.role === 'admin') {
+        toast.success(`Template "${res.template.title}" saved and published directly to the public library!`);
+      } else if (saveTemplateForm.requestPublic) {
+        toast.success(`Template "${res.template.title}" submitted to Admin for verification! Once approved, it will be visible in the public library.`);
+      } else {
+        toast.success(`Template "${res.template.title}" saved to your personal templates.`);
+      }
+
+      setSaveAsTemplateInv(null);
+      await loadDashboardData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save template');
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
+
+  const handleSubmitTemplateForVerification = async (tmplId: string, tmplTitle: string) => {
+    try {
+      await api.submitTemplateForVerification(tmplId);
+      toast.success(`Template "${tmplTitle}" submitted to Admin for verification!`);
+      await loadDashboardData();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit template for verification');
+    }
+  };
+
+  const handleCreateFromTemplate = async (tmpl: InvitationTemplate) => {
+    try {
+      setIsLoading(true);
+      const res = await api.createInvitation({
+        title: `${tmpl.title} (Project)`,
+        category: (tmpl.category as any) || 'wedding',
+        templateId: tmpl.id
+      });
+      if (res.invitation) {
+        toast.success(`Created project from "${tmpl.title}"! Launching editor...`);
+        onOpenEditor(res.invitation.id);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create invitation from template');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -373,7 +459,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <div className="text-2xl font-bold text-slate-900 font-mono mt-1">{invitations.length}</div>
               <div className="text-[10px] text-slate-400 mt-0.5">All customer projects</div>
             </div>
-            
+
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/70">
               <div className="text-[10px] uppercase font-bold text-amber-700">Draft Invitations</div>
               <div className="text-2xl font-bold text-amber-700 font-mono mt-1">
@@ -400,415 +486,640 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        {/* Search, Status Tabs, Category Filter & View Mode */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by invitation title, customer, or URL slug..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-sm"
-            />
-          </div>
+        {/* Main Dashboard Navigation Switcher */}
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+          <button
+            type="button"
+            onClick={() => setDashboardTab('invitations')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${dashboardTab === 'invitations'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+          >
+            <Layout className="w-4 h-4" />
+            <span>My Invitations ({invitations.length})</span>
+          </button>
 
-          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1">
-            {/* Status Filter */}
-            <div className="flex bg-white p-1 rounded-xl border border-slate-200 text-xs shadow-sm">
-              {(['all', 'published', 'draft'] as const).map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setStatusFilter(st)}
-                  className={`px-3.5 py-1.5 rounded-lg capitalize font-medium text-xs transition-colors cursor-pointer ${
-                    statusFilter === st ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {st === 'all' ? 'All' : st}
-                </button>
-              ))}
-            </div>
-
-            {/* Event Category filter */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none shadow-sm cursor-pointer"
-            >
-              <option value="all">All Event Types</option>
-              <option value="wedding">Wedding</option>
-              <option value="birthday">Birthday</option>
-              <option value="engagement">Engagement</option>
-              <option value="anniversary">Anniversary</option>
-              <option value="baby-shower">Baby Shower</option>
-              <option value="business-event">Business Event</option>
-              <option value="other">Other</option>
-            </select>
-
-            {/* View Mode Toggle */}
-            <div className="flex bg-white p-1 rounded-xl border border-slate-200 text-xs shadow-sm">
-              <button
-                type="button"
-                onClick={() => setViewLayout('grid')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
-                  viewLayout === 'grid' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
-                }`}
-                title="Grid View"
-              >
-                <Layout className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewLayout('table')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
-                  viewLayout === 'table' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
-                }`}
-                title="Table Listing View"
-              >
-                <Layers className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setDashboardTab('templates')}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${dashboardTab === 'templates'
+              ? 'bg-amber-500 text-slate-950 font-extrabold shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Templates Library ({templates.length})</span>
+          </button>
         </div>
 
-        {/* Invitation Listing Page - Grid / Table */}
-        {filteredInvitations.length === 0 ? (
-          <div className="py-16 text-center rounded-2xl border border-dashed border-slate-200 bg-white shadow-sm">
-            <Layout className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-sm font-bold text-slate-700">No invitations found</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
-              {searchQuery || statusFilter !== 'all' || categoryFilter !== 'all'
-                ? 'Try clearing your search query or filters to view all client invitations.'
-                : 'Get started by creating your first client digital invitation using our 3-step wizard.'}
-            </p>
-            <button
-              type="button"
-              onClick={openCreateWizard}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create New Invitation</span>
-            </button>
-          </div>
-        ) : viewLayout === 'table' ? (
-          /* Table Listing View */
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-100">
-                  <tr>
-                    <th className="p-4">Thumbnail & Title</th>
-                    <th className="p-4">Customer</th>
-                    <th className="p-4">Event Type</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Last Edited</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredInvitations.map((inv) => {
-                    const previewImg =
-                      inv.thumbnail ||
-                      inv.pages[0]?.background?.imageUrl ||
-                      'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
+        {dashboardTab === 'invitations' ? (
+          <>
+            {/* Search, Status Tabs, Category Filter & View Mode */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="relative w-full md:w-96">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search by invitation title, customer, or URL slug..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-slate-900 shadow-sm"
+                />
+              </div>
 
-                    return (
-                      <tr key={inv.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={previewImg}
-                              alt={inv.title}
-                              className="w-14 h-10 object-cover rounded-lg border border-slate-200 shrink-0 cursor-pointer"
-                              referrerPolicy="no-referrer"
-                              onClick={() => onOpenEditor(inv.id)}
-                            />
-                            <div>
-                              <div
-                                onClick={() => onOpenEditor(inv.id)}
-                                className="font-bold text-slate-900 hover:text-slate-700 cursor-pointer text-xs"
-                              >
-                                {inv.title}
+              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1">
+                {/* Status Filter */}
+                <div className="flex bg-white p-1 rounded-xl border border-slate-200 text-xs shadow-sm">
+                  {(['all', 'published', 'draft'] as const).map((st) => (
+                    <button
+                      key={st}
+                      onClick={() => setStatusFilter(st)}
+                      className={`px-3.5 py-1.5 rounded-lg capitalize font-medium text-xs transition-colors cursor-pointer ${statusFilter === st ? 'bg-slate-900 text-white font-bold' : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                    >
+                      {st === 'all' ? 'All' : st}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Event Category filter */}
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none shadow-sm cursor-pointer"
+                >
+                  <option value="all">All Event Types</option>
+                  <option value="wedding">Wedding</option>
+                  <option value="birthday">Birthday</option>
+                  <option value="engagement">Engagement</option>
+                  <option value="anniversary">Anniversary</option>
+                  <option value="baby-shower">Baby Shower</option>
+                  <option value="business-event">Business Event</option>
+                  <option value="other">Other</option>
+                </select>
+
+                {/* View Mode Toggle */}
+                <div className="flex bg-white p-1 rounded-xl border border-slate-200 text-xs shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setViewLayout('grid')}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${viewLayout === 'grid' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    title="Grid View"
+                  >
+                    <Layout className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewLayout('table')}
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${viewLayout === 'table' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    title="Table Listing View"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Invitation Listing Page - Grid / Table */}
+            {filteredInvitations.length === 0 ? (
+              <div className="py-16 text-center rounded-2xl border border-dashed border-slate-200 bg-white shadow-sm">
+                <Layout className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-sm font-bold text-slate-700">No invitations found</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 mb-4">
+                  {searchQuery || statusFilter !== 'all' || categoryFilter !== 'all'
+                    ? 'Try clearing your search query or filters to view all client invitations.'
+                    : 'Get started by creating your first client digital invitation using our 3-step wizard.'}
+                </p>
+                <button
+                  type="button"
+                  onClick={openCreateWizard}
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Create New Invitation</span>
+                </button>
+              </div>
+            ) : viewLayout === 'table' ? (
+              /* Table Listing View */
+              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-100">
+                      <tr>
+                        <th className="p-4">Thumbnail & Title</th>
+                        <th className="p-4">Customer</th>
+                        <th className="p-4">Event Type</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4">Last Edited</th>
+                        <th className="p-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredInvitations.map((inv) => {
+                        const previewImg =
+                          inv.thumbnail ||
+                          inv.pages[0]?.background?.imageUrl ||
+                          'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
+
+                        return (
+                          <tr key={inv.id} className="hover:bg-slate-50/70 transition-colors">
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <img
+                                  src={previewImg}
+                                  alt={inv.title}
+                                  className="w-14 h-10 object-cover rounded-lg border border-slate-200 shrink-0 cursor-pointer"
+                                  referrerPolicy="no-referrer"
+                                  onClick={() => onOpenEditor(inv.id)}
+                                />
+                                <div>
+                                  <div
+                                    onClick={() => onOpenEditor(inv.id)}
+                                    className="font-bold text-slate-900 hover:text-slate-700 cursor-pointer text-xs"
+                                  >
+                                    {inv.title}
+                                  </div>
+                                  <div className="text-[11px] text-slate-400 font-mono">/{inv.slug}</div>
+                                </div>
                               </div>
-                              <div className="text-[11px] text-slate-400 font-mono">/{inv.slug}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-4 text-slate-700">
-                          {inv.customerName ? (
-                            <div className="font-medium text-slate-800">{inv.customerName}</div>
-                          ) : (
-                            <span className="text-slate-400 italic">Unassigned</span>
-                          )}
-                          {inv.eventDate && (
-                            <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                              <Calendar className="w-3 h-3 text-slate-400" />
-                              <span>{inv.eventDate}</span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
-                            {inv.eventType || inv.category}
-                          </span>
-                        </td>
-                        <td className="p-4">
+                            </td>
+                            <td className="p-4 text-slate-700">
+                              {inv.customerName ? (
+                                <div className="font-medium text-slate-800">{inv.customerName}</div>
+                              ) : (
+                                <span className="text-slate-400 italic">Unassigned</span>
+                              )}
+                              {inv.eventDate && (
+                                <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                  <Calendar className="w-3 h-3 text-slate-400" />
+                                  <span>{inv.eventDate}</span>
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                                {inv.eventType || inv.category}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <button
+                                type="button"
+                                onClick={(e) => handleTogglePublish(inv, e)}
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer ${inv.status === 'published'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                                  : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                                  }`}
+                                title="Click to toggle publish status"
+                              >
+                                <span className={`w-1.5 h-1.5 rounded-full ${inv.status === 'published' ? 'bg-emerald-600' : 'bg-slate-400'}`} />
+                                <span className="capitalize">{inv.status}</span>
+                              </button>
+                            </td>
+                            <td className="p-4 text-slate-500 text-[11px]">
+                              {new Date(inv.updatedAt || inv.createdAt).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </td>
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {/* Preview */}
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewInv(inv)}
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
+                                  title="Preview"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Share & QR */}
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveShareInv(inv)}
+                                  className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors"
+                                  title="Share & QR Code"
+                                >
+                                  <Share2 className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Edit */}
+                                <button
+                                  type="button"
+                                  onClick={() => onOpenEditor(inv.id)}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors"
+                                  title="Open in Editor"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </button>
+
+                                {/* Save as Template */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleOpenSaveAsTemplate(inv, e)}
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-800 border border-slate-200 transition-colors"
+                                  title="Save as Template & Submit for Verification"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                                </button>
+
+                                {/* Duplicate */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDuplicate(inv, e)}
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
+                                  title="Duplicate Invitation"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Delete */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDelete(inv, e)}
+                                  className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors"
+                                  title="Delete Invitation"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              /* Grid View Cards */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredInvitations.map((inv) => {
+                  const previewImg =
+                    inv.thumbnail ||
+                    inv.pages[0]?.background?.imageUrl ||
+                    'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
+
+                  return (
+                    <div
+                      key={inv.id}
+                      className="rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 hover:shadow-md transition-all overflow-hidden flex flex-col group shadow-sm"
+                    >
+                      {/* Card Thumbnail / Preview Banner */}
+                      <div
+                        className="relative h-48 bg-slate-100 overflow-hidden cursor-pointer"
+                        onClick={() => onOpenEditor(inv.id)}
+                      >
+                        <img
+                          src={previewImg}
+                          alt={inv.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-black/20" />
+
+                        {/* Status Pill with Toggle */}
+                        <div className="absolute top-3 left-3">
                           <button
                             type="button"
                             onClick={(e) => handleTogglePublish(inv, e)}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors cursor-pointer ${
-                              inv.status === 'published'
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                                : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                            }`}
+                            className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-full backdrop-blur-md border transition-all cursor-pointer ${inv.status === 'published'
+                              ? 'bg-emerald-50/90 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                              : 'bg-white/90 text-slate-800 border-slate-300 hover:bg-slate-100'
+                              }`}
                             title="Click to toggle publish status"
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${inv.status === 'published' ? 'bg-emerald-600' : 'bg-slate-400'}`} />
-                            <span className="capitalize">{inv.status}</span>
+                            {inv.status === 'published' ? '● Published' : '○ Draft'}
                           </button>
-                        </td>
-                        <td className="p-4 text-slate-500 text-[11px]">
-                          {new Date(inv.updatedAt || inv.createdAt).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </td>
-                        <td className="p-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {/* Preview */}
+                        </div>
+
+                        {/* Event Type Badge */}
+                        <div className="absolute top-3 right-3">
+                          <span className="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-md border border-white/20">
+                            {inv.eventType || inv.category}
+                          </span>
+                        </div>
+
+                        {/* Quick Preview Icon Overlay */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewInv(inv);
+                          }}
+                          className="absolute bottom-3 right-3 p-2 rounded-xl bg-white/90 hover:bg-white text-slate-800 shadow-md backdrop-blur-xs transition-transform active:scale-95"
+                          title="Quick Preview"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Body Content */}
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                          <div className="flex items-start justify-between gap-2">
+                            <h3
+                              onClick={() => onOpenEditor(inv.id)}
+                              className="text-base font-bold text-slate-900 hover:text-slate-700 transition-colors cursor-pointer truncate flex-1"
+                            >
+                              {inv.title}
+                            </h3>
+                          </div>
+
+                          {/* Customer & Event Date Info */}
+                          <div className="mt-1 space-y-1 text-xs">
+                            {inv.customerName ? (
+                              <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                                <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+                                <span>Customer: {inv.customerName}</span>
+                              </div>
+                            ) : null}
+
+                            {inv.eventDate ? (
+                              <div className="flex items-center gap-1.5 text-slate-500">
+                                <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                <span>Date: {inv.eventDate}</span>
+                              </div>
+                            ) : null}
+
+                            <div className="text-[11px] text-slate-400 flex items-center gap-2 pt-0.5">
+                              <span>{inv.pages.length} Pages</span>
+                              <span>•</span>
+                              <span className="font-mono">/{inv.slug}</span>
+                              <span>•</span>
+                              <span>Edited {new Date(inv.updatedAt || inv.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Bar */}
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                          {/* Left: Quick guest details button */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleOpenDetails(inv, e)}
+                            title="View RSVPs and Wishes"
+                            className="flex items-center gap-1.5 text-xs text-slate-700 hover:text-slate-900 font-semibold cursor-pointer"
+                          >
+                            <Users className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Guests & RSVP</span>
+                          </button>
+
+                          {/* Right: Actions */}
+                          <div className="flex items-center gap-1">
+                            {/* Publish / Unpublish Toggle */}
                             <button
                               type="button"
-                              onClick={() => setPreviewInv(inv)}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
-                              title="Preview"
+                              title={inv.status === 'published' ? 'Unpublish (set to Draft)' : 'Publish Invitation'}
+                              onClick={(e) => handleTogglePublish(inv, e)}
+                              className={`p-1.5 rounded-lg border transition-colors ${inv.status === 'published'
+                                ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                                : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                                }`}
                             >
-                              <Eye className="w-3.5 h-3.5" />
+                              <Globe className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Share & QR */}
+                            {/* Share & QR Code */}
                             <button
                               type="button"
-                              onClick={() => setActiveShareInv(inv)}
-                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors"
                               title="Share & QR Code"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveShareInv(inv);
+                              }}
+                              className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors cursor-pointer"
                             >
                               <Share2 className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Edit */}
                             <button
                               type="button"
-                              onClick={() => onOpenEditor(inv.id)}
-                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors"
-                              title="Open in Editor"
+                              title="Save as Template"
+                              onClick={(e) => handleOpenSaveAsTemplate(inv, e)}
+                              className="p-1.5 rounded-lg hover:bg-amber-50 text-slate-500 hover:text-amber-800 border border-slate-200 transition-colors cursor-pointer"
                             >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>Edit</span>
+                              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                             </button>
 
-                            {/* Duplicate */}
                             <button
                               type="button"
-                              onClick={(e) => handleDuplicate(inv, e)}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors"
                               title="Duplicate Invitation"
+                              onClick={(e) => handleDuplicate(inv, e)}
+                              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 transition-colors cursor-pointer"
                             >
                               <Copy className="w-3.5 h-3.5" />
                             </button>
-
-                            {/* Delete */}
                             <button
                               type="button"
+                              title="Delete"
                               onClick={(e) => handleDelete(inv, e)}
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors"
-                              title="Delete Invitation"
+                              className="p-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => onOpenEditor(inv.id)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm transition-colors cursor-pointer"
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              <span>Edit</span>
+                            </button>
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          /* Grid View Cards */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredInvitations.map((inv) => {
-              const previewImg =
-                inv.thumbnail ||
-                inv.pages[0]?.background?.imageUrl ||
-                'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';
-
-              return (
-                <div
-                  key={inv.id}
-                  className="rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 hover:shadow-md transition-all overflow-hidden flex flex-col group shadow-sm"
-                >
-                  {/* Card Thumbnail / Preview Banner */}
-                  <div
-                    className="relative h-48 bg-slate-100 overflow-hidden cursor-pointer"
-                    onClick={() => onOpenEditor(inv.id)}
-                  >
-                    <img
-                      src={previewImg}
-                      alt={inv.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-black/20" />
-
-                    {/* Status Pill with Toggle */}
-                    <div className="absolute top-3 left-3">
-                      <button
-                        type="button"
-                        onClick={(e) => handleTogglePublish(inv, e)}
-                        className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-full backdrop-blur-md border transition-all cursor-pointer ${
-                          inv.status === 'published'
-                            ? 'bg-emerald-50/90 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-                            : 'bg-white/90 text-slate-800 border-slate-300 hover:bg-slate-100'
-                        }`}
-                        title="Click to toggle publish status"
-                      >
-                        {inv.status === 'published' ? '● Published' : '○ Draft'}
-                      </button>
-                    </div>
-
-                    {/* Event Type Badge */}
-                    <div className="absolute top-3 right-3">
-                      <span className="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full bg-black/60 text-white backdrop-blur-md border border-white/20">
-                        {inv.eventType || inv.category}
-                      </span>
-                    </div>
-
-                    {/* Quick Preview Icon Overlay */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreviewInv(inv);
-                      }}
-                      className="absolute bottom-3 right-3 p-2 rounded-xl bg-white/90 hover:bg-white text-slate-800 shadow-md backdrop-blur-xs transition-transform active:scale-95"
-                      title="Quick Preview"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                    <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <h3
-                          onClick={() => onOpenEditor(inv.id)}
-                          className="text-base font-bold text-slate-900 hover:text-slate-700 transition-colors cursor-pointer truncate flex-1"
-                        >
-                          {inv.title}
-                        </h3>
-                      </div>
-
-                      {/* Customer & Event Date Info */}
-                      <div className="mt-1 space-y-1 text-xs">
-                        {inv.customerName ? (
-                          <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                            <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-                            <span>Customer: {inv.customerName}</span>
-                          </div>
-                        ) : null}
-
-                        {inv.eventDate ? (
-                          <div className="flex items-center gap-1.5 text-slate-500">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                            <span>Date: {inv.eventDate}</span>
-                          </div>
-                        ) : null}
-
-                        <div className="text-[11px] text-slate-400 flex items-center gap-2 pt-0.5">
-                          <span>{inv.pages.length} Pages</span>
-                          <span>•</span>
-                          <span className="font-mono">/{inv.slug}</span>
-                          <span>•</span>
-                          <span>Edited {new Date(inv.updatedAt || inv.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        ) : (
+          /* TEMPLATES LIBRARY VIEW */
+          <div className="space-y-6">
+            {/* Template Filters & Search */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setTemplateFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${templateFilter === 'all'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                >
+                  All Templates ({templates.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemplateFilter('admin')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${templateFilter === 'admin'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                >
+                  👑 Admin Created
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemplateFilter('my-templates')}
+                  className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${templateFilter === 'my-templates'
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                >
+                  🏪 My Shop Templates
+                </button>
+              </div>
 
-                    {/* Action Bar */}
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                      {/* Left: Quick guest details button */}
-                      <button
-                        type="button"
-                        onClick={(e) => handleOpenDetails(inv, e)}
-                        title="View RSVPs and Wishes"
-                        className="flex items-center gap-1.5 text-xs text-slate-700 hover:text-slate-900 font-semibold cursor-pointer"
-                      >
-                        <Users className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Guests & RSVP</span>
-                      </button>
+              <div className="text-xs text-slate-500">
+                Templates verified by Admin are accessible for all studios to start projects with.
+              </div>
+            </div>
 
-                      {/* Right: Actions */}
-                      <div className="flex items-center gap-1">
-                        {/* Publish / Unpublish Toggle */}
-                        <button
-                          type="button"
-                          title={inv.status === 'published' ? 'Unpublish (set to Draft)' : 'Publish Invitation'}
-                          onClick={(e) => handleTogglePublish(inv, e)}
-                          className={`p-1.5 rounded-lg border transition-colors ${
-                            inv.status === 'published'
-                              ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
-                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
-                          }`}
-                        >
-                          <Globe className="w-3.5 h-3.5" />
-                        </button>
+            {/* Template Grid */}
+            {(() => {
+              const displayTemplates = templates.filter((t) => {
+                const isAdmin = t.isSuperAdmin || t.authorRole === 'admin' || t.authorRole === 'superadmin';
+                const isOwn = Boolean(user && t.createdBy === user.id);
 
-                        {/* Share & QR Code */}
-                        <button
-                          type="button"
-                          title="Share & QR Code"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveShareInv(inv);
-                          }}
-                          className="p-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors cursor-pointer"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                        </button>
+                if (templateFilter === 'admin' && !isAdmin) return false;
+                if (templateFilter === 'my-templates' && !isOwn) return false;
+                return true;
+              });
 
-                        <button
-                          type="button"
-                          title="Duplicate Invitation"
-                          onClick={(e) => handleDuplicate(inv, e)}
-                          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 transition-colors cursor-pointer"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          title="Delete"
-                          onClick={(e) => handleDelete(inv, e)}
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onOpenEditor(inv.id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm transition-colors cursor-pointer"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                          <span>Edit</span>
-                        </button>
-                      </div>
-                    </div>
+              if (displayTemplates.length === 0) {
+                return (
+                  <div className="p-12 text-center rounded-2xl bg-white border border-slate-200">
+                    <Sparkles className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                    <h3 className="text-base font-bold text-slate-800">No Templates Found</h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                      {templateFilter === 'my-templates'
+                        ? 'You have not saved any templates yet. You can turn any of your existing invitations into a template using the "Save as Template" button!'
+                        : 'Templates created by Admin or verified and published from shop submissions will appear here.'}
+                    </p>
                   </div>
+                );
+              }
+
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayTemplates.map((tmpl) => {
+                    const isAdmin = tmpl.isSuperAdmin || tmpl.authorRole === 'admin' || tmpl.authorRole === 'superadmin';
+                    const isOwn = Boolean(user && tmpl.createdBy === user.id);
+                    const isPending = tmpl.verificationStatus === 'pending';
+                    const isApproved = tmpl.isPublic && (isAdmin || tmpl.verificationStatus === 'approved');
+
+                    return (
+                      <div
+                        key={tmpl.id}
+                        className="bg-white rounded-2xl border border-slate-200 hover:border-slate-300 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+                      >
+                        <div>
+                          <div className="relative aspect-[16/10] bg-slate-900 overflow-hidden">
+                            <img
+                              src={tmpl.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80'}
+                              alt={tmpl.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+
+                            <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/90 text-slate-900 uppercase tracking-wider backdrop-blur-xs">
+                                {tmpl.category}
+                              </span>
+                            </div>
+
+                            <div className="absolute top-3 right-3">
+                              {isAdmin ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 shadow">
+                                  👑 Admin Template
+                                </span>
+                              ) : isOwn ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white shadow">
+                                  My Shop Template
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow">
+                                  Verified Public
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
+                              <span className="text-[11px] font-medium bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-xs flex items-center gap-1">
+                                <Layout className="w-3.5 h-3.5 text-amber-300" />
+                                {tmpl.pages?.length || 1} Pages
+                              </span>
+                              <span className="text-[10px] text-slate-200">
+                                By {isAdmin ? 'System Admin' : tmpl.authorName || 'Shop'}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="p-4 space-y-2">
+                            <h3 className="text-base font-bold text-slate-900 group-hover:text-amber-800 transition-colors">
+                              {tmpl.title}
+                            </h3>
+                            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                              {tmpl.description || 'Custom crafted digital invitation template.'}
+                            </p>
+
+                            {/* Verification status badge for own templates */}
+                            {isOwn && (
+                              <div className="pt-2 flex items-center justify-between">
+                                <span className="text-[10px] text-slate-500 font-medium">Verification Status:</span>
+                                {isPending ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1 animate-pulse">
+                                    <Clock className="w-3 h-3" /> Pending Admin Review
+                                  </span>
+                                ) : isApproved ? (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" /> Approved & Public
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                    Private Draft
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="p-4 pt-0 space-y-2">
+                          {isOwn && !isApproved && !isPending && (
+                            <button
+                              type="button"
+                              onClick={() => handleSubmitTemplateForVerification(tmpl.id, tmpl.title)}
+                              className="w-full py-1.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+                              <span>Submit for Admin Verification</span>
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleCreateFromTemplate(tmpl)}
+                            className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                          >
+                            <Plus className="w-4 h-4 text-amber-400" />
+                            <span>Create Project with this Template</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               );
-            })}
+            })()}
           </div>
         )}
       </main>
@@ -1049,11 +1360,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                           <tr key={r.id}>
                             <td className="p-3 font-semibold text-slate-900">{r.guestName}</td>
                             <td className="p-3">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                r.attendance === 'attending'
-                                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                  : 'bg-slate-100 text-slate-600'
-                              }`}>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${r.attendance === 'attending'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600'
+                                }`}>
                                 {r.attendance}
                               </span>
                             </td>
@@ -1148,6 +1458,118 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         onConfirm={confirmDeleteInvitation}
         onCancel={() => setInvToDelete(null)}
       />
+
+      {/* SAVE AS TEMPLATE MODAL */}
+      {saveAsTemplateInv && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 max-h-[90vh] overflow-y-auto">
+            <button
+              type="button"
+              onClick={() => setSaveAsTemplateInv(null)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 mb-3">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                Save Design as Template
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Convert <strong className="text-slate-800">{saveAsTemplateInv.title}</strong> into a reusable template with all pages, theme styling, and opening screen configuration.
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveAsTemplateSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="text-slate-700 font-bold block mb-1">
+                  Template Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={saveTemplateForm.title}
+                  onChange={(e) => setSaveTemplateForm({ ...saveTemplateForm, title: e.target.value })}
+                  placeholder="e.g. Royal Gold Monogram Suite"
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-700 font-bold block mb-1">Category</label>
+                <select
+                  value={saveTemplateForm.category}
+                  onChange={(e) => setSaveTemplateForm({ ...saveTemplateForm, category: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 capitalize focus:outline-none transition-colors"
+                >
+                  <option value="wedding">Wedding</option>
+                  <option value="birthday">Birthday</option>
+                  <option value="engagement">Engagement</option>
+                  <option value="anniversary">Anniversary</option>
+                  <option value="party">Party & Celebration</option>
+                  <option value="gala">Gala & Soirée</option>
+                  <option value="baby-shower">Baby Shower</option>
+                  <option value="corporate">Corporate</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-700 font-bold block mb-1">Description</label>
+                <textarea
+                  rows={3}
+                  value={saveTemplateForm.description}
+                  onChange={(e) => setSaveTemplateForm({ ...saveTemplateForm, description: e.target.value })}
+                  placeholder="Describe the aesthetic and recommended events for this template..."
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-slate-900 rounded-xl p-3 text-slate-900 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Public verification option */}
+              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-1.5">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={saveTemplateForm.requestPublic}
+                    onChange={(e) => setSaveTemplateForm({ ...saveTemplateForm, requestPublic: e.target.checked })}
+                    className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 mt-0.5"
+                  />
+                  <div>
+                    <span className="font-bold text-amber-950 block">
+                      Make Public & Submit for Admin Verification
+                    </span>
+                    <span className="text-[11px] text-amber-800 leading-relaxed block mt-0.5">
+                      {user?.role === 'admin'
+                        ? 'As an Administrator, this template will be immediately verified and published directly to the public library for all users.'
+                        : 'Submit this template to the Admin for verification. Once approved, all other shops and users will be able to see and use it in their editor canvas.'}
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setSaveAsTemplateInv(null)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingTemplate}
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingTemplate ? 'Saving...' : 'Save Template'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

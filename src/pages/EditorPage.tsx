@@ -42,6 +42,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
   const toast = useToast();
   const [invitation, setInvitation] = useState<Invitation | null>(null);
   const [templates, setTemplates] = useState<InvitationTemplate[]>([]);
+  const [blocks, setBlocks] = useState<PrebuiltBlock[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -85,11 +86,25 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
         if (isEditingTemplate && effectiveTemplateId) {
           // Load template directly to edit it in visual canvas
-          const [tmplRes, tmplListRes] = await Promise.all([
-            api.getTemplateById(effectiveTemplateId),
-            api.getTemplates({ all: true })
-          ]);
+          const tmplRes = await api.getTemplateById(effectiveTemplateId);
           const tmpl = tmplRes.template;
+
+          let tmplList: InvitationTemplate[] = [];
+          let blockList: PrebuiltBlock[] = [];
+          try {
+            const tmplListRes = await api.getTemplates({ all: true });
+            tmplList = tmplListRes.templates || [];
+          } catch (e) {
+            console.warn('Failed to fetch templates:', e);
+          }
+          try {
+            const blockRes = await api.getBlocks({ all: true });
+            blockList = blockRes.blocks || [];
+          } catch (e) {
+            console.warn('Failed to fetch blocks:', e);
+          }
+
+          setBlocks(blockList);
 
           const defaultTheme = {
             primaryColor: '#c5a059',
@@ -164,17 +179,30 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           (tmplAsInvitation as any).isPremium = Boolean(tmpl.isPremium);
 
           setInvitation(tmplAsInvitation);
-          setTemplates(tmplListRes.templates || []);
+          setTemplates(tmplList);
           setHistory([tmplAsInvitation]);
           setHistoryIndex(0);
           setHasUnsavedChanges(false);
         } else if (effectiveInvitationId) {
-          const [invData, tmplData] = await Promise.all([
-            api.getInvitation(effectiveInvitationId),
-            api.getTemplates()
-          ]);
+          const invData = await api.getInvitation(effectiveInvitationId);
+          let tmplList: InvitationTemplate[] = [];
+          let blockList: PrebuiltBlock[] = [];
+          try {
+            const tmplData = await api.getTemplates();
+            tmplList = tmplData.templates || [];
+          } catch (e) {
+            console.warn('Failed to fetch templates:', e);
+          }
+          try {
+            const blockData = await api.getBlocks();
+            blockList = blockData.blocks || [];
+          } catch (e) {
+            console.warn('Failed to fetch blocks:', e);
+          }
+
           setInvitation(invData);
-          setTemplates(tmplData.templates || []);
+          setTemplates(tmplList);
+          setBlocks(blockList);
           setHistory([invData]);
           setHistoryIndex(0);
           setHasUnsavedChanges(false);
@@ -365,15 +393,26 @@ export const EditorPage: React.FC<EditorPageProps> = ({
 
   const isOpeningScreenSelected = selectedPageIndex === -1;
 
-  const activePage: InvitationPage = isOpeningScreenSelected
+  const rawActivePage: InvitationPage = isOpeningScreenSelected
     ? getOrCreateOpeningScreenPage(invitation || {})
     : (invitation?.pages?.[selectedPageIndex] || invitation?.pages?.[0] || {
-        id: 'temp-page',
-        pageNumber: 1,
-        elements: []
-      });
+      id: 'temp-page',
+      name: 'Page 1',
+      pageNumber: 1,
+      heightMode: 'viewport',
+      height: 844,
+      isFullHeight: true,
+      background: { type: 'color', color: '#f8fafc' },
+      elements: []
+    });
 
-  const selectedElements = activePage?.elements?.filter(el => selectedElementIds.includes(el.id)) || [];
+  const activePage: InvitationPage = {
+    ...rawActivePage,
+    elements: Array.isArray(rawActivePage.elements) ? rawActivePage.elements : [],
+    background: rawActivePage.background || { type: 'color', color: '#f8fafc' }
+  };
+
+  const selectedElements = (activePage.elements || []).filter(el => selectedElementIds.includes(el.id));
   const selectedElement = selectedElements[0] || null;
 
   // Single or Multi Selection Handler
@@ -559,8 +598,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
         (updatedPage.background?.type === 'image'
           ? 'image'
           : updatedPage.background?.type === 'video'
-          ? 'video'
-          : 'envelope'),
+            ? 'video'
+            : 'envelope'),
       background: updatedPage.background,
       page: updatedPage
     };
@@ -626,8 +665,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
   ) => {
     if (!invitation) return;
     const newId = `el-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
-    const effectiveParentId = targetParentId !== undefined 
-      ? targetParentId 
+    const effectiveParentId = targetParentId !== undefined
+      ? targetParentId
       : (customProps.parentContainerId || customProps.parentId || null);
 
     const isChild = Boolean(effectiveParentId);
@@ -1305,7 +1344,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       theme: template.theme,
       openingScreen: template.openingScreen,
       music: template.music,
-      pages: template.pages.map((p, idx) => ({
+      pages: (template.pages || []).map((p, idx) => ({
         ...p,
         id: `page-${Date.now()}-${idx}`
       }))
@@ -1316,11 +1355,29 @@ export const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   // Loading state rendered after all hooks have been declared
-  if (isLoading || !invitation) {
+  if (isLoading) {
     return (
       <div className="h-screen w-full bg-slate-50 flex flex-col items-center justify-center text-slate-600 gap-3">
         <Loader2 className="w-8 h-8 text-slate-900 animate-spin" />
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Loading Studio Canvas...</span>
+      </div>
+    );
+  }
+
+  if (!invitation) {
+    return (
+      <div className="h-screen w-full bg-neutral-950 flex flex-col items-center justify-center text-amber-400 gap-4 p-6 font-sans">
+        <AlertCircle className="w-12 h-12 text-rose-500" />
+        <h2 className="text-lg font-bold text-white">Canvas Could Not Be Loaded</h2>
+        <p className="text-xs text-neutral-400 max-w-sm text-center leading-relaxed">
+          The requested invitation or template could not be loaded from the system database.
+        </p>
+        <button
+          onClick={onBackToDashboard}
+          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
+        >
+          Return to Dashboard
+        </button>
       </div>
     );
   }
@@ -1401,7 +1458,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
       <div className="flex-1 flex overflow-hidden">
         {/* Left Elements & Pages Sidebar */}
         <LeftSidebar
-          pages={invitation.pages}
+          pages={invitation.pages || []}
           activePageIndex={selectedPageIndex}
           onSelectPage={handleSelectPage}
           onAddPage={handleAddPage}
@@ -1413,6 +1470,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           onReorderPages={handleReorderPages}
           onAddElement={handleAddElement}
           onInsertBlock={handleInsertBlock}
+          blocks={blocks}
           templates={templates}
           onApplyTemplate={handleApplyTemplate}
           onInsertTemplatePage={(page) => {
@@ -1582,6 +1640,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
         onClose={() => setIsPageTemplatesModalOpen(false)}
         onSelectTemplate={handleSelectPageTemplate}
         onAddBlankPage={handleAddBlankPage}
+        templates={templates}
       />
 
       {/* UNSAVED CHANGES EXIT CONFIRMATION */}

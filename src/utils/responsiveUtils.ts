@@ -53,13 +53,18 @@ export function resolveElementForViewport(
       ? Math.round((targetWidth - 390) / 2)
       : 0;
 
+  const rawX = baseStyle.x ?? 0;
+  const rawY = baseStyle.y ?? 0;
+  const rawWidth = baseStyle.width ?? 200;
+  const rawHeight = baseStyle.height ?? 50;
+
   // Merge override properties into base style
   const mergedStyle: ElementStyle = {
     ...baseStyle,
-    x: override?.x !== undefined ? override.x : baseStyle.x + defaultHorizontalOffset,
-    y: override?.y !== undefined ? override.y : baseStyle.y,
-    width: override?.width !== undefined ? override.width : baseStyle.width,
-    height: override?.height !== undefined ? override.height : baseStyle.height,
+    x: override?.x !== undefined ? override.x : rawX + defaultHorizontalOffset,
+    y: override?.y !== undefined ? override.y : rawY,
+    width: override?.width !== undefined ? override.width : rawWidth,
+    height: override?.height !== undefined ? override.height : rawHeight,
     fontSize: override?.fontSize !== undefined ? override.fontSize : baseStyle.fontSize,
     lineHeight: override?.lineHeight !== undefined ? override.lineHeight : baseStyle.lineHeight,
     textAlign: override?.textAlign !== undefined ? override.textAlign : baseStyle.textAlign,
@@ -204,10 +209,11 @@ export function getPageTransitionVariants(
  * and element alignments match exactly between editing canvas and preview.
  */
 export function getPageCalculatedHeight(
-  page: InvitationPage,
+  page?: InvitationPage | null,
   mode: ViewportMode = 'mobile',
   currentWindowHeight?: number
 ): number {
+  if (!page) return 844;
   const winHeight =
     currentWindowHeight !== undefined
       ? currentWindowHeight

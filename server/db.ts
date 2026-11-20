@@ -2,8 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient, Db } from 'mongodb';
-import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset } from '../src/types';
-import { INITIAL_TEMPLATES, createInvitationFromTemplate, createBlankInvitation } from '../src/data/initialTemplates';
+import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset, PrebuiltBlock } from '../src/types';
 import { DEFAULT_PUBLIC_ASSETS } from '../src/data/stockFramesAndStickers';
 import { STOCK_ASSETS } from '../src/data/stockAssets';
 
@@ -23,7 +22,7 @@ export function comparePassword(plainText: string, storedHash: string): boolean 
       return false;
     }
   }
-  // Plaintext match for initial seeds / demo
+  // Plaintext match for default credentials / demo accounts
   return cleanPass === storedHash;
 }
 
@@ -31,6 +30,7 @@ interface DatabaseSchema {
   users: (User & { passwordHash: string })[];
   invitations: Invitation[];
   templates: InvitationTemplate[];
+  blocks: PrebuiltBlock[];
   rsvps: RSVPResponse[];
   guestbook: GuestbookMessage[];
   media: MediaAsset[];
@@ -48,13 +48,14 @@ let db: DatabaseSchema = {
   users: [],
   invitations: [],
   templates: [],
+  blocks: [],
   rsvps: [],
   guestbook: [],
   media: []
 };
 
-// Seed initial data
-function seedInitialData(): DatabaseSchema {
+// Initial clean database state (no seeded invitations, blocks, templates, rsvps, or guestbook)
+function createEmptyDatabase(): DatabaseSchema {
   const initialUsers: (User & { passwordHash: string })[] = [
     {
       id: 'usr-admin-1',
@@ -99,293 +100,31 @@ function seedInitialData(): DatabaseSchema {
     }
   ];
 
-  // Seed sample invitations
-  const sampleInv1 = createInvitationFromTemplate(
-    INITIAL_TEMPLATES[0],
-    'usr-biz-royal',
-    'Rahul & Priya Wedding Celebration'
-  );
-  sampleInv1.slug = 'rahul-priya-wedding';
-  sampleInv1.status = 'published';
-  sampleInv1.viewsCount = 384;
-  sampleInv1.eventDate = 'December 2026';
-  sampleInv1.customerName = 'Rahul & Priya';
-  sampleInv1.openingScreen = {
-    enabled: true,
-    style: 'envelope',
-    title: 'Wedding Invitation',
-    coupleNames: 'Rahul & Priya',
-    subtitle: 'December 2026',
-    openButtonText: 'Open Invitation',
-    sealText: 'R&P',
-    envelopeColor: '#0e261d',
-    sealColor: '#d4af37'
-  };
-
-  const sampleInv2 = createInvitationFromTemplate(
-    INITIAL_TEMPLATES[1],
-    'usr-biz-elegance',
-    'Liam & Olivia Botanical Save the Date'
-  );
-  sampleInv2.slug = 'liam-olivia-save-the-date';
-  sampleInv2.status = 'published';
-  sampleInv2.viewsCount = 89;
-
-  const sampleInv3 = createInvitationFromTemplate(
-    INITIAL_TEMPLATES[2],
-    'usr-biz-royal',
-    'Victoria 30th Birthday Gala VIP'
-  );
-  sampleInv3.slug = 'victoria-30th-birthday-gala';
-  sampleInv3.status = 'published';
-  sampleInv3.viewsCount = 56;
-
-  const sampleInv4 = createInvitationFromTemplate(
-    INITIAL_TEMPLATES[0],
-    'usr-biz-royal',
-    'Alexander & Sophia Grand Wedding'
-  );
-  sampleInv4.slug = 'alexander-sophia-wedding';
-  sampleInv4.status = 'published';
-  sampleInv4.viewsCount = 142;
-
-  // Sample RSVPs
-  const sampleRsvps: RSVPResponse[] = [
-    {
-      id: 'rsvp-1',
-      invitationId: sampleInv1.id,
-      guestName: 'Eleanor Vance',
-      guestEmail: 'eleanor.vance@example.com',
-      guestPhone: '+1 555-432-1100',
-      attendance: 'attending',
-      guestCount: 2,
-      dietaryPreferences: 'Vegetarian, Gluten-Free',
-      message: 'So thrilled to celebrate with you both in North Carolina!',
-      submittedAt: '2026-08-20T14:22:00.000Z'
-    },
-    {
-      id: 'rsvp-2',
-      invitationId: sampleInv1.id,
-      guestName: 'Marcus Holloway',
-      guestEmail: 'marcus.h@example.com',
-      guestPhone: '+1 555-901-3322',
-      attendance: 'attending',
-      guestCount: 1,
-      dietaryPreferences: 'None',
-      message: 'Looking forward to the royal banquet and dancing!',
-      submittedAt: '2026-08-22T09:15:00.000Z'
-    },
-    {
-      id: 'rsvp-3',
-      invitationId: sampleInv1.id,
-      guestName: 'Gwendolyn Croft',
-      guestEmail: 'gwen.c@example.com',
-      guestPhone: '+1 555-882-7711',
-      attendance: 'not_attending',
-      guestCount: 0,
-      message: 'Sending you all my love and blessings from London!',
-      submittedAt: '2026-08-23T18:40:00.000Z'
-    }
-  ];
-
-  // Sample Guestbook messages
-  const sampleGuestbook: GuestbookMessage[] = [
-    {
-      id: 'gb-1',
-      invitationId: sampleInv1.id,
-      senderName: 'The Sterling Family',
-      relationship: 'Family',
-      message: 'Wishing Alexander and Sophia a lifetime of radiant joy, harmony, and cherished memories together!',
-      isApproved: true,
-      createdAt: '2026-08-21T11:00:00.000Z'
-    },
-    {
-      id: 'gb-2',
-      invitationId: sampleInv1.id,
-      senderName: 'David & Catherine Ross',
-      relationship: 'Close Friends',
-      message: 'The digital invitation is absolutely breathtaking! Can\'t wait for the grand celebration in October.',
-      isApproved: true,
-      createdAt: '2026-08-24T16:30:00.000Z'
-    }
-  ];
-
-  // Sample Initial Media Assets (Images, Videos, Audio)
-  const sampleMedia: MediaAsset[] = [
-    {
-      id: 'med-img-1',
-      businessId: 'usr-biz-royal',
-      invitationId: sampleInv1.id,
-      invitationIds: [sampleInv1.id],
-      title: 'Romantic Couple Golden Hour',
-      name: 'couple_golden_hour.jpg',
-      url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=300&q=80',
-      type: 'image',
-      format: 'jpg',
-      size: 428000,
-      dimensions: { width: 1200, height: 800 },
-      category: 'wedding',
-      tags: ['couple', 'portrait', 'golden hour', 'wedding'],
-      createdAt: '2026-08-15T10:00:00.000Z'
-    },
-    {
-      id: 'med-img-2',
-      businessId: 'usr-biz-royal',
-      invitationId: sampleInv1.id,
-      invitationIds: [sampleInv1.id, sampleInv2.id],
-      title: 'Diamond Wedding Rings Velvet',
-      name: 'rings_macro_velvet.png',
-      url: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=1200&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=300&q=80',
-      type: 'image',
-      format: 'png',
-      size: 612000,
-      dimensions: { width: 1200, height: 800 },
-      category: 'wedding',
-      tags: ['rings', 'jewelry', 'velvet'],
-      createdAt: '2026-08-16T11:20:00.000Z'
-    },
-    {
-      id: 'med-img-3',
-      businessId: 'usr-biz-elegance',
-      invitationId: sampleInv2.id,
-      invitationIds: [sampleInv2.id],
-      title: 'Botanical Eucalyptus & White Roses',
-      name: 'eucalyptus_bouquet.webp',
-      url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=300&q=80',
-      type: 'image',
-      format: 'webp',
-      size: 295000,
-      dimensions: { width: 1200, height: 900 },
-      category: 'floral',
-      tags: ['botanical', 'roses', 'foliage'],
-      createdAt: '2026-08-18T14:10:00.000Z'
-    },
-    {
-      id: 'med-img-4',
-      businessId: 'usr-biz-royal',
-      invitationId: sampleInv3.id,
-      invitationIds: [sampleInv3.id],
-      title: 'Luxury Gold Ballroom Chandelier',
-      name: 'ballroom_chandelier.jpg',
-      url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=300&q=80',
-      type: 'image',
-      format: 'jpg',
-      size: 512000,
-      dimensions: { width: 1200, height: 800 },
-      category: 'venue',
-      tags: ['gala', 'ballroom', 'chandelier', 'gold'],
-      createdAt: '2026-08-19T09:30:00.000Z'
-    },
-    {
-      id: 'med-vid-1',
-      businessId: 'usr-biz-royal',
-      invitationId: sampleInv1.id,
-      invitationIds: [sampleInv1.id, sampleInv3.id],
-      title: 'Golden Particle Bokeh Lights',
-      name: 'golden_bokeh_particles.mp4',
-      url: 'https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=300&q=80',
-      type: 'video',
-      format: 'mp4',
-      size: 3420000,
-      dimensions: { width: 1920, height: 1080 },
-      duration: 15,
-      category: 'background',
-      tags: ['video', 'bokeh', 'gold', 'sparkles'],
-      createdAt: '2026-08-20T16:00:00.000Z'
-    },
-    {
-      id: 'med-vid-2',
-      businessId: 'usr-biz-elegance',
-      invitationId: sampleInv2.id,
-      invitationIds: [sampleInv2.id],
-      title: 'Wedding Rings in Velvet Box Cinematic',
-      name: 'wedding_rings_box.mp4',
-      url: 'https://assets.mixkit.co/videos/preview/mixkit-wedding-rings-in-a-box-41589-large.mp4',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&w=300&q=80',
-      type: 'video',
-      format: 'mp4',
-      size: 4190000,
-      dimensions: { width: 1920, height: 1080 },
-      duration: 18,
-      category: 'cinematic',
-      tags: ['video', 'rings', 'cinematic'],
-      createdAt: '2026-08-21T12:00:00.000Z'
-    },
-    {
-      id: 'med-aud-1',
-      businessId: 'usr-biz-royal',
-      invitationId: sampleInv1.id,
-      invitationIds: [sampleInv1.id, sampleInv2.id],
-      title: 'Romantic Wedding Symphony (Acoustic Strings)',
-      name: 'romantic_wedding_symphony.mp3',
-      url: 'https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3',
-      type: 'audio',
-      format: 'mp3',
-      size: 1850000,
-      duration: 124,
-      category: 'classical',
-      tags: ['audio', 'symphony', 'strings', 'wedding music'],
-      createdAt: '2026-08-22T08:00:00.000Z'
-    },
-    {
-      id: 'med-aud-2',
-      businessId: 'usr-biz-elegance',
-      invitationId: sampleInv2.id,
-      invitationIds: [sampleInv2.id],
-      title: 'Acoustic Guitar Love Ballad',
-      name: 'acoustic_love_ballad.mp3',
-      url: 'https://cdn.freesound.org/previews/415/415804_5121236-lq.mp3',
-      type: 'audio',
-      format: 'mp3',
-      size: 1420000,
-      duration: 98,
-      category: 'acoustic',
-      tags: ['audio', 'guitar', 'romantic', 'soft'],
-      createdAt: '2026-08-23T11:00:00.000Z'
-    }
-  ];
-
   return {
     users: initialUsers,
-    invitations: [sampleInv1, sampleInv2, sampleInv3, sampleInv4],
-    templates: INITIAL_TEMPLATES,
-    rsvps: sampleRsvps,
-    guestbook: sampleGuestbook,
-    media: sampleMedia
+    invitations: [],
+    templates: [],
+    blocks: [],
+    rsvps: [],
+    guestbook: [],
+    media: []
   };
 }
+
+let lastDbMtime = 0;
 
 export function loadDatabase(): DatabaseSchema {
   try {
     if (fs.existsSync(DATA_FILE)) {
+      const stats = fs.statSync(DATA_FILE);
+      if (stats.mtimeMs === lastDbMtime && db && db.users && db.users.length > 0) {
+        return db;
+      }
+      lastDbMtime = stats.mtimeMs;
       const data = fs.readFileSync(DATA_FILE, 'utf-8');
       db = JSON.parse(data);
-      // Ensure templates are present
-      if (!db.templates || db.templates.length === 0) {
-        db.templates = INITIAL_TEMPLATES.map(t => ({
-          ...t,
-          isPublic: true,
-          isSuperAdmin: true,
-          authorRole: 'superadmin',
-          authorName: 'Super Admin',
-          createdBy: 'usr-admin-1'
-        }));
-      } else {
-        // Ensure every template has an explicit isPublic flag and super admin tags
-        db.templates = db.templates.map(t => ({
-          ...t,
-          isPublic: t.isPublic !== false,
-          isSuperAdmin: t.isSuperAdmin !== false,
-          authorRole: t.authorRole || 'superadmin',
-          authorName: t.authorName || 'Super Admin',
-          createdBy: t.createdBy || 'usr-admin-1'
-        }));
-      }
+      if (!db.templates) db.templates = [];
+      if (!db.blocks) db.blocks = [];
 
       // Ensure public assets (frames, stickers, gifs, videos) exist in db.media
       if (!db.media) db.media = [];
@@ -413,9 +152,10 @@ export function loadDatabase(): DatabaseSchema {
         }
       }
 
-      // Ensure stock library assets (photos, patterns, textures) exist in db.media
+      // Ensure stock library assets (backgrounds, photos, patterns, textures) exist in db.media
       for (const asset of STOCK_ASSETS) {
-        if (!db.media.some(m => m.id === asset.id)) {
+        const existing = db.media.find(m => m.id === asset.id);
+        if (!existing) {
           db.media.push({
             id: asset.id,
             businessId: 'admin',
@@ -434,25 +174,19 @@ export function loadDatabase(): DatabaseSchema {
             authorRole: 'superadmin',
             createdAt: new Date().toISOString()
           });
+        } else {
+          existing.category = asset.category;
+          existing.tags = asset.tags;
         }
       }
 
-      // Ensure rahul-priya-wedding exists
-      if (!db.invitations.some(i => i.slug === 'rahul-priya-wedding')) {
-        const seeded = seedInitialData();
-        const rahulPriya = seeded.invitations.find(i => i.slug === 'rahul-priya-wedding');
-        if (rahulPriya) {
-          db.invitations.unshift(rahulPriya);
-          saveDatabase();
-        }
-      }
       return db;
     }
   } catch (err) {
-    console.error('Error loading DB file, re-seeding:', err);
+    console.error('Error loading DB file, resetting to empty database:', err);
   }
 
-  db = seedInitialData();
+  db = createEmptyDatabase();
   saveDatabase();
   return db;
 }
@@ -464,14 +198,14 @@ let isMongoConnected = false;
 async function persistToMongo(): Promise<void> {
   if (!mongoDb || !isMongoConnected) return;
   try {
-    const collections: (keyof DatabaseSchema)[] = ['users', 'invitations', 'templates', 'rsvps', 'guestbook', 'media'];
+    const collections: (keyof DatabaseSchema)[] = ['users', 'invitations', 'templates', 'blocks', 'rsvps', 'guestbook', 'media'];
     for (const name of collections) {
       const col = mongoDb.collection(name);
       const items = db[name];
       if (items) {
         await col.deleteMany({});
         if (items.length > 0) {
-          await col.insertMany(items.map(it => ({ ...it })));
+          await col.insertMany(items.map(({ _id, ...it }: any) => ({ ...it })));
         }
       }
     }
@@ -505,6 +239,7 @@ export async function initMongo(): Promise<boolean> {
       const users = await mongoDb.collection('users').find({}).toArray();
       const invitations = await mongoDb.collection('invitations').find({}).toArray();
       const templates = await mongoDb.collection('templates').find({}).toArray();
+      const blocks = await mongoDb.collection('blocks').find({}).toArray();
       const rsvps = await mongoDb.collection('rsvps').find({}).toArray();
       const guestbook = await mongoDb.collection('guestbook').find({}).toArray();
       const media = await mongoDb.collection('media').find({}).toArray();
@@ -512,6 +247,7 @@ export async function initMongo(): Promise<boolean> {
       if (users.length > 0) db.users = users.map(({ _id, ...u }) => u as any);
       if (invitations.length > 0) db.invitations = invitations.map(({ _id, ...i }) => i as any);
       if (templates.length > 0) db.templates = templates.map(({ _id, ...t }) => t as any);
+      if (blocks.length > 0) db.blocks = blocks.map(({ _id, ...b }) => b as any);
       if (rsvps.length > 0) db.rsvps = rsvps.map(({ _id, ...r }) => r as any);
       if (guestbook.length > 0) db.guestbook = guestbook.map(({ _id, ...g }) => g as any);
       if (media.length > 0) db.media = media.map(({ _id, ...m }) => m as any);
@@ -519,9 +255,9 @@ export async function initMongo(): Promise<boolean> {
       saveDatabase();
       console.log(`[MongoDB] Loaded data from Atlas: ${db.users.length} users, ${db.invitations.length} invitations.`);
     } else {
-      console.log('[MongoDB] Initializing Atlas database with initial seed data...');
+      console.log('[MongoDB] Initializing Atlas database schema...');
       await persistToMongo();
-      console.log('[MongoDB] Seed data written to MongoDB Atlas successfully.');
+      console.log('[MongoDB] Database synchronized to MongoDB Atlas successfully.');
     }
     return true;
   } catch (err: any) {
@@ -534,6 +270,9 @@ export async function initMongo(): Promise<boolean> {
 export function saveDatabase(): void {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf-8');
+    try {
+      lastDbMtime = fs.statSync(DATA_FILE).mtimeMs;
+    } catch { }
   } catch (err) {
     console.error('Error saving DB file:', err);
   }
@@ -803,18 +542,38 @@ export const dbService = {
   },
 
   // Templates Management
-  getTemplates: (params: { category?: string; search?: string; all?: boolean; superAdminOnly?: boolean } = {}) => {
+  getTemplates: (params: {
+    category?: string;
+    search?: string;
+    all?: boolean;
+    superAdminOnly?: boolean;
+    userId?: string;
+    userRole?: string;
+    verificationStatus?: string;
+  } = {}) => {
     loadDatabase();
     let list = db.templates || [];
 
-    // Filter by publish status: if not requesting all (admin view), show only published templates
-    if (!params.all) {
-      list = list.filter(t => t.isPublic !== false);
+    // Authorization & Visibility Filter
+    // If not admin and not requesting all (e.g. shop owner browsing available templates):
+    if (!params.all && params.userRole !== 'admin') {
+      list = list.filter(t => {
+        const isAdminCreated = t.isSuperAdmin || t.authorRole === 'admin' || t.authorRole === 'superadmin';
+        const isApprovedPublic = t.isPublic === true && t.verificationStatus === 'approved';
+        const isOwnTemplate = Boolean(params.userId && t.createdBy === params.userId);
+        // Show if created by admin & public, or if verified & made public by admin, or if own template
+        return (isAdminCreated && t.isPublic !== false) || isApprovedPublic || isOwnTemplate;
+      });
+    }
+
+    // Filter by verification status if specified (e.g. for Admin reviewing pending templates)
+    if (params.verificationStatus && params.verificationStatus !== 'all') {
+      list = list.filter(t => t.verificationStatus === params.verificationStatus);
     }
 
     // Filter by super admin creation
     if (params.superAdminOnly) {
-      list = list.filter(t => t.isSuperAdmin !== false);
+      list = list.filter(t => t.isSuperAdmin !== false || t.authorRole === 'admin' || t.authorRole === 'superadmin');
     }
 
     // Filter by category
@@ -845,11 +604,15 @@ export const dbService = {
     return template;
   },
 
-  createTemplate: (templateData: Partial<InvitationTemplate>) => {
+  createTemplate: (templateData: Partial<InvitationTemplate>, user?: { id?: string; role?: string; name?: string; businessName?: string }) => {
     loadDatabase();
     if (!db.templates) db.templates = [];
 
     const now = new Date().toISOString();
+    const isAdmin = user?.role === 'admin' || templateData.isSuperAdmin;
+    const verificationStatus = isAdmin ? 'approved' : (templateData.verificationStatus || 'pending');
+    const isPublic = isAdmin ? (templateData.isPublic !== false) : (verificationStatus === 'approved');
+
     const newTemplate: InvitationTemplate = {
       id: templateData.id || `tmpl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       title: templateData.title || 'Untitled Template',
@@ -857,12 +620,14 @@ export const dbService = {
       description: templateData.description || 'Custom crafted invitation template.',
       thumbnail: templateData.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
       isPremium: Boolean(templateData.isPremium),
-      isPublic: templateData.isPublic !== false, // default to published
-      isSuperAdmin: templateData.isSuperAdmin !== false,
-      authorRole: templateData.authorRole || 'superadmin',
-      authorName: templateData.authorName || 'Super Admin',
-      createdBy: templateData.createdBy || 'usr-admin-1',
-      tags: templateData.tags || [templateData.category || 'wedding', 'custom', 'super-admin'],
+      isPublic,
+      verificationStatus,
+      rejectionReason: '',
+      authorRole: isAdmin ? 'admin' : (user?.role as any || 'business'),
+      authorName: user?.businessName || user?.name || templateData.authorName || (isAdmin ? 'Super Admin' : 'Shop Owner'),
+      createdBy: user?.id || templateData.createdBy || (isAdmin ? 'usr-admin-1' : ''),
+      isSuperAdmin: Boolean(isAdmin),
+      tags: templateData.tags || [templateData.category || 'wedding', 'custom'],
       theme: templateData.theme || {
         primaryColor: '#d4af37',
         secondaryColor: '#1a3628',
@@ -894,51 +659,13 @@ export const dbService = {
       },
       pages: templateData.pages && templateData.pages.length > 0 ? templateData.pages : [
         {
-          id: `page-${Date.now()}-1`,
-          name: 'Front Cover & Details',
+          id: `p-${Date.now()}-1`,
+          name: 'Section 1',
           order: 0,
           height: 844,
           isFullHeight: true,
-          background: {
-            type: 'color',
-            color: templateData.theme?.backgroundColor || '#071912'
-          },
-          elements: [
-            {
-              id: `el-hdr-${Date.now()}`,
-              type: 'heading',
-              name: 'Template Title',
-              style: {
-                x: 20,
-                y: 140,
-                width: 350,
-                height: 60,
-                fontFamily: templateData.theme?.fontHeading || "'Cinzel', serif",
-                fontSize: 28,
-                fontWeight: 700,
-                color: templateData.theme?.primaryColor || '#d4af37',
-                textAlign: 'center'
-              },
-              content: { text: templateData.title || 'Together With Our Families' }
-            },
-            {
-              id: `el-sub-${Date.now()}`,
-              type: 'text',
-              name: 'Subtitle',
-              style: {
-                x: 30,
-                y: 220,
-                width: 330,
-                height: 40,
-                fontFamily: templateData.theme?.fontBody || "'Montserrat', sans-serif",
-                fontSize: 14,
-                fontWeight: 400,
-                color: '#ffffffcc',
-                textAlign: 'center'
-              },
-              content: { text: 'Request the pleasure of your company at the celebration of their love' }
-            }
-          ]
+          background: { type: 'color', color: '#f8fafc' },
+          elements: []
         }
       ],
       createdAt: now,
@@ -978,6 +705,43 @@ export const dbService = {
     return { success: true, id };
   },
 
+  verifyTemplate: (id: string, isApproved: boolean, reason?: string, adminName?: string) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+    const index = db.templates.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Template not found');
+
+    db.templates[index].verificationStatus = isApproved ? 'approved' : 'rejected';
+    db.templates[index].isPublic = isApproved;
+    db.templates[index].rejectionReason = isApproved ? '' : (reason || 'Admin requested modifications before public listing.');
+    db.templates[index].verifiedAt = new Date().toISOString();
+    db.templates[index].verifiedBy = adminName || 'System Administrator';
+    db.templates[index].updatedAt = new Date().toISOString();
+
+    saveDatabase();
+    return db.templates[index];
+  },
+
+  submitTemplateForVerification: (id: string, userId?: string) => {
+    loadDatabase();
+    if (!db.templates) db.templates = [];
+    const index = db.templates.findIndex(t => t.id === id);
+    if (index === -1) throw new Error('Template not found');
+
+    if (userId && db.templates[index].createdBy && db.templates[index].createdBy !== userId) {
+      throw new Error('Not authorized to submit this template');
+    }
+
+    db.templates[index].verificationStatus = 'pending';
+    db.templates[index].isPublic = false;
+    db.templates[index].rejectionReason = '';
+    db.templates[index].submittedAt = new Date().toISOString();
+    db.templates[index].updatedAt = new Date().toISOString();
+
+    saveDatabase();
+    return db.templates[index];
+  },
+
   toggleTemplatePublish: (id: string, isPublic: boolean) => {
     loadDatabase();
     if (!db.templates) db.templates = [];
@@ -985,23 +749,32 @@ export const dbService = {
     if (index === -1) throw new Error('Template not found');
 
     db.templates[index].isPublic = isPublic;
+    if (isPublic && db.templates[index].verificationStatus !== 'approved') {
+      db.templates[index].verificationStatus = 'approved';
+    }
     db.templates[index].updatedAt = new Date().toISOString();
     saveDatabase();
     return db.templates[index];
   },
 
-  duplicateTemplate: (id: string) => {
+  duplicateTemplate: (id: string, user?: { id?: string; role?: string; name?: string }) => {
     loadDatabase();
     if (!db.templates) db.templates = [];
     const original = db.templates.find(t => t.id === id);
     if (!original) throw new Error('Template not found');
 
     const now = new Date().toISOString();
+    const isAdmin = user?.role === 'admin';
     const copy: InvitationTemplate = {
       ...JSON.parse(JSON.stringify(original)),
       id: `tmpl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       title: `${original.title} (Copy)`,
       isPublic: false, // Default copy to draft
+      verificationStatus: 'draft',
+      createdBy: user?.id || original.createdBy,
+      authorRole: isAdmin ? 'admin' : 'business',
+      authorName: user?.name || original.authorName,
+      isSuperAdmin: Boolean(isAdmin),
       createdAt: now,
       updatedAt: now
     };
@@ -1011,19 +784,36 @@ export const dbService = {
     return copy;
   },
 
-  saveAsTemplate: (invitationId: string, templateData: { title: string; category: string; description: string; isPublic?: boolean }) => {
+  saveAsTemplate: (
+    invitationId: string,
+    templateData: { title: string; category: string; description: string; isPublic?: boolean; requestPublic?: boolean },
+    user?: { id?: string; role?: string; name?: string; businessName?: string }
+  ) => {
     loadDatabase();
     const inv = db.invitations.find(i => i.id === invitationId);
     if (!inv) throw new Error('Invitation not found');
 
     const now = new Date().toISOString();
+    const isAdmin = user?.role === 'admin';
+    const wantsPublic = templateData.requestPublic === true || templateData.isPublic === true;
+    const verificationStatus = isAdmin ? 'approved' : (wantsPublic ? 'pending' : 'draft');
+    const isPublic = isAdmin ? true : false;
+
     const newTemplate: InvitationTemplate = {
-      id: `tmpl-${Date.now()}`,
+      id: `tmpl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       title: templateData.title,
       category: templateData.category || inv.category,
-      description: templateData.description,
+      description: templateData.description || 'Custom crafted invitation template.',
       thumbnail: inv.thumbnail || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80',
-      isPublic: templateData.isPublic !== false,
+      isPublic,
+      verificationStatus,
+      rejectionReason: '',
+      authorBusinessId: inv.businessId,
+      createdBy: user?.id || inv.businessId,
+      authorRole: isAdmin ? 'admin' : 'business',
+      authorName: user?.businessName || user?.name || (isAdmin ? 'Super Admin' : 'Shop Owner'),
+      isSuperAdmin: Boolean(isAdmin),
+      submittedAt: wantsPublic ? now : undefined,
       theme: JSON.parse(JSON.stringify(inv.theme)),
       openingScreen: JSON.parse(JSON.stringify(inv.openingScreen)),
       music: JSON.parse(JSON.stringify(inv.music)),
@@ -1035,6 +825,86 @@ export const dbService = {
     db.templates.push(newTemplate);
     saveDatabase();
     return newTemplate;
+  },
+
+  // Blocks Management
+  getBlocks: (params: { category?: string; search?: string; all?: boolean; userId?: string; userRole?: string } = {}) => {
+    loadDatabase();
+    let list = db.blocks || [];
+
+    if (!params.all && params.userRole !== 'admin') {
+      list = list.filter(b => {
+        const isAdminCreated = b.isSuperAdmin || b.authorRole === 'admin' || b.authorRole === 'superadmin';
+        const isApproved = b.isPublic !== false && b.verificationStatus === 'approved';
+        const isOwn = Boolean(params.userId && b.createdBy === params.userId);
+        return (isAdminCreated && b.isPublic !== false) || isApproved || isOwn;
+      });
+    }
+
+    if (params.category && params.category !== 'all') {
+      list = list.filter(b => b.category === params.category);
+    }
+
+    if (params.search && params.search.trim()) {
+      const q = params.search.toLowerCase().trim();
+      list = list.filter(b =>
+        b.name.toLowerCase().includes(q) ||
+        (b.description && b.description.toLowerCase().includes(q)) ||
+        (b.subcategory && b.subcategory.toLowerCase().includes(q))
+      );
+    }
+
+    return list;
+  },
+
+  getBlockById: (id: string) => {
+    loadDatabase();
+    const block = (db.blocks || []).find(b => b.id === id);
+    if (!block) throw new Error('Block not found');
+    return block;
+  },
+
+  createBlock: (blockData: Partial<PrebuiltBlock>, user?: { id?: string; role?: string; name?: string }) => {
+    loadDatabase();
+    if (!db.blocks) db.blocks = [];
+
+    const now = new Date().toISOString();
+    const isAdmin = user?.role === 'admin' || blockData.isSuperAdmin;
+
+    const newBlock: PrebuiltBlock = {
+      id: blockData.id || `blk-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: blockData.name || 'Untitled Section Block',
+      category: (blockData.category || 'event') as any,
+      subcategory: blockData.subcategory || 'custom',
+      description: blockData.description || 'Custom prebuilt section block.',
+      icon: blockData.icon,
+      thumbnail: blockData.thumbnail,
+      suggestedHeight: blockData.suggestedHeight || 300,
+      elements: blockData.elements || [],
+      createdBy: user?.id || (isAdmin ? 'usr-admin-1' : ''),
+      authorRole: isAdmin ? 'admin' : (user?.role as any || 'business'),
+      authorName: user?.name || (isAdmin ? 'Super Admin' : 'Shop Owner'),
+      isSuperAdmin: Boolean(isAdmin),
+      isPublic: isAdmin ? true : (blockData.isPublic !== false),
+      verificationStatus: isAdmin ? 'approved' : 'draft',
+      createdAt: now,
+      updatedAt: now
+    };
+
+    db.blocks.push(newBlock);
+    saveDatabase();
+    return newBlock;
+  },
+
+  deleteBlock: (id: string) => {
+    loadDatabase();
+    if (!db.blocks) db.blocks = [];
+    const index = db.blocks.findIndex(b => b.id === id);
+    if (index === -1) throw new Error('Block not found');
+
+    db.blocks.splice(index, 1);
+    saveDatabase();
+    return { success: true, id };
   },
 
   // RSVPs
@@ -1134,7 +1004,7 @@ export const dbService = {
       list = list.filter(m => m.isPublic || m.isSuperAdmin || m.businessId === 'admin');
     } else if (params.scope === 'uploads' || params.scope === 'my_uploads') {
       if (params.invitationId && params.invitationId !== 'all') {
-        list = list.filter(m => 
+        list = list.filter(m =>
           !m.isSuperAdmin && (
             m.invitationId === params.invitationId ||
             (m.invitationIds && m.invitationIds.includes(params.invitationId!)) ||
@@ -1154,8 +1024,8 @@ export const dbService = {
     } else {
       // Default: show invitation items AND public/admin assets so users can select and use them
       if (params.invitationId && params.invitationId !== 'all') {
-        list = list.filter(m => 
-          m.invitationId === params.invitationId || 
+        list = list.filter(m =>
+          m.invitationId === params.invitationId ||
           (m.invitationIds && m.invitationIds.includes(params.invitationId!)) ||
           m.isPublic ||
           m.isSuperAdmin ||
@@ -1190,6 +1060,9 @@ export const dbService = {
         if (cat === 'frames' || cat === 'frame') {
           return mType === 'frame' || mCat.includes('frame') || mTags.includes('frame') || mCat.includes('arch');
         }
+        if (cat === 'backgrounds' || cat === 'background' || cat === 'background-images' || cat === 'background_images') {
+          return mCat.includes('background') || mTags.includes('background') || mTags.includes('wallpaper') || mTags.includes('backdrop') || mCat.includes('texture') || mCat.includes('pattern') || mType === 'pattern' || mType === 'texture';
+        }
         if (cat === 'borders' || cat === 'border') {
           return mCat.includes('border') || mTags.includes('border') || mCat.includes('frame') || mType === 'frame';
         }
@@ -1221,7 +1094,7 @@ export const dbService = {
     // Search query by title, name, or tags
     if (params.search && params.search.trim()) {
       const q = params.search.toLowerCase().trim();
-      list = list.filter(m => 
+      list = list.filter(m =>
         m.title.toLowerCase().includes(q) ||
         (m.name && m.name.toLowerCase().includes(q)) ||
         (m.tags && m.tags.some(t => t.toLowerCase().includes(q))) ||

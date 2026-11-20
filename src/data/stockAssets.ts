@@ -9,40 +9,88 @@ export interface StockAssetItem {
 }
 
 export const STOCK_ASSETS: StockAssetItem[] = [
-  // Background Textures & Patterns
+  // Background Images & Textures
+  {
+    id: 'bg-ivory-silk',
+    name: 'Luxury Ivory Silk Drape',
+    category: 'background',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80',
+    tags: ['background', 'silk', 'fabric', 'luxury', 'ivory', 'elegant']
+  },
+  {
+    id: 'bg-golden-bokeh',
+    name: 'Warm Golden Bokeh Lights',
+    category: 'background',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=1200&q=80',
+    tags: ['background', 'bokeh', 'gold', 'lights', 'celebration']
+  },
+  {
+    id: 'bg-watercolor-sage',
+    name: 'Sage Green & Gold Watercolor Wash',
+    category: 'background',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=1200&q=80',
+    tags: ['background', 'watercolor', 'sage', 'botanical', 'gold', 'artistic']
+  },
+  {
+    id: 'bg-midnight-navy',
+    name: 'Midnight Navy & Cosmic Dust',
+    category: 'background',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1200&q=80',
+    tags: ['background', 'navy', 'dark', 'midnight', 'stars', 'luxury']
+  },
+  {
+    id: 'bg-rose-blush',
+    name: 'Soft Rose Gold Shimmer',
+    category: 'background',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=1200&q=80',
+    tags: ['background', 'rose', 'pink', 'blush', 'pastel', 'shimmer']
+  },
+  {
+    id: 'bg-warm-stone-arch',
+    name: 'Minimalist Sandstone Arch Backdrop',
+    category: 'background',
+    type: 'image',
+    url: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80',
+    tags: ['background', 'stone', 'arch', 'minimalist', 'boho', 'neutral']
+  },
   {
     id: 'pat-gold-damask',
     name: 'Gold Royal Damask',
-    category: 'pattern',
+    category: 'background',
     type: 'pattern',
     url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80',
-    tags: ['luxury', 'gold', 'royal']
+    tags: ['background', 'luxury', 'gold', 'royal', 'pattern']
   },
   {
     id: 'pat-marble-white',
     name: 'Carrara White Marble',
-    category: 'texture',
+    category: 'background',
     type: 'texture',
     url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-    tags: ['marble', 'clean', 'minimal']
+    tags: ['background', 'marble', 'clean', 'minimal', 'texture']
   },
   {
     id: 'pat-velvet-emerald',
     name: 'Emerald Velvet Texture',
-    category: 'texture',
+    category: 'background',
     type: 'texture',
     url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=1200&q=80',
-    tags: ['emerald', 'velvet', 'dark']
+    tags: ['background', 'emerald', 'velvet', 'dark', 'texture']
   },
   {
     id: 'pat-handmade-paper',
     name: 'Deckled Edge Cotton Paper',
-    category: 'texture',
+    category: 'background',
     type: 'texture',
     url: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80',
-    tags: ['paper', 'organic', 'boho']
+    tags: ['background', 'paper', 'organic', 'boho', 'texture']
   },
-  
+
   // Wedding Stock Photos
   {
     id: 'img-couple-arch',

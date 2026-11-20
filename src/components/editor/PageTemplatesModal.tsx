@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { PageTemplate, TemplateCategory } from '../../types';
+import { PageTemplate, TemplateCategory, InvitationTemplate } from '../../types';
 import { ALL_PAGE_TEMPLATES, TEMPLATE_CATEGORIES } from '../../data/templates';
 import {
   X,
@@ -23,6 +23,7 @@ interface PageTemplatesModalProps {
   onClose: () => void;
   onSelectTemplate: (template: PageTemplate) => void;
   onAddBlankPage: () => void;
+  templates?: InvitationTemplate[];
 }
 
 const CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
@@ -39,14 +40,48 @@ export const PageTemplatesModal: React.FC<PageTemplatesModalProps> = ({
   isOpen,
   onClose,
   onSelectTemplate,
-  onAddBlankPage
+  onAddBlankPage,
+  templates = []
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<TemplateCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState<PageTemplate | null>(null);
 
+  // Derive page templates from live templates created by Admin and approved from shops
+  const availablePageTemplates: PageTemplate[] = useMemo(() => {
+    const list: PageTemplate[] = [];
+
+    if (templates && templates.length > 0) {
+      templates.forEach((t) => {
+        if (t.pages && t.pages.length > 0) {
+          t.pages.forEach((p, idx) => {
+            list.push({
+              id: `tmpl-page-${t.id}-${p.id || idx}`,
+              name: `${t.title} - ${p.name || `Page ${idx + 1}`}`,
+              category: (t.category as any) || 'wedding',
+              subcategory: p.name || 'Section',
+              description: `Layout from "${t.title}" created by ${t.authorName || 'Admin'}.`,
+              thumbnail: t.thumbnail,
+              page: {
+                name: p.name,
+                order: p.order,
+                height: p.height,
+                isFullHeight: p.isFullHeight,
+                background: p.background,
+                elements: p.elements
+              }
+            });
+          });
+        }
+      });
+    }
+
+    // Fallback to static ALL_PAGE_TEMPLATES if any
+    return list.length > 0 ? list : ALL_PAGE_TEMPLATES;
+  }, [templates]);
+
   const filteredTemplates = useMemo(() => {
-    return ALL_PAGE_TEMPLATES.filter((tmpl) => {
+    return availablePageTemplates.filter((tmpl) => {
       const matchesCategory = selectedCategory === 'all' || tmpl.category === selectedCategory;
       if (!matchesCategory) return false;
 
@@ -58,7 +93,7 @@ export const PageTemplatesModal: React.FC<PageTemplatesModalProps> = ({
         (tmpl.description && tmpl.description.toLowerCase().includes(q))
       );
     });
-  }, [selectedCategory, searchQuery]);
+  }, [availablePageTemplates, selectedCategory, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -125,17 +160,15 @@ export const PageTemplatesModal: React.FC<PageTemplatesModalProps> = ({
                   key={cat.id}
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
-                    isSelected
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${isSelected
                       ? 'bg-slate-900 text-white shadow-xs font-semibold'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-400' : 'text-slate-400'}`} />
                   <span>{cat.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isSelected ? 'bg-slate-800 text-slate-200' : 'bg-slate-200/80 text-slate-500'
-                  }`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-800 text-slate-200' : 'bg-slate-200/80 text-slate-500'
+                    }`}>
                     {count}
                   </span>
                 </button>
@@ -248,7 +281,7 @@ export const PageTemplatesModal: React.FC<PageTemplatesModalProps> = ({
                     <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                       {template.description}
                     </p>
-                    
+
                     {containerCount > 0 && (
                       <div className="mt-2 flex items-center gap-1 text-[11px] text-slate-400 font-medium">
                         <span>Includes {containerCount} architectural container{containerCount > 1 ? 's' : ''}</span>

@@ -31,6 +31,7 @@ import {
 
 const ASSET_TYPE_FILTERS = [
   { id: 'all', label: 'All Assets', icon: Layers },
+  { id: 'background', label: 'Background Images', icon: ImageIcon },
   { id: 'frame', label: 'Frames & Borders', icon: Crop },
   { id: 'gif', label: 'Animated GIFs', icon: Film },
   { id: 'video', label: 'Stock Videos', icon: Video },
@@ -42,6 +43,8 @@ const ASSET_TYPE_FILTERS = [
 ];
 
 const STOCK_CATEGORY_SUGGESTIONS = [
+  'Background Images',
+  'Luxury Backgrounds',
   'Frames & Arches',
   'Gold & Foil Borders',
   'Animated GIFs & Sparkles',
@@ -52,7 +55,6 @@ const STOCK_CATEGORY_SUGGESTIONS = [
   'Art Deco & Geometric',
   'Vintage & Ornate',
   'Dividers & Corners',
-  'Luxury Backgrounds',
   'Wedding Melodies'
 ];
 
@@ -111,8 +113,13 @@ export const AdminAssetManager: React.FC = () => {
   const filteredAssets = useMemo(() => {
     return assets.filter((asset) => {
       // Type filter
-      if (selectedType !== 'all' && asset.type !== selectedType) {
-        return false;
+      if (selectedType !== 'all') {
+        if (selectedType === 'background') {
+          const isBg = asset.type === 'background' || (asset.category || '').toLowerCase().includes('background') || (asset.tags || []).some((t) => t.toLowerCase().includes('background'));
+          if (!isBg) return false;
+        } else if (asset.type !== selectedType) {
+          return false;
+        }
       }
 
       // Search filter
@@ -297,6 +304,9 @@ export const AdminAssetManager: React.FC = () => {
 
   // Stats computation
   const totalAssets = assets.length;
+  const backgroundsCount = assets.filter((a) =>
+    a.type === 'background' || (a.category || '').toLowerCase().includes('background') || (a.tags || []).some((t) => t.toLowerCase().includes('background'))
+  ).length;
   const framesCount = assets.filter((a) => a.type === 'frame').length;
   const imagesCount = assets.filter((a) => a.type === 'image').length;
   const stickersCount = assets.filter((a) => a.type === 'sticker' || a.type === 'decoration').length;
@@ -331,10 +341,16 @@ export const AdminAssetManager: React.FC = () => {
         </div>
 
         {/* KPI Counts */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t border-slate-800/80">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mt-6 pt-6 border-t border-slate-800/80">
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
             <span className="text-xs text-slate-400 block font-medium">Total Assets</span>
             <span className="text-2xl font-bold text-white mt-1 block">{totalAssets}</span>
+          </div>
+          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
+            <span className="text-xs text-emerald-400 block font-medium flex items-center gap-1">
+              <ImageIcon className="w-3.5 h-3.5" /> Backgrounds
+            </span>
+            <span className="text-2xl font-bold text-emerald-300 mt-1 block">{backgroundsCount}</span>
           </div>
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
             <span className="text-xs text-amber-400 block font-medium flex items-center gap-1">
@@ -355,10 +371,10 @@ export const AdminAssetManager: React.FC = () => {
             <span className="text-2xl font-bold text-purple-300 mt-1 block">{stickersCount}</span>
           </div>
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl col-span-2 sm:col-span-1">
-            <span className="text-xs text-emerald-400 block font-medium flex items-center gap-1">
+            <span className="text-xs text-rose-400 block font-medium flex items-center gap-1">
               <Music className="w-3.5 h-3.5" /> Audio Tracks
             </span>
-            <span className="text-2xl font-bold text-emerald-300 mt-1 block">{audioCount}</span>
+            <span className="text-2xl font-bold text-rose-300 mt-1 block">{audioCount}</span>
           </div>
         </div>
       </div>
@@ -380,18 +396,16 @@ export const AdminAssetManager: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setSelectedType(tab.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
-                  isSelected
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${isSelected
                     ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
                     : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
-                }`}
+                  }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isSelected ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-700 text-slate-300'
-                  }`}
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-700 text-slate-300'
+                    }`}
                 >
                   {count}
                 </span>
@@ -477,11 +491,10 @@ export const AdminAssetManager: React.FC = () => {
               >
                 {/* Visual Canvas Box */}
                 <div
-                  className={`relative aspect-square flex items-center justify-center p-3 overflow-hidden ${
-                    isFrame || isSticker
+                  className={`relative aspect-square flex items-center justify-center p-3 overflow-hidden ${isFrame || isSticker
                       ? 'bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:12px_12px] bg-slate-950'
                       : 'bg-slate-950'
-                  }`}
+                    }`}
                 >
                   {isAudio ? (
                     <div className="flex flex-col items-center justify-center text-center p-2 text-slate-400">
@@ -515,23 +528,21 @@ export const AdminAssetManager: React.FC = () => {
                     <img
                       src={asset.url}
                       alt={asset.title}
-                      className={`max-w-full max-h-full transition-transform duration-300 group-hover:scale-105 ${
-                        isFrame || isSticker ? 'object-contain' : 'object-cover w-full h-full'
-                      }`}
+                      className={`max-w-full max-h-full transition-transform duration-300 group-hover:scale-105 ${isFrame || isSticker ? 'object-contain' : 'object-cover w-full h-full'
+                        }`}
                       loading="lazy"
                     />
                   )}
 
                   {/* Type Badge */}
                   <div className="absolute top-2 left-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm ${
-                      isGif
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm ${isGif
                         ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
                         : isVideo
-                        ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
-                        : 'bg-slate-950/80 text-amber-300 border border-amber-500/30'
-                    }`}>
-                      {isGif ? 'GIF' : isVideo ? 'VIDEO' : asset.type}
+                          ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
+                          : 'bg-slate-950/80 text-amber-300 border border-amber-500/30'
+                      }`}>
+                      {isGif ? 'GIF' : isVideo ? 'VIDEO' : asset.type === 'background' ? 'BACKGROUND' : asset.type}
                     </span>
                   </div>
 
@@ -617,22 +628,20 @@ export const AdminAssetManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setUploadTab('file')}
-                  className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                    uploadTab === 'file'
+                  className={`py-2 text-xs font-semibold rounded-lg transition-all ${uploadTab === 'file'
                       ? 'bg-amber-500 text-slate-950 shadow'
                       : 'text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   Upload File (SVG / PNG / MP3)
                 </button>
                 <button
                   type="button"
                   onClick={() => setUploadTab('url')}
-                  className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                    uploadTab === 'url'
+                  className={`py-2 text-xs font-semibold rounded-lg transition-all ${uploadTab === 'url'
                       ? 'bg-amber-500 text-slate-950 shadow'
                       : 'text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   Paste Image / Asset URL
                 </button>
@@ -746,6 +755,7 @@ export const AdminAssetManager: React.FC = () => {
                     onChange={(e: any) => setUploadForm({ ...uploadForm, type: e.target.value })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   >
+                    <option value="background">Background Image</option>
                     <option value="frame">Frame & Border (Cutout)</option>
                     <option value="gif">Animated GIF</option>
                     <option value="video">Stock Video (Cinematic MP4)</option>

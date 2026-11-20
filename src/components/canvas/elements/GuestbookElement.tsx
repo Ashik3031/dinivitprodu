@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ElementStyle, ElementContent, GuestbookMessage } from '../../../types';
-import { api } from '../../../services/api';
 import { MessageSquare, Send, Heart, User, Check, Sparkles } from 'lucide-react';
 
 interface GuestbookElementProps {
@@ -42,8 +41,17 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const primaryColor = style.color || '#d4af37';
-  const bgColor = style.backgroundColor || 'rgba(15, 23, 42, 0.9)';
+  const colors = style.colors || {};
+  const primaryColor = colors.accent || style.color || '#d4af37';
+  const bgColor = colors.cardBackground || style.backgroundColor || 'rgba(15, 23, 42, 0.9)';
+  const headingColor = colors.heading || '#f8fafc';
+  const bodyColor = colors.body || '#cbd5e1';
+  const inputBg = colors.inputBackground || 'rgba(2, 6, 23, 0.8)';
+  const inputText = colors.inputText || '#f8fafc';
+  const buttonBg = colors.buttonBackground || primaryColor;
+  const buttonText = colors.buttonText || '#020617';
+  const borderColor = colors.border || style.borderColor || 'rgba(255, 255, 255, 0.1)';
+  const feedCardBg = colors.cardBackground ? `${colors.cardBackground}dd` : 'rgba(15, 23, 42, 0.8)';
 
   const handleSubmit = async (e: React.FormEvent) => {
     if (isEditor) return;
@@ -76,27 +84,28 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-md shadow-xl text-slate-100 overflow-y-auto transition-all"
+      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-md shadow-xl overflow-y-auto transition-all"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
         borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
         borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
-        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.1)',
+        borderColor: borderColor,
         borderStyle: style.borderStyle || 'solid',
         boxShadow: style.boxShadow,
-        padding: style.padding ? `${style.padding}px` : '16px'
+        padding: style.padding ? `${style.padding}px` : '16px',
+        color: bodyColor
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-2">
+      <div className="flex items-center justify-between pb-3 border-b mb-2" style={{ borderColor }}>
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
           <span
             className="font-bold tracking-wider uppercase transition-colors"
             style={{
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: primaryColor,
+              color: headingColor,
               fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
               letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
             }}
@@ -107,7 +116,7 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
         <button
           type="button"
           onClick={isEditor ? undefined : onOpenModal}
-          className="text-[10px] px-2.5 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold hover:bg-white/10 transition-colors cursor-pointer"
+          className="text-[10px] px-2.5 py-0.5 rounded-full border uppercase tracking-widest font-semibold hover:bg-white/10 transition-colors cursor-pointer"
           style={{
             color: primaryColor,
             borderColor: `${primaryColor}40`,
@@ -123,7 +132,11 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
         {messages.slice(0, 3).map((msg) => (
           <div
             key={msg.id}
-            className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1"
+            className="p-2.5 rounded-xl border space-y-1"
+            style={{
+              backgroundColor: feedCardBg,
+              borderColor
+            }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -133,15 +146,15 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
                 >
                   {msg.senderName.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-xs font-bold text-slate-200 truncate max-w-[130px]">
+                <span className="text-xs font-bold truncate max-w-[130px]" style={{ color: headingColor }}>
                   {msg.senderName}
                 </span>
               </div>
-              <span className="text-[9px] text-slate-400 font-mono">
+              <span className="text-[9px] font-mono opacity-60">
                 {new Date(msg.createdAt).toLocaleDateString()}
               </span>
             </div>
-            <p className="text-[11px] text-slate-300 font-sans leading-relaxed pl-6">
+            <p className="text-[11px] font-sans leading-relaxed pl-6" style={{ color: bodyColor }}>
               "{msg.message}"
             </p>
           </div>
@@ -149,44 +162,52 @@ export const GuestbookElement: React.FC<GuestbookElementProps> = ({
       </div>
 
       {/* Inline Post Form */}
-      <form onSubmit={handleSubmit} className="border-t border-white/10 pt-2.5 space-y-2">
+      <form onSubmit={handleSubmit} className="border-t pt-2.5 space-y-2" style={{ borderColor }}>
         {hasSubmitted ? (
           <div className="py-2 text-center text-emerald-400 text-xs font-sans font-semibold flex items-center justify-center gap-1.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
             <Check className="w-4 h-4" />
             <span>Thank you for your heartfelt blessing!</span>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 gap-1.5">
+          <div className="grid grid-cols-1 gap-1.5">
+            <input
+              type="text"
+              required
+              placeholder="Your Name"
+              value={senderName}
+              onChange={(e) => setSenderName(e.target.value)}
+              className="w-full border rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none"
+              style={{
+                backgroundColor: inputBg,
+                color: inputText,
+                borderColor
+              }}
+            />
+            <div className="flex gap-1.5">
               <input
                 type="text"
                 required
-                placeholder="Your Name"
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                className="w-full bg-slate-950/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-400 font-sans focus:outline-none focus:border-amber-400"
+                placeholder="Leave your warm wish..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="flex-1 border rounded-xl px-2.5 py-1.5 text-xs font-sans focus:outline-none"
+                style={{
+                  backgroundColor: inputBg,
+                  color: inputText,
+                  borderColor
+                }}
               />
-              <div className="flex gap-1.5">
-                <input
-                  type="text"
-                  required
-                  placeholder="Leave your warm wish..."
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  className="flex-1 bg-slate-950/80 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-400 font-sans focus:outline-none focus:border-amber-400"
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-3.5 py-1.5 rounded-xl font-bold text-xs font-sans text-slate-950 shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  <Send className="w-3 h-3" />
-                  <span>Post</span>
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-3.5 py-1.5 rounded-xl font-bold text-xs font-sans shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                style={{ backgroundColor: buttonBg, color: buttonText }}
+              >
+                <Send className="w-3 h-3" />
+                <span>Post</span>
+              </button>
             </div>
-          </>
+          </div>
         )}
       </form>
     </div>

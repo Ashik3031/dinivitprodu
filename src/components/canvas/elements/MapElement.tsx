@@ -37,7 +37,14 @@ export const MapElement: React.FC<MapElementProps> = ({
     }
   };
 
-  const primaryColor = style.color || '#d4af37';
+  const colors = style.colors || {};
+  const primaryColor = colors.accent || style.color || '#d4af37';
+  const cardBg = colors.cardBackground || (style.backgroundColor && style.backgroundColor !== 'transparent' ? style.backgroundColor : '#020617');
+  const headingColor = colors.heading || '#ffffff';
+  const bodyColor = colors.body || '#cbd5e1';
+  const btnBg = colors.buttonBackground || primaryColor;
+  const btnText = colors.buttonText || '#020617';
+  const borderColor = colors.border || style.borderColor || 'rgba(255, 255, 255, 0.15)';
 
   return (
     <div
@@ -46,10 +53,10 @@ export const MapElement: React.FC<MapElementProps> = ({
         fontFamily: style.fontFamily || "'Playfair Display', serif",
         borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
         borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
-        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.15)',
+        borderColor: borderColor,
         borderStyle: style.borderStyle || 'solid',
         boxShadow: style.boxShadow || '0 10px 25px -5px rgba(0,0,0,0.3)',
-        backgroundColor: style.backgroundColor || '#020617'
+        backgroundColor: cardBg
       }}
     >
       {/* Google Maps Iframe */}
@@ -63,23 +70,29 @@ export const MapElement: React.FC<MapElementProps> = ({
 
         {/* Floating Pin / Venue Badge */}
         <div
-          className="absolute top-2.5 left-2.5 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-white shadow-lg flex items-center gap-1.5 max-w-[85%]"
-          style={{ backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}f0` : 'rgba(2, 6, 23, 0.9)' }}
+          className="absolute top-2.5 left-2.5 backdrop-blur-md px-2.5 py-1.5 rounded-xl border text-white shadow-lg flex items-center gap-1.5 max-w-[85%]"
+          style={{
+            backgroundColor: `${cardBg}f0`,
+            borderColor
+          }}
         >
           <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: primaryColor }} />
           <div className="truncate">
-            <span className="text-[11px] font-bold block truncate">{venueName}</span>
+            <span className="text-[11px] font-bold block truncate" style={{ color: headingColor }}>{venueName}</span>
           </div>
         </div>
       </div>
 
       {/* Footer Info & Directions Button */}
       <div
-        className="p-3 backdrop-blur-md border-t border-white/10 flex items-center justify-between gap-2"
-        style={{ backgroundColor: style.backgroundColor && style.backgroundColor !== 'transparent' ? `${style.backgroundColor}fa` : 'rgba(2, 6, 23, 0.95)' }}
+        className="p-3 backdrop-blur-md border-t flex items-center justify-between gap-2"
+        style={{
+          backgroundColor: `${cardBg}fa`,
+          borderColor
+        }}
       >
         <div className="flex-1 min-w-0 pr-1">
-          <div className="text-[11px] text-slate-300 truncate font-medium">
+          <div className="text-[11px] truncate font-medium" style={{ color: bodyColor }}>
             {venueAddress}
           </div>
         </div>
@@ -90,7 +103,8 @@ export const MapElement: React.FC<MapElementProps> = ({
             type="button"
             title="Copy Address"
             onClick={handleCopyAddress}
-            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer border border-white/10"
+            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors cursor-pointer border"
+            style={{ color: bodyColor, borderColor }}
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
@@ -99,10 +113,10 @@ export const MapElement: React.FC<MapElementProps> = ({
           <button
             type="button"
             onClick={handleDirectionsClick}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer font-sans"
-            style={{ backgroundColor: primaryColor }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer font-sans"
+            style={{ backgroundColor: btnBg, color: btnText }}
           >
-            <Navigation className="w-3.5 h-3.5 fill-slate-950" />
+            <Navigation className="w-3.5 h-3.5" style={{ fill: btnText }} />
             <span>Directions</span>
           </button>
         </div>

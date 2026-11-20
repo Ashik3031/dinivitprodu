@@ -31,14 +31,23 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
   const events = content.timelineEvents && content.timelineEvents.length > 0
     ? content.timelineEvents
     : [
-        { time: '04:00 PM', title: 'Solemn Ceremony', description: 'Exchange of vows at the sacred chapel', icon: 'Church' },
-        { time: '05:30 PM', title: 'Cocktail Hour', description: 'Champagne, canapés and acoustic serenade', icon: 'Wine' },
-        { time: '07:00 PM', title: 'Grand Banquet', description: 'Five-course dinner, heartfelt toasts & first dance', icon: 'Utensils' },
-        { time: '09:00 PM', title: 'After Party', description: 'Midnight dancing under the starlight', icon: 'Sparkles' }
-      ];
+      { time: '04:00 PM', title: 'Solemn Ceremony', description: 'Exchange of vows at the sacred chapel', icon: 'Church' },
+      { time: '05:30 PM', title: 'Cocktail Hour', description: 'Champagne, canapés and acoustic serenade', icon: 'Wine' },
+      { time: '07:00 PM', title: 'Grand Banquet', description: 'Five-course dinner, heartfelt toasts & first dance', icon: 'Utensils' },
+      { time: '09:00 PM', title: 'After Party', description: 'Midnight dancing under the starlight', icon: 'Sparkles' }
+    ];
 
-  const primaryColor = style.color || '#d4af37';
-  const bgColor = style.backgroundColor || 'rgba(15, 23, 42, 0.85)';
+  const colors = style.colors || {};
+  const primaryColor = colors.accent || style.color || '#d4af37';
+  const bgColor = colors.cardBackground || style.backgroundColor || 'rgba(15, 23, 42, 0.85)';
+  const headingColor = colors.heading || '#f8fafc';
+  const bodyColor = colors.body || '#cbd5e1';
+  const lineColor = colors.timelineLine || primaryColor;
+  const markerBg = colors.timelineMarker || bgColor;
+  const markerIcon = colors.icon || primaryColor;
+  const borderColor = colors.border || style.borderColor || 'rgba(255, 255, 255, 0.1)';
+  const badgeBg = colors.badgeBackground || 'transparent';
+  const badgeText = colors.badgeText || primaryColor;
 
   const renderIcon = (iconName?: string) => {
     const iconProps = { className: 'w-3.5 h-3.5' };
@@ -80,27 +89,28 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-start select-none backdrop-blur-md shadow-lg text-slate-100 overflow-y-auto transition-all"
+      className="w-full h-full flex flex-col justify-start select-none backdrop-blur-md shadow-lg overflow-y-auto transition-all"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
         borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
         borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
-        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.1)',
+        borderColor: borderColor,
         borderStyle: style.borderStyle || 'solid',
         boxShadow: style.boxShadow,
-        padding: style.padding ? `${style.padding}px` : '16px'
+        padding: style.padding ? `${style.padding}px` : '16px',
+        color: bodyColor
       }}
     >
       {/* Optional Title */}
-      <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 mb-2 border-b" style={{ borderColor }}>
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 flex-shrink-0" style={{ color: primaryColor }} />
           <span
             className="font-bold tracking-wider uppercase transition-colors"
             style={{
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: primaryColor,
+              color: headingColor,
               fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
               letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : undefined
             }}
@@ -109,10 +119,11 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
           </span>
         </div>
         <span
-          className="text-[10px] px-2 py-0.5 rounded-full border border-white/15 uppercase tracking-widest font-semibold transition-colors"
+          className="text-[10px] px-2 py-0.5 rounded-full border uppercase tracking-widest font-semibold transition-colors"
           style={{
-            color: primaryColor,
-            borderColor: `${primaryColor}40`,
+            color: badgeText,
+            borderColor: `${badgeText}40`,
+            backgroundColor: badgeBg,
             fontFamily: style.fontFamily
           }}
         >
@@ -129,17 +140,17 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center border shadow-md transition-transform group-hover:scale-110"
                 style={{
-                  backgroundColor: bgColor,
-                  borderColor: primaryColor,
-                  color: primaryColor
+                  backgroundColor: markerBg,
+                  borderColor: lineColor,
+                  color: markerIcon
                 }}
               >
                 {renderIcon(event.icon)}
               </div>
               {idx < events.length - 1 && (
                 <div
-                  className="w-0.5 min-h-[36px] my-1 rounded-full opacity-40"
-                  style={{ backgroundColor: primaryColor }}
+                  className="w-0.5 min-h-[36px] my-1 rounded-full opacity-60"
+                  style={{ backgroundColor: lineColor }}
                 />
               )}
             </div>
@@ -153,15 +164,15 @@ export const TimelineElement: React.FC<TimelineElementProps> = ({
                 {event.time}
               </div>
               <div
-                className="text-xs font-bold text-slate-100 mt-0.5 transition-colors"
-                style={{ fontFamily: style.fontFamily }}
+                className="text-xs font-bold mt-0.5 transition-colors"
+                style={{ fontFamily: style.fontFamily, color: headingColor }}
               >
                 {event.title}
               </div>
               {event.description && (
                 <div
-                  className="text-[11px] text-slate-300 mt-0.5 leading-relaxed opacity-85 transition-colors"
-                  style={{ fontFamily: style.fontFamily }}
+                  className="text-[11px] mt-0.5 leading-relaxed opacity-85 transition-colors"
+                  style={{ fontFamily: style.fontFamily, color: bodyColor }}
                 >
                   {event.description}
                 </div>

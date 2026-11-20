@@ -1,4 +1,4 @@
-import { User, Invitation, RSVPResponse, GuestbookMessage, InvitationTemplate, AdminStats, MediaAsset } from '../types';
+import { User, Invitation, RSVPResponse, GuestbookMessage, InvitationTemplate, AdminStats, MediaAsset, PrebuiltBlock } from '../types';
 
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
@@ -25,6 +25,84 @@ function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
+async function parseJsonResponse<T = any>(res: Response, defaultError = 'Request failed'): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(`API Error (${res.status}): ${res.statusText || defaultError}`);
+    }
+    if (text.trim().startsWith('<') || text.includes('<!doctype') || text.includes('<html')) {
+      throw new Error(`Server returned HTML instead of JSON. Ensure the server is running on the correct port.`);
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(`Invalid response format from server (${contentType || 'non-JSON'}).`);
+    }
+  }
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || data.message || defaultError);
+  }
+  return data;
+}
+
+// In-flight request deduplication map and short TTL response cache
+const inFlightRequests = new Map<string, Promise<any>>();
+const cacheStore = new Map<string, { timestamp: number; data: any }>();
+
+export function invalidateApiCache(prefix?: string) {
+  if (!prefix) {
+    cacheStore.clear();
+    return;
+  }
+  for (const key of cacheStore.keys()) {
+    if (key.includes(prefix)) {
+      cacheStore.delete(key);
+    }
+  }
+}
+
+async function fetchWithDeduplication<T>(
+  url: string,
+  options: RequestInit = {},
+  cacheTtlMs: number = 3000
+): Promise<T> {
+  const method = (options.method || 'GET').toUpperCase();
+  const cacheKey = `${method}:${url}`;
+
+  // Serve from short TTL cache if valid (GET only)
+  if (method === 'GET' && cacheTtlMs > 0) {
+    const cached = cacheStore.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < cacheTtlMs) {
+      return cached.data as T;
+    }
+  }
+
+  // Deduplicate identical in-flight requests
+  if (inFlightRequests.has(cacheKey)) {
+    return inFlightRequests.get(cacheKey) as Promise<T>;
+  }
+
+  const reqPromise = (async () => {
+    try {
+      const res = await fetch(url, options);
+      const data = await parseJsonResponse<T>(res);
+      if (method === 'GET' && cacheTtlMs > 0) {
+        cacheStore.set(cacheKey, { timestamp: Date.now(), data });
+      }
+      return data;
+    } finally {
+      inFlightRequests.delete(cacheKey);
+    }
+  })();
+
+  inFlightRequests.set(cacheKey, reqPromise);
+  return reqPromise;
+}
+
 export const api = {
   // Auth
   login: async (credentials: { username: string; password: string }) => {
@@ -33,8 +111,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(credentials)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
+    const data = await parseJsonResponse(res, 'Login failed');
     if (data.token) {
       localStorage.setItem('dis_token', data.token);
     }
@@ -45,9 +122,7 @@ export const api = {
     const res = await fetch('/api/auth/me', {
       headers: getAuthHeaders()
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch current user');
-    return data;
+    return parseJsonResponse(res, 'Failed to fetch current user');
   },
 
   updateProfile: async (payload: { ownerName: string; email: string; phone?: string; businessName?: string }): Promise<{ user: User; message: string }> => {
@@ -56,9 +131,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update profile');
-    return data;
+    return parseJsonResponse(res, 'Failed to update profile');
   },
 
   changePassword: async (payload: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
@@ -67,9 +140,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to change password');
-    return data;
+    return parseJsonResponse(res, 'Failed to change password');
   },
 
   updateBranding: async (payload: {
@@ -88,9 +159,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update branding settings');
-    return data;
+    return parseJsonResponse(res, 'Failed to update branding settings');
   },
 
   // Admin User Management
@@ -98,9 +167,7 @@ export const api = {
     const res = await fetch('/api/admin/users', {
       headers: getAuthHeaders()
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch users');
-    return data;
+    return parseJsonResponse(res, 'Failed to fetch users');
   },
   getAdminUsers: async (): Promise<{ users: User[] }> => {
     return api.getUsers();
@@ -112,9 +179,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(userData)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to create user');
-    return data;
+    return parseJsonResponse(res, 'Failed to create user');
   },
   createAdminUser: async (userData: any): Promise<{ user: User; message: string }> => {
     return api.createUser(userData);
@@ -126,9 +191,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify(updates)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update user');
-    return data;
+    return parseJsonResponse(res, 'Failed to update user');
   },
   updateAdminUser: async (id: string, updates: any): Promise<{ user: User; message: string }> => {
     return api.updateUser(id, updates);
@@ -140,9 +203,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ isActive })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update user status');
-    return data;
+    return parseJsonResponse(res, 'Failed to update user status');
   },
 
   resetUserPassword: async (id: string, newPassword: string): Promise<{ message: string }> => {
@@ -151,9 +212,7 @@ export const api = {
       headers: getAuthHeaders(),
       body: JSON.stringify({ newPassword })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to reset password');
-    return data;
+    return parseJsonResponse(res, 'Failed to reset password');
   },
   resetAdminUserPassword: async (id: string, newPassword: string): Promise<{ message: string }> => {
     return api.resetUserPassword(id, newPassword);
@@ -164,9 +223,7 @@ export const api = {
       method: 'DELETE',
       headers: getAuthHeaders()
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to delete user');
-    return data;
+    return parseJsonResponse(res, 'Failed to delete user');
   },
   deleteAdminUser: async (id: string): Promise<{ success: boolean }> => {
     return api.deleteUser(id);
@@ -176,8 +233,7 @@ export const api = {
     const res = await fetch('/api/admin/stats', {
       headers: getAuthHeaders()
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch stats');
+    const data = await parseJsonResponse(res, 'Failed to fetch stats');
     return data.stats;
   },
 
@@ -186,35 +242,30 @@ export const api = {
     const params = new URLSearchParams();
     if (businessId) params.append('businessId', businessId);
     if (role) params.append('role', role);
-    const res = await fetch(`/api/invitations?${params.toString()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch invitations');
-    return data;
+    const qs = params.toString();
+    const url = `/api/invitations${qs ? `?${qs}` : ''}`;
+    return fetchWithDeduplication<{ invitations: Invitation[] }>(url, {
+      headers: getAuthHeaders()
+    }, 2000);
   },
 
   getInvitation: async (id: string): Promise<Invitation> => {
     const res = await fetch(`/api/invitations/${id}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch invitation');
+    const data = await parseJsonResponse(res, 'Failed to fetch invitation');
     return data.invitation || data;
   },
   getInvitationById: async (id: string): Promise<{ invitation: Invitation }> => {
     const res = await fetch(`/api/invitations/${id}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch invitation');
-    return data;
+    return parseJsonResponse(res, 'Failed to fetch invitation');
   },
 
   getInvitationBySlug: async (slug: string): Promise<{ invitation: Invitation; stats: any; guestbook: GuestbookMessage[] }> => {
     const res = await fetch(`/api/invitations/slug/${slug}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Invitation not found');
-    return data;
+    return parseJsonResponse(res, 'Invitation not found');
   },
   getPublishedInvitationBySlug: async (slug: string): Promise<Invitation> => {
     const res = await fetch(`/api/invitations/slug/${slug}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Invitation not found');
+    const data = await parseJsonResponse(res, 'Invitation not found');
     return data.invitation || data;
   },
 
@@ -239,9 +290,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(bodyPayload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to create invitation');
-    return data;
+    return parseJsonResponse(res, 'Failed to create invitation');
   },
 
   updateInvitation: async (id: string, updates: Partial<Invitation>): Promise<{ invitation: Invitation; message: string }> => {
@@ -250,9 +299,7 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to save invitation');
-    return data;
+    return parseJsonResponse(res, 'Failed to save invitation');
   },
 
   duplicateInvitation: async (id: string, businessId?: string): Promise<{ invitation: Invitation }> => {
@@ -263,35 +310,27 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ businessId: businessId || user?.id || 'biz-royal-prints' })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to duplicate invitation');
-    return data;
+    return parseJsonResponse(res, 'Failed to duplicate invitation');
   },
 
   deleteInvitation: async (id: string): Promise<{ success: boolean }> => {
     const res = await fetch(`/api/invitations/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to delete invitation');
-    return data;
+    return parseJsonResponse(res, 'Failed to delete invitation');
   },
 
-  saveAsTemplate: async (id: string, templateData: { title: string; category: string; description: string }): Promise<{ template: InvitationTemplate }> => {
+  saveAsTemplate: async (id: string, templateData: { title: string; category: string; description: string; requestPublic?: boolean; isPublic?: boolean }): Promise<{ template: InvitationTemplate }> => {
     const res = await fetch(`/api/invitations/${id}/save-template`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(templateData)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to save template');
-    return data;
+    return parseJsonResponse(res, 'Failed to save template');
   },
 
   // RSVP
   getRSVPs: async (invitationId: string): Promise<{ rsvps: RSVPResponse[] }> => {
     const res = await fetch(`/api/rsvp/${invitationId}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch RSVPs');
-    return data;
+    return parseJsonResponse(res, 'Failed to fetch RSVPs');
   },
   getRSVPList: async (invitationId: string): Promise<{ rsvps: RSVPResponse[] }> => {
     return api.getRSVPs(invitationId);
@@ -303,24 +342,18 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to submit RSVP');
-    return data;
+    return parseJsonResponse(res, 'Failed to submit RSVP');
   },
 
   deleteRSVP: async (id: string): Promise<{ success: boolean }> => {
     const res = await fetch(`/api/rsvp/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to delete RSVP');
-    return data;
+    return parseJsonResponse(res, 'Failed to delete RSVP');
   },
 
   // Guestbook
   getGuestbook: async (invitationId: string): Promise<{ messages: GuestbookMessage[] }> => {
     const res = await fetch(`/api/guestbook/${invitationId}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch guestbook');
-    return data;
+    return parseJsonResponse(res, 'Failed to fetch guestbook');
   },
 
   submitGuestbook: async (payload: any): Promise<{ success: boolean; message: GuestbookMessage; statusMessage: string }> => {
@@ -329,16 +362,12 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to submit message');
-    return data;
+    return parseJsonResponse(res, 'Failed to submit message');
   },
 
   deleteGuestbook: async (id: string): Promise<{ success: boolean }> => {
     const res = await fetch(`/api/guestbook/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to delete message');
-    return data;
+    return parseJsonResponse(res, 'Failed to delete message');
   },
 
   // AI Assistant
@@ -348,80 +377,140 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params)
     });
-    const data = await res.json();
+    const data = await parseJsonResponse(res, 'Failed to generate AI content');
     return data.text || '';
   },
 
   // Templates Management
-  getTemplates: async (params?: { category?: string; search?: string; all?: boolean; superAdminOnly?: boolean }): Promise<{ templates: InvitationTemplate[] }> => {
+  getTemplates: async (params?: { category?: string; search?: string; all?: boolean; superAdminOnly?: boolean; userId?: string; userRole?: string; verificationStatus?: string }, signal?: AbortSignal): Promise<{ templates: InvitationTemplate[] }> => {
     const searchParams = new URLSearchParams();
     if (params?.category && params.category !== 'all') searchParams.append('category', params.category);
     if (params?.search) searchParams.append('search', params.search);
     if (params?.all) searchParams.append('all', 'true');
     if (params?.superAdminOnly) searchParams.append('superAdminOnly', 'true');
+    if (params?.userId) searchParams.append('userId', params.userId);
+    if (params?.userRole) searchParams.append('userRole', params.userRole);
+    if (params?.verificationStatus && params.verificationStatus !== 'all') searchParams.append('verificationStatus', params.verificationStatus);
 
-    const res = await fetch(`/api/templates?${searchParams.toString()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch templates');
-    return data;
+    const qs = searchParams.toString();
+    const url = `/api/templates${qs ? `?${qs}` : ''}`;
+    return fetchWithDeduplication<{ templates: InvitationTemplate[] }>(url, {
+      headers: getAuthHeaders(),
+      signal
+    }, 4000);
   },
 
   getTemplateById: async (id: string): Promise<{ template: InvitationTemplate }> => {
-    const res = await fetch(`/api/templates/${id}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch template');
-    return data;
+    return fetchWithDeduplication<{ template: InvitationTemplate }>(`/api/templates/${id}`, {
+      headers: getAuthHeaders()
+    }, 2000);
   },
 
   createTemplate: async (payload: Partial<InvitationTemplate>): Promise<{ template: InvitationTemplate }> => {
+    invalidateApiCache('/api/templates');
     const res = await fetch('/api/templates', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to create template');
-    return data;
+    return parseJsonResponse(res, 'Failed to create template');
   },
 
   updateTemplate: async (id: string, updates: Partial<InvitationTemplate>): Promise<{ template: InvitationTemplate }> => {
+    invalidateApiCache('/api/templates');
     const res = await fetch(`/api/templates/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(updates)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update template');
-    return data;
+    return parseJsonResponse(res, 'Failed to update template');
+  },
+
+  verifyTemplate: async (id: string, isApproved: boolean, reason?: string): Promise<{ template: InvitationTemplate }> => {
+    invalidateApiCache('/api/templates');
+    const res = await fetch(`/api/templates/${id}/verify`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ isApproved, reason })
+    });
+    return parseJsonResponse(res, 'Failed to verify template');
+  },
+
+  submitTemplateForVerification: async (id: string): Promise<{ template: InvitationTemplate }> => {
+    invalidateApiCache('/api/templates');
+    const res = await fetch(`/api/templates/${id}/submit-verification`, {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    });
+    return parseJsonResponse(res, 'Failed to submit template for verification');
   },
 
   togglePublishTemplate: async (id: string, isPublic: boolean): Promise<{ template: InvitationTemplate }> => {
+    invalidateApiCache('/api/templates');
     const res = await fetch(`/api/templates/${id}/publish`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ isPublic })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to toggle template publish status');
-    return data;
+    return parseJsonResponse(res, 'Failed to toggle template publish status');
   },
 
   duplicateTemplate: async (id: string): Promise<{ template: InvitationTemplate }> => {
+    invalidateApiCache('/api/templates');
     const res = await fetch(`/api/templates/${id}/duplicate`, {
-      method: 'POST'
+      method: 'POST',
+      headers: getAuthHeaders()
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to duplicate template');
-    return data;
+    return parseJsonResponse(res, 'Failed to duplicate template');
   },
 
   deleteTemplate: async (id: string): Promise<{ success: boolean; id: string }> => {
+    invalidateApiCache('/api/templates');
     const res = await fetch(`/api/templates/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getAuthHeaders()
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to delete template');
-    return data;
+    return parseJsonResponse(res, 'Failed to delete template');
+  },
+
+  // Section Blocks Management
+  getBlocks: async (params?: { category?: string; search?: string; all?: boolean }, signal?: AbortSignal): Promise<{ blocks: PrebuiltBlock[] }> => {
+    const searchParams = new URLSearchParams();
+    if (params?.category && params.category !== 'all') searchParams.append('category', params.category);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.all) searchParams.append('all', 'true');
+
+    const qs = searchParams.toString();
+    const url = `/api/blocks${qs ? `?${qs}` : ''}`;
+    return fetchWithDeduplication<{ blocks: PrebuiltBlock[] }>(url, {
+      headers: getAuthHeaders(),
+      signal
+    }, 4000);
+  },
+
+  getBlockById: async (id: string): Promise<{ block: PrebuiltBlock }> => {
+    return fetchWithDeduplication<{ block: PrebuiltBlock }>(`/api/blocks/${id}`, {
+      headers: getAuthHeaders()
+    }, 2000);
+  },
+
+  createBlock: async (payload: Partial<PrebuiltBlock>): Promise<{ block: PrebuiltBlock }> => {
+    invalidateApiCache('/api/blocks');
+    const res = await fetch('/api/blocks', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload)
+    });
+    return parseJsonResponse(res, 'Failed to create block');
+  },
+
+  deleteBlock: async (id: string): Promise<{ success: boolean; id: string }> => {
+    invalidateApiCache('/api/blocks');
+    const res = await fetch(`/api/blocks/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return parseJsonResponse(res, 'Failed to delete block');
   },
 
   // Media Library
@@ -435,60 +524,55 @@ export const api = {
     if (params?.isPublic !== undefined) searchParams.append('isPublic', String(params.isPublic));
     if (params?.scope) searchParams.append('scope', params.scope);
 
-    const res = await fetch(`/api/media?${searchParams.toString()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch media assets');
-    return data;
+    const qs = searchParams.toString();
+    const url = `/api/media${qs ? `?${qs}` : ''}`;
+    return fetchWithDeduplication<{ success: boolean; media: MediaAsset[] }>(url, {
+      headers: getAuthHeaders()
+    }, 3000);
   },
 
   uploadMedia: async (payload: Partial<MediaAsset>): Promise<{ success: boolean; media: MediaAsset; message: string }> => {
+    invalidateApiCache('/api/media');
     const res = await fetch('/api/media', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to upload media asset');
-    return data;
+    return parseJsonResponse(res, 'Failed to upload media asset');
   },
 
   linkMediaToInvitation: async (mediaId: string, invitationId: string): Promise<{ success: boolean; media: MediaAsset }> => {
+    invalidateApiCache('/api/media');
     const res = await fetch(`/api/media/${mediaId}/link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ invitationId })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to link media');
-    return data;
+    return parseJsonResponse(res, 'Failed to link media');
   },
 
   updateMedia: async (mediaId: string, updates: Partial<MediaAsset>): Promise<{ success: boolean; media: MediaAsset }> => {
+    invalidateApiCache('/api/media');
     const res = await fetch(`/api/media/${mediaId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates)
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to update media');
-    return data;
+    return parseJsonResponse(res, 'Failed to update media');
   },
 
   deleteMedia: async (mediaId: string): Promise<{ success: boolean; message: string }> => {
+    invalidateApiCache('/api/media');
     const res = await fetch(`/api/media/${mediaId}`, {
       method: 'DELETE'
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to delete media asset');
-    return data;
+    return parseJsonResponse(res, 'Failed to delete media asset');
   },
 
   getMediaStats: async (businessId?: string): Promise<{ success: boolean; stats: any }> => {
     const searchParams = new URLSearchParams();
     if (businessId) searchParams.append('businessId', businessId);
     const res = await fetch(`/api/media/stats?${searchParams.toString()}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch media stats');
-    return data;
+    return parseJsonResponse(res, 'Failed to fetch media stats');
   }
 };

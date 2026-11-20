@@ -1,6 +1,7 @@
 import express from 'express';
 import { dbService } from '../db';
-import { INITIAL_TEMPLATES, createInvitationFromTemplate, createBlankInvitation } from '../../src/data/initialTemplates';
+import { createInvitationFromTemplate, createBlankInvitation } from '../../src/data/initialTemplates';
+import { optionalAuthMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -83,9 +84,11 @@ router.post('/', (req, res) => {
       try {
         template = dbService.getTemplateById(templateId);
       } catch (err) {
-        template = INITIAL_TEMPLATES.find(t => t.id === templateId) || INITIAL_TEMPLATES[0];
+        template = null;
       }
-      const newInv = createInvitationFromTemplate(template, businessId, title);
+      const newInv = template
+        ? createInvitationFromTemplate(template, businessId, title)
+        : createBlankInvitation(businessId, title, assignedCategory);
       const saved = dbService.createInvitation({
         ...newInv,
         customerName: customerName || '',
@@ -139,14 +142,18 @@ router.post('/:id/duplicate', (req, res) => {
 });
 
 // Save design as template
-router.post('/:id/save-template', (req, res) => {
+router.post('/:id/save-template', optionalAuthMiddleware, (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { title, category, description } = req.body;
+    const { title, category, description, requestPublic, isPublic } = req.body;
     if (!title) {
       return res.status(400).json({ error: 'Template title required' });
     }
-    const template = dbService.saveAsTemplate(id, { title, category, description });
+    const template = dbService.saveAsTemplate(
+      id,
+      { title, category, description, requestPublic, isPublic },
+      req.user
+    );
     return res.status(201).json({ success: true, template });
   } catch (error: any) {
     return res.status(400).json({ error: error.message });

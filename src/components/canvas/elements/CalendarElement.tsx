@@ -48,7 +48,7 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
     const title = encodeURIComponent(content.calendarEventTitle || content.text || 'Celebration Invitation');
     const location = encodeURIComponent(content.calendarEventLocation || content.venueAddress || 'Celebration Venue');
     const details = encodeURIComponent(content.calendarEventDescription || 'Join us for this unforgettable celebration!');
-    
+
     // Format YYYYMMDDTHHMMSSZ
     const startIso = isValidDate
       ? targetDate.toISOString().replace(/-|:|\.\d\d\d/g, '')
@@ -61,42 +61,51 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
     window.open(gcalUrl, '_blank');
   };
 
-
-  const primaryColor = style.color || '#d4af37';
-  const bgColor = style.backgroundColor || 'rgba(15, 23, 42, 0.85)';
+  const colors = style.colors || {};
+  const primaryColor = colors.accent || style.color || '#d4af37';
+  const bgColor = colors.cardBackground || style.backgroundColor || 'rgba(15, 23, 42, 0.85)';
+  const headingColor = colors.heading || primaryColor;
+  const labelColor = colors.label || '#94a3b8';
+  const numberColor = colors.numberColor || '#e2e8f0';
+  const buttonBg = colors.buttonBackground || primaryColor;
+  const buttonText = colors.buttonText || (['#ffffff', '#f8fafc', '#fff1f2', '#fefce8', '#fde68a', '#d4af37'].includes(buttonBg.toLowerCase()) ? '#0f172a' : '#ffffff');
+  const badgeBg = colors.badgeBackground || 'rgba(255, 255, 255, 0.05)';
+  const badgeText = colors.badgeText || primaryColor;
+  const borderColor = colors.border || style.borderColor || 'rgba(255, 255, 255, 0.15)';
 
   return (
     <div
-      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-xl shadow-2xl text-slate-100 transition-all overflow-hidden relative"
+      className="w-full h-full flex flex-col justify-between select-none backdrop-blur-xl shadow-2xl transition-all overflow-hidden relative"
       style={{
         backgroundColor: bgColor,
         fontFamily: style.fontFamily || "'Playfair Display', serif",
         borderRadius: style.borderRadius ? `${style.borderRadius}px` : '16px',
         borderWidth: style.borderWidth ? `${style.borderWidth}px` : 1,
-        borderColor: style.borderColor || 'rgba(255, 255, 255, 0.15)',
+        borderColor: borderColor,
         borderStyle: style.borderStyle || 'solid',
         boxShadow: style.boxShadow || '0 20px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-        padding: style.padding ? `${style.padding}px` : '14px'
+        padding: style.padding ? `${style.padding}px` : '14px',
+        color: numberColor
       }}
     >
       {/* Decorative background glow based on primary color */}
-      <div 
+      <div
         className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
         style={{ backgroundColor: primaryColor }}
       />
-      <div 
+      <div
         className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
         style={{ backgroundColor: primaryColor }}
       />
 
       {/* Header Month / Year */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/10 relative z-10">
+      <div className="flex items-center justify-between pb-2 border-b relative z-10" style={{ borderColor }}>
         <div className="flex items-center gap-1.5">
           <span
             className="font-bold tracking-widest uppercase transition-colors"
             style={{
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: primaryColor,
+              color: headingColor,
               fontSize: style.fontSize ? `${style.fontSize}px` : '14px',
               fontWeight: style.fontWeight || '700',
               letterSpacing: style.letterSpacing ? `${style.letterSpacing}px` : '1px',
@@ -111,10 +120,11 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
           </span>
         </div>
         <div
-          className="text-[8px] px-2 py-0.5 rounded-full border border-white/20 uppercase tracking-widest font-semibold transition-colors bg-white/5 backdrop-blur-sm shadow-sm"
+          className="text-[8px] px-2 py-0.5 rounded-full border uppercase tracking-widest font-semibold transition-colors backdrop-blur-sm shadow-sm"
           style={{
-            color: primaryColor,
-            borderColor: `${primaryColor}40`,
+            color: badgeText,
+            borderColor: `${badgeText}40`,
+            backgroundColor: badgeBg,
             fontFamily: style.fontFamily
           }}
         >
@@ -124,16 +134,16 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
 
       {/* Weekday Labels */}
       <div
-        className="grid grid-cols-7 gap-1 text-center py-1 text-[8px] font-bold opacity-60 tracking-widest relative z-10"
-        style={{ fontFamily: "'Inter', sans-serif" }}
+        className="grid grid-cols-7 gap-1 text-center py-1 text-[8px] font-bold tracking-widest relative z-10"
+        style={{ fontFamily: "'Inter', sans-serif", color: labelColor }}
       >
-        <span className="text-rose-400">S</span>
+        <span style={{ color: primaryColor }}>S</span>
         <span>M</span>
         <span>T</span>
         <span>W</span>
         <span>T</span>
         <span>F</span>
-        <span className="text-rose-400">S</span>
+        <span style={{ color: primaryColor }}>S</span>
       </div>
 
       {/* Day Grid */}
@@ -152,11 +162,13 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
           return (
             <div
               key={`day-${day}`}
-              className={`w-full h-full flex items-center justify-center transition-all relative ${
-                isTarget
+              className={`w-full h-full flex items-center justify-center transition-all relative ${isTarget
                   ? 'font-bold scale-125 z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]'
-                  : `hover:bg-white/10 rounded-lg cursor-default ${isWeekend ? 'text-slate-400' : 'text-slate-200'}`
-              }`}
+                  : 'hover:bg-white/10 rounded-lg cursor-default'
+                }`}
+              style={{
+                color: isTarget ? '#ffffff' : (isWeekend ? labelColor : numberColor)
+              }}
             >
               {isTarget && (
                 <Heart
@@ -164,11 +176,11 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
                   style={{ color: primaryColor }}
                 />
               )}
-              <span 
+              <span
                 className={`relative z-10 transition-colors duration-300 ${isTarget ? '-mt-[1px] text-[10px]' : ''}`}
                 style={
-                  isTarget 
-                    ? { color: ['#ffffff', '#f8fafc', '#fff1f2', '#fefce8', '#fde68a'].includes(primaryColor.toLowerCase()) ? '#0f172a' : '#ffffff' } 
+                  isTarget
+                    ? { color: ['#ffffff', '#f8fafc', '#fff1f2', '#fefce8', '#fde68a'].includes(primaryColor.toLowerCase()) ? '#0f172a' : '#ffffff' }
                     : {}
                 }
               >
@@ -187,8 +199,8 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
             onClick={handleAddToGoogleCalendar}
             className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-[10px] font-bold tracking-widest transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-95 cursor-pointer uppercase"
             style={{
-              backgroundColor: primaryColor,
-              color: ['#ffffff', '#f8fafc', '#fff1f2', '#fefce8', '#fde68a', '#d4af37'].includes(primaryColor.toLowerCase()) ? '#0f172a' : '#ffffff',
+              backgroundColor: buttonBg,
+              color: buttonText,
               fontFamily: "'Inter', sans-serif"
             }}
           >

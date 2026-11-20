@@ -679,32 +679,44 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
       case 'dress-code': {
         const colors = content.dressCodeColors || ['#000000', '#ffffff', '#d4af37'];
         const dressType = content.dressCodeType || 'Black Tie';
+        const elColors = style.colors || {};
+        const accentColor = elColors.accent || style.color || '#fbbf24';
+        const headingColor = elColors.heading || accentColor;
+        const bodyColor = elColors.body || '#d4d4d4';
+        const badgeBg = elColors.badgeBackground || `${accentColor}25`;
+        const badgeText = elColors.badgeText || accentColor;
+        const cardBg = elColors.cardBackground || style.backgroundColor || 'transparent';
+        const borderCol = elColors.border || style.borderColor;
+
         return (
           <div
             className="w-full h-full flex flex-col items-center justify-center p-3 text-center select-none transition-all"
             style={{
-              backgroundColor: style.backgroundColor || 'transparent',
+              backgroundColor: cardBg,
               borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
               borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
-              borderColor: style.borderColor,
+              borderColor: borderCol,
               borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
               boxShadow: style.boxShadow,
               padding: style.padding ? `${style.padding}px` : undefined,
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: style.color || 'inherit'
+              color: bodyColor
             }}
           >
             <div className="flex items-center gap-1.5 mb-1">
-              <Shirt className="w-3.5 h-3.5 text-amber-500" />
+              <Shirt className="w-3.5 h-3.5" style={{ color: accentColor }} />
               <span
                 className="text-[11px] uppercase tracking-widest font-semibold"
-                style={{ color: style.color || '#fbbf24' }}
+                style={{ color: headingColor }}
               >
                 {content.dressCodeTitle || 'Dress Code'}
               </span>
             </div>
             {dressType && (
-              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30 mb-2">
+              <span
+                className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border mb-2"
+                style={{ backgroundColor: badgeBg, color: badgeText, borderColor: `${accentColor}40` }}
+              >
                 {dressType}
               </span>
             )}
@@ -722,14 +734,14 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
             )}
             {content.dressCodeDescription && (
               <p
-                className="text-xs text-neutral-300 max-w-xs mt-1 leading-relaxed opacity-90"
-                style={{ fontFamily: style.fontFamily }}
+                className="text-xs max-w-xs mt-1 leading-relaxed opacity-90"
+                style={{ fontFamily: style.fontFamily, color: bodyColor }}
               >
                 {content.dressCodeDescription}
               </p>
             )}
             {content.dressCodeNote && (
-              <span className="text-[10px] text-amber-300/80 mt-1 italic block">
+              <span className="text-[10px] mt-1 italic block" style={{ color: accentColor }}>
                 {content.dressCodeNote}
               </span>
             )}
@@ -745,33 +757,41 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
             { name: 'Amazon Registry', url: 'https://amazon.com' },
             { name: 'Honeyfund', url: 'https://honeyfund.com' }
           ];
+        const elColors = style.colors || {};
+        const accentColor = elColors.accent || style.color || '#fbbf24';
+        const headingColor = elColors.heading || accentColor;
+        const bodyColor = elColors.body || '#d4d4d4';
+        const cardBg = elColors.cardBackground || style.backgroundColor || 'transparent';
+        const borderCol = elColors.border || style.borderColor;
+        const btnBg = elColors.buttonBackground || `${accentColor}18`;
+        const btnText = elColors.buttonText || accentColor;
 
         return (
           <div
             className="w-full h-full flex flex-col items-center justify-center p-4 text-center select-none transition-all"
             style={{
-              backgroundColor: style.backgroundColor || 'transparent',
+              backgroundColor: cardBg,
               borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
               borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
-              borderColor: style.borderColor,
+              borderColor: borderCol,
               borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
               boxShadow: style.boxShadow,
               padding: style.padding ? `${style.padding}px` : undefined,
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: style.color || 'inherit'
+              color: bodyColor
             }}
           >
             <div className="flex items-center gap-1.5 mb-1">
-              <Gift className="w-4 h-4 text-amber-500" />
+              <Gift className="w-4 h-4" style={{ color: accentColor }} />
               <span
                 className="text-xs uppercase tracking-widest font-semibold"
-                style={{ color: style.color || '#fbbf24' }}
+                style={{ color: headingColor }}
               >
                 {content.giftRegistryTitle || 'Gift Registry'}
               </span>
             </div>
             {content.giftRegistryDescription && (
-              <p className="text-xs text-neutral-300 max-w-sm mt-1 mb-3 leading-relaxed opacity-90">
+              <p className="text-xs max-w-sm mt-1 mb-3 leading-relaxed opacity-90" style={{ color: bodyColor }}>
                 {content.giftRegistryDescription}
               </p>
             )}
@@ -785,7 +805,12 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                   onClick={(e) => {
                     if (isEditor) e.preventDefault();
                   }}
-                  className="px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                  className="px-3.5 py-1.5 rounded-full border text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                  style={{
+                    backgroundColor: btnBg,
+                    color: btnText,
+                    borderColor: `${accentColor}40`
+                  }}
                 >
                   <span>{reg.name || 'Registry Link'}</span>
                   <ExternalLink className="w-3 h-3 opacity-70" />
@@ -793,7 +818,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               ))}
             </div>
             {content.giftRegistryCashInfo && (
-              <p className="text-[10.5px] text-neutral-400 mt-2.5 max-w-xs italic">
+              <p className="text-[10.5px] mt-2.5 max-w-xs italic opacity-75" style={{ color: bodyColor }}>
                 {content.giftRegistryCashInfo}
               </p>
             )}
@@ -813,33 +838,41 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               rateCode: 'WEDDING2026'
             }
           ];
+        const elColors = style.colors || {};
+        const accentColor = elColors.accent || style.color || '#fbbf24';
+        const headingColor = elColors.heading || accentColor;
+        const bodyColor = elColors.body || '#d4d4d4';
+        const cardBg = elColors.cardBackground || style.backgroundColor || 'transparent';
+        const borderCol = elColors.border || style.borderColor;
+        const btnBg = elColors.buttonBackground || accentColor;
+        const btnText = elColors.buttonText || '#020617';
 
         return (
           <div
             className="w-full h-full flex flex-col items-center justify-center p-4 text-center select-none transition-all"
             style={{
-              backgroundColor: style.backgroundColor || 'transparent',
+              backgroundColor: cardBg,
               borderRadius: style.borderRadius ? `${style.borderRadius}px` : undefined,
               borderWidth: style.borderWidth ? `${style.borderWidth}px` : undefined,
-              borderColor: style.borderColor,
+              borderColor: borderCol,
               borderStyle: style.borderStyle || (style.borderWidth ? 'solid' : undefined),
               boxShadow: style.boxShadow,
               padding: style.padding ? `${style.padding}px` : undefined,
               fontFamily: style.fontFamily || "'Playfair Display', serif",
-              color: style.color || 'inherit'
+              color: bodyColor
             }}
           >
             <div className="flex items-center gap-1.5 mb-1">
-              <Plane className="w-4 h-4 text-amber-500" />
+              <Plane className="w-4 h-4" style={{ color: accentColor }} />
               <span
                 className="text-xs uppercase tracking-widest font-semibold"
-                style={{ color: style.color || '#fbbf24' }}
+                style={{ color: headingColor }}
               >
                 {content.travelTitle || 'Travel & Accommodations'}
               </span>
             </div>
             {content.travelDescription && (
-              <p className="text-xs text-neutral-300 max-w-sm mt-1 mb-2.5 leading-relaxed opacity-90">
+              <p className="text-xs max-w-sm mt-1 mb-2.5 leading-relaxed opacity-90" style={{ color: bodyColor }}>
                 {content.travelDescription}
               </p>
             )}
@@ -847,18 +880,19 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
               {accommodations.map((hotel, idx) => (
                 <div
                   key={idx}
-                  className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-left flex items-center justify-between gap-2"
+                  className="p-2.5 rounded-xl border text-left flex items-center justify-between gap-2"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: borderCol || 'rgba(255, 255, 255, 0.1)' }}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="text-xs font-bold text-white truncate">{hotel.name}</div>
                     {hotel.address && (
                       <div className="text-[10px] text-neutral-400 flex items-center gap-1 truncate mt-0.5">
-                        <MapPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                        <MapPin className="w-2.5 h-2.5 shrink-0" style={{ color: accentColor }} />
                         <span className="truncate">{hotel.address}</span>
                       </div>
                     )}
                     {hotel.rateCode && (
-                      <div className="text-[9.5px] text-amber-300 mt-1 font-mono">
+                      <div className="text-[9.5px] mt-1 font-mono" style={{ color: accentColor }}>
                         Code: {hotel.rateCode}
                       </div>
                     )}
@@ -871,7 +905,8 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                       onClick={(e) => {
                         if (isEditor) e.preventDefault();
                       }}
-                      className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-neutral-950 font-semibold text-[10.5px] shrink-0 flex items-center gap-1 transition-colors"
+                      className="px-2.5 py-1 rounded-lg font-semibold text-[10.5px] shrink-0 flex items-center gap-1 transition-colors"
+                      style={{ backgroundColor: btnBg, color: btnText }}
                     >
                       <span>Book</span>
                       <ExternalLink className="w-2.5 h-2.5" />
@@ -908,10 +943,10 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
                   <div
                     key={child.id}
                     className={`cursor-pointer transition-shadow ${isEditor
-                        ? isChildSelected
-                          ? 'ring-2 ring-indigo-600 rounded-[2px] z-50'
-                          : 'hover:ring-1 hover:ring-indigo-400/50'
-                        : ''
+                      ? isChildSelected
+                        ? 'ring-2 ring-indigo-600 rounded-[2px] z-50'
+                        : 'hover:ring-1 hover:ring-indigo-400/50'
+                      : ''
                       }`}
                     style={{
                       position: 'absolute',

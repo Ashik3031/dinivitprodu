@@ -48,7 +48,7 @@ import {
   OuterDropEffectType
 } from '../../types';
 import { STOCK_ASSETS } from '../../data/stockAssets';
-import { ALL_PREBUILT_BLOCKS, TEMPLATE_CATEGORIES } from '../../data/templates';
+import { TEMPLATE_CATEGORIES } from '../../data/templates';
 import { api } from '../../services/api';
 
 import { PagesTab } from './PagesTab';
@@ -67,6 +67,7 @@ interface LeftSidebarProps {
   onReorderPages: (fromIndex: number, toIndex: number) => void;
   onAddElement: (type: ElementType, customProps?: Partial<CanvasElement>, parentId?: string | null) => void;
   onInsertBlock?: (block: PrebuiltBlock) => void;
+  blocks?: PrebuiltBlock[];
   templates: InvitationTemplate[];
   onApplyTemplate: (template: InvitationTemplate) => void;
   onInsertTemplatePage: (templatePage: InvitationPage) => void;
@@ -101,6 +102,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   onReorderPages,
   onAddElement,
   onInsertBlock,
+  blocks = [],
   templates,
   onApplyTemplate,
   onInsertTemplatePage,
@@ -639,8 +641,8 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                             type="button"
                             onClick={el.onClick}
                             className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs transition-all cursor-pointer text-left h-[42px] overflow-hidden group shadow-2xs ${el.isActive
-                                ? 'bg-rose-50 border-rose-300 text-rose-950 font-semibold ring-1 ring-rose-400/50'
-                                : 'bg-slate-50/80 hover:bg-slate-100/90 border-slate-200 text-slate-800 font-medium'
+                              ? 'bg-rose-50 border-rose-300 text-rose-950 font-semibold ring-1 ring-rose-400/50'
+                              : 'bg-slate-50/80 hover:bg-slate-100/90 border-slate-200 text-slate-800 font-medium'
                               }`}
                           >
                             <div className="shrink-0 group-hover:scale-110 transition-transform">{el.icon}</div>
@@ -690,10 +692,12 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
             <div>
               <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1 flex items-center justify-between">
                 <span>Prebuilt Section Blocks</span>
-                <span className="text-[10px] text-slate-400 font-mono">{ALL_PREBUILT_BLOCKS.length} Blocks</span>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {blocks.filter((b) => selectedBlockCategory === 'all' || b.category === selectedBlockCategory).length} Blocks
+                </span>
               </div>
               <p className="text-[11px] text-slate-500 mb-2.5">
-                Insert fully styled, editable section blocks into your active page canvas.
+                Insert styled, editable section blocks created by Admin into your active page canvas.
               </p>
 
               {/* Category Filter Chips */}
@@ -716,49 +720,76 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 })}
               </div>
 
-              {/* Blocks Grid */}
-              <div className="space-y-2 mt-1">
-                {ALL_PREBUILT_BLOCKS.filter(
+              {/* Blocks Grid or Empty State */}
+              {(() => {
+                const currentFilteredBlocks = blocks.filter(
                   (b) => selectedBlockCategory === 'all' || b.category === selectedBlockCategory
-                ).map((block) => (
-                  <div
-                    key={block.id}
-                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-400 transition-all flex flex-col gap-2 group"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-slate-900">{block.name}</span>
-                          <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200">
-                            {block.subcategory || block.category}
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
-                          {block.description}
-                        </p>
-                      </div>
-                    </div>
+                );
 
-                    <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/60">
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        {block.elements.length} elements
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (onInsertBlock) {
-                            onInsertBlock(block);
-                          }
-                        }}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-semibold cursor-pointer shadow-2xs transition-colors"
-                      >
-                        <Plus className="w-3 h-3 text-amber-400" />
-                        <span>Insert Block</span>
-                      </button>
+                if (currentFilteredBlocks.length === 0) {
+                  return (
+                    <div className="p-5 text-center rounded-xl bg-slate-50 border border-slate-200 my-2">
+                      <Box className="w-7 h-7 text-slate-400 mx-auto mb-1.5" />
+                      <p className="text-xs font-bold text-slate-700">No Section Blocks Available</p>
+                      <p className="text-[10px] text-slate-500 mt-1 max-w-[220px] mx-auto leading-relaxed">
+                        Section blocks created by Admin will appear here for you to insert into your pages.
+                      </p>
                     </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-2 mt-1">
+                    {currentFilteredBlocks.map((block) => {
+                      const isAdmin = block.isSuperAdmin || block.authorRole === 'admin' || block.authorRole === 'superadmin';
+                      return (
+                        <div
+                          key={block.id}
+                          className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-400 transition-all flex flex-col gap-2 group"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-slate-900">{block.name}</span>
+                                {isAdmin ? (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                    👑 Admin
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                                    {block.subcategory || block.category}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                {block.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/60">
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              {block.elements?.length || 0} elements
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onInsertBlock) {
+                                  onInsertBlock(block);
+                                }
+                              }}
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-semibold cursor-pointer shadow-2xs transition-colors"
+                            >
+                              <Plus className="w-3 h-3 text-amber-400" />
+                              <span>Insert Block</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
 
             {/* Standard Container Shapes */}
@@ -845,35 +876,72 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         {activeTab === 'templates' && (
           <div className="space-y-3">
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Luxury Invitation Themes
+              Invitation Templates ({templates.length})
             </div>
-            {templates.map((tmpl) => (
-              <div
-                key={tmpl.id}
-                className="rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-400 transition-colors shadow-xs"
-              >
-                <img
-                  src={tmpl.thumbnail}
-                  alt={tmpl.title}
-                  className="w-full h-32 object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="p-3">
-                  <div className="text-xs font-bold text-slate-900">{tmpl.title}</div>
-                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{tmpl.description}</p>
-
-                  <div className="flex items-center gap-2 mt-3">
-                    <button
-                      type="button"
-                      onClick={() => onApplyTemplate(tmpl)}
-                      className="flex-1 py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors cursor-pointer"
-                    >
-                      Apply All ({tmpl.pages.length} Pages)
-                    </button>
-                  </div>
-                </div>
+            {templates.length === 0 ? (
+              <div className="p-6 text-center rounded-xl bg-slate-50 border border-slate-200 my-2">
+                <Sparkles className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                <p className="text-xs font-bold text-slate-700">No Templates Available</p>
+                <p className="text-[11px] text-slate-500 mt-1 max-w-[220px] mx-auto leading-relaxed">
+                  Templates created by Admin or verified public shop templates will appear here.
+                </p>
               </div>
-            ))}
+            ) : (
+              templates.map((tmpl) => {
+                const isAdmin = tmpl.isSuperAdmin || tmpl.authorRole === 'admin' || tmpl.authorRole === 'superadmin';
+                const isOwn = Boolean(businessId && tmpl.createdBy === businessId);
+                return (
+                  <div
+                    key={tmpl.id}
+                    className="rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-400 transition-colors shadow-xs"
+                  >
+                    <div className="relative">
+                      <img
+                        src={tmpl.thumbnail}
+                        alt={tmpl.title}
+                        className="w-full h-32 object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-2 left-2 flex items-center gap-1">
+                        {isAdmin ? (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-400 text-slate-950 shadow">
+                            👑 Admin Template
+                          </span>
+                        ) : isOwn ? (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-600 text-white shadow">
+                            My Template
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-600 text-white shadow">
+                            Verified Public
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-slate-900 truncate">{tmpl.title}</span>
+                        <span className="text-[10px] text-slate-400 shrink-0 font-medium">{tmpl.pages?.length || 1} pgs</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">{tmpl.description}</p>
+                      <div className="text-[10px] text-slate-400 mt-1 font-medium">
+                        By {isAdmin ? 'System Admin' : tmpl.authorName || 'Shop'}
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-3">
+                        <button
+                          type="button"
+                          onClick={() => onApplyTemplate(tmpl)}
+                          className="flex-1 py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors cursor-pointer"
+                        >
+                          Apply All ({tmpl.pages?.length || 1} Pages)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
 

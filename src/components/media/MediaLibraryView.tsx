@@ -328,6 +328,7 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
     if (asset.type === 'video') return 'VIDEO';
     if (asset.type === 'sticker' || (asset.category || '').toLowerCase().includes('seal')) return 'STICKER';
     if (asset.type === 'audio') return 'AUDIO';
+    if ((asset.category || '').toLowerCase().includes('background') || asset.type === 'pattern' || asset.type === 'texture') return 'BG IMAGE';
     return 'PHOTO';
   };
 
@@ -338,11 +339,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
         <button
           type="button"
           onClick={() => { setScope('public'); setSelectedCategory('all'); }}
-          className={`flex-1 py-1.5 px-2 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 ${
-            scope === 'public'
+          className={`flex-1 py-1.5 px-2 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 ${scope === 'public'
               ? 'bg-white text-slate-900 shadow-xs font-bold'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
           <span>Asset Library</span>
@@ -351,11 +351,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
         <button
           type="button"
           onClick={() => { setScope('uploads'); setSelectedCategory('all'); }}
-          className={`flex-1 py-1.5 px-2 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 ${
-            scope === 'uploads'
+          className={`flex-1 py-1.5 px-2 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-1.5 ${scope === 'uploads'
               ? 'bg-white text-slate-900 shadow-xs font-bold'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Upload className="w-3.5 h-3.5 text-blue-500" />
           <span>My Uploads</span>
@@ -364,11 +363,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
         <button
           type="button"
           onClick={() => { setScope('all'); setSelectedCategory('all'); }}
-          className={`py-1.5 px-3 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center ${
-            scope === 'all'
+          className={`py-1.5 px-3 rounded-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center ${scope === 'all'
               ? 'bg-white text-slate-900 shadow-xs font-bold'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <span>All</span>
         </button>
@@ -402,11 +400,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
             }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
-            className={`relative p-3.5 rounded-xl border-2 border-dashed transition-all text-center ${
-              isDragOver
+            className={`relative p-3.5 rounded-xl border-2 border-dashed transition-all text-center ${isDragOver
                 ? 'border-slate-900 bg-slate-100 scale-[0.99]'
                 : 'border-slate-300 hover:border-slate-400 bg-slate-50/70'
-            }`}
+              }`}
           >
             <input
               ref={fileInputRef}
@@ -447,10 +444,11 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
         )}
       </div>
 
-      {/* Category Pills (Frames, Photos, GIFs, Videos, Stickers, Audio) */}
+      {/* Category Pills (All, Backgrounds, Frames, Photos, GIFs, Videos, Stickers, Floral, Audio) */}
       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-0.5 text-xs">
         {[
           { id: 'all', label: 'All Assets' },
+          { id: 'backgrounds', label: 'Background Images' },
           { id: 'frames', label: 'Frames & Borders' },
           { id: 'photos', label: 'Stock Photos' },
           { id: 'gif', label: 'Animated GIFs' },
@@ -463,11 +461,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
             key={cat.id}
             type="button"
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-2.5 py-1 rounded-full whitespace-nowrap text-xs transition-colors cursor-pointer ${
-              selectedCategory === cat.id
+            className={`px-2.5 py-1 rounded-full whitespace-nowrap text-xs transition-colors cursor-pointer ${selectedCategory === cat.id
                 ? 'bg-slate-900 text-white font-bold shadow-2xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'
-            }`}
+              }`}
           >
             {cat.label}
           </button>
@@ -482,7 +479,7 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search frames, stickers, stock photos, GIFs..."
+            placeholder="Search background images, frames, stickers, stock photos..."
             className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-900"
           />
         </div>
@@ -500,11 +497,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
                 key={t.id}
                 type="button"
                 onClick={() => setSelectedType(t.id as any)}
-                className={`px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                  selectedType === t.id
+                className={`px-2 py-0.5 rounded-full font-medium transition-colors cursor-pointer flex items-center gap-1 ${selectedType === t.id
                     ? 'bg-slate-900 text-white font-bold'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 {t.icon && <t.icon className="w-3 h-3" />}
                 <span>{t.label}</span>
@@ -577,11 +573,10 @@ export const MediaLibraryView: React.FC<MediaLibraryViewProps> = ({
 
                   {/* Thumbnail Container */}
                   <div
-                    className={`relative h-28 overflow-hidden flex items-center justify-center ${
-                      isFramish || isSticker
+                    className={`relative h-28 overflow-hidden flex items-center justify-center ${isFramish || isSticker
                         ? 'bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:8px_8px] bg-slate-100/90'
                         : 'bg-slate-100'
-                    }`}
+                      }`}
                   >
                     {/* Visual Media (Image, Frame, Sticker, GIF) */}
                     {asset.type !== 'video' && asset.type !== 'audio' && (
