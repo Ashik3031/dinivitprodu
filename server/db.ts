@@ -1106,6 +1106,12 @@ export const dbService = {
     return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   },
 
+  getMediaById: (id: string) => {
+    loadDatabase();
+    if (!db.media) db.media = [];
+    return db.media.find(m => m.id === id);
+  },
+
   createMedia: (mediaData: Omit<MediaAsset, 'id' | 'createdAt'>) => {
     loadDatabase();
     if (!db.media) db.media = [];

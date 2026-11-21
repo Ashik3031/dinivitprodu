@@ -3,6 +3,7 @@ import { CanvasElement, InvitationPage, ViewportMode, OuterDropEffectType } from
 import { ElementRenderer } from './ElementRenderer';
 import { resolveElementForViewport, setElementResponsiveOverride, getPageCalculatedHeight } from '../../utils/responsiveUtils';
 import { OuterDropParticles } from './OuterDropParticles';
+import { getPageBgStyle, getBackgroundOverlayStyle } from '../../utils/backgroundStyles';
 import {
   Lock,
   Unlock,
@@ -146,44 +147,6 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
 
   const canvasWidth = page?.width || getCanvasWidth();
   const canvasHeight = page ? getPageCalculatedHeight(page, viewportMode, windowHeight) : 844;
-
-  // Page background style
-  const getPageBgStyle = () => {
-    const bg = page?.background;
-    if (!bg) return { backgroundColor: '#f8fafc' };
-
-    switch (bg.type) {
-      case 'color':
-        return { backgroundColor: bg.color || '#f8fafc' };
-      case 'gradient':
-        if (bg.gradient) {
-          const colors = bg.gradient.colors.join(', ');
-          const angle = bg.gradient.angle ?? 180;
-          return {
-            background: bg.gradient.type === 'radial'
-              ? `radial-gradient(circle, ${colors})`
-              : `linear-gradient(${angle}deg, ${colors})`
-          };
-        }
-        return { backgroundColor: bg.color || '#f8fafc' };
-      case 'image':
-      case 'pattern':
-      case 'texture': {
-        const url = bg.imageUrl || bg.pattern || bg.texture;
-        return {
-          backgroundImage: url ? `url("${url}")` : undefined,
-          backgroundSize: bg.size || (bg.type === 'pattern' ? 'auto' : 'cover'),
-          backgroundRepeat: bg.repeat || (bg.type === 'pattern' ? 'repeat' : 'no-repeat'),
-          backgroundPosition: bg.position || 'center',
-          backgroundColor: '#f8fafc'
-        };
-      }
-      case 'video':
-        return { backgroundColor: '#f8fafc' };
-      default:
-        return { backgroundColor: '#f8fafc' };
-    }
-  };
 
   // Keyboard Nudge & Short keys (Up/Down/Left/Right nudging)
   useEffect(() => {
@@ -558,7 +521,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
           width: `${canvasWidth}px`,
           height: `${canvasHeight}px`,
           transform: `scale(${zoomLevel / 100})`,
-          ...getPageBgStyle()
+          ...getPageBgStyle(page.background)
         }}
       >
         {/* Optional Snap Grid */}
@@ -601,13 +564,10 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
         )}
 
         {/* Background Overlay if specified */}
-        {page.background?.overlayOpacity !== undefined && page.background.overlayOpacity > 0 && (
+        {getBackgroundOverlayStyle(page.background) && (
           <div
             className="absolute inset-0 pointer-events-none z-0"
-            style={{
-              backgroundColor: page.background.overlayColor || '#000000',
-              opacity: page.background.overlayOpacity
-            }}
+            style={getBackgroundOverlayStyle(page.background)!}
           />
         )}
 

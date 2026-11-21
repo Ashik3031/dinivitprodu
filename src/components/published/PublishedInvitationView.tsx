@@ -27,6 +27,7 @@ import {
 import { resolveElementForViewport, getPageTransitionVariants, CANVAS_BREAKPOINTS, getPageCalculatedHeight } from '../../utils/responsiveUtils';
 import { OuterDropParticles } from '../canvas/OuterDropParticles';
 import { getOrCreateOpeningScreenPage } from '../../utils/openingScreenUtils';
+import { getPageBgStyle, getBackgroundOverlayStyle } from '../../utils/backgroundStyles';
 
 interface PublishedInvitationViewProps {
   invitation: Invitation;
@@ -79,12 +80,12 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
   const activeViewport: ViewportMode = forcedViewportMode
     ? previewViewport
     : !isLiveViewer || showPreviewControls
-    ? previewViewport
-    : windowWidth >= 1024
-    ? 'desktop'
-    : windowWidth >= 768
-    ? 'tablet'
-    : 'mobile';
+      ? previewViewport
+      : windowWidth >= 1024
+        ? 'desktop'
+        : windowWidth >= 768
+          ? 'tablet'
+          : 'mobile';
 
   const pages = invitation.pages || [];
   const settings = invitation.settings || {};
@@ -130,39 +131,6 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
     }
   };
 
-  const getPageBgStyle = (page: InvitationPage) => {
-    const bg = page.background;
-    if (!bg) return { backgroundColor: theme.backgroundColor || '#f8fafc' };
-
-    switch (bg.type) {
-      case 'color':
-        return { backgroundColor: bg.color || '#f8fafc' };
-      case 'gradient':
-        if (bg.gradient) {
-          const colors = bg.gradient.colors.join(', ');
-          const angle = bg.gradient.angle ?? 180;
-          return {
-            background:
-              bg.gradient.type === 'radial'
-                ? `radial-gradient(circle, ${colors})`
-                : `linear-gradient(${angle}deg, ${colors})`
-          };
-        }
-        return { backgroundColor: bg.color || '#f8fafc' };
-      case 'image':
-        return {
-          backgroundImage: `url(${bg.imageUrl})`,
-          backgroundSize: bg.size || 'cover',
-          backgroundPosition: bg.position || 'center',
-          backgroundRepeat: bg.repeat || 'no-repeat'
-        };
-      case 'video':
-        return { backgroundColor: '#f8fafc' };
-      default:
-        return { backgroundColor: '#f8fafc' };
-    }
-  };
-
   // Container width based on viewport
   const targetCanvasWidth = CANVAS_BREAKPOINTS[activeViewport].width;
 
@@ -173,8 +141,8 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
   const contentScale = (activeViewport === 'mobile' && isMobileScreen)
     ? windowWidth / 390
     : isPhoneWidth
-    ? Math.min(1, (windowWidth - (isLiveViewer ? 0 : 24)) / targetCanvasWidth)
-    : 1;
+      ? Math.min(1, (windowWidth - (isLiveViewer ? 0 : 24)) / targetCanvasWidth)
+      : 1;
 
   const handleCopyLink = () => {
     const url = window.location.href;
@@ -245,11 +213,10 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
               <button
                 type="button"
                 onClick={() => setPreviewViewport('desktop')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
-                  activeViewport === 'desktop'
+                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${activeViewport === 'desktop'
                     ? 'bg-slate-700 text-white font-bold shadow-xs'
                     : 'text-slate-400 hover:text-white'
-                }`}
+                  }`}
               >
                 <Monitor className="w-3.5 h-3.5" />
                 <span>Desktop (768px)</span>
@@ -257,11 +224,10 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
               <button
                 type="button"
                 onClick={() => setPreviewViewport('tablet')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
-                  activeViewport === 'tablet'
+                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${activeViewport === 'tablet'
                     ? 'bg-slate-700 text-white font-bold shadow-xs'
                     : 'text-slate-400 hover:text-white'
-                }`}
+                  }`}
               >
                 <Tablet className="w-3.5 h-3.5" />
                 <span>Tablet (768px)</span>
@@ -269,11 +235,10 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
               <button
                 type="button"
                 onClick={() => setPreviewViewport('mobile')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
-                  activeViewport === 'mobile'
+                className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${activeViewport === 'mobile'
                     ? 'bg-emerald-600 text-white font-bold shadow-sm'
                     : 'text-slate-400 hover:text-white'
-                }`}
+                  }`}
               >
                 <Smartphone className="w-3.5 h-3.5" />
                 <span>Mobile (390px)</span>
@@ -311,30 +276,30 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
       {/* Quick Action Floating Bar for RSVP & Guestbook (Mobile-First Touch Optimized) */}
       {((settings.enableRSVP !== false && settings.allowRSVP !== false) ||
         (settings.enableGuestbook !== false && settings.allowGuestComments !== false)) && (
-        <div className="fixed bottom-5 left-4 sm:left-6 z-40 flex items-center gap-2">
-          {settings.enableRSVP !== false && settings.allowRSVP !== false && (
-            <button
-              type="button"
-              onClick={() => setIsRSVPOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xl transition-all active:scale-95 cursor-pointer border border-slate-700/60 hover:shadow-amber-500/10"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>RSVP</span>
-            </button>
-          )}
+          <div className="fixed bottom-5 left-4 sm:left-6 z-40 flex items-center gap-2">
+            {settings.enableRSVP !== false && settings.allowRSVP !== false && (
+              <button
+                type="button"
+                onClick={() => setIsRSVPOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xl transition-all active:scale-95 cursor-pointer border border-slate-700/60 hover:shadow-amber-500/10"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>RSVP</span>
+              </button>
+            )}
 
-          {settings.enableGuestbook !== false && settings.allowGuestComments !== false && (
-            <button
-              type="button"
-              onClick={() => setIsGuestbookOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-white/95 hover:bg-white text-slate-800 border border-slate-200 font-bold text-xs shadow-xl transition-all active:scale-95 cursor-pointer backdrop-blur-md"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-slate-700" />
-              <span>Wishes</span>
-            </button>
-          )}
-        </div>
-      )}
+            {settings.enableGuestbook !== false && settings.allowGuestComments !== false && (
+              <button
+                type="button"
+                onClick={() => setIsGuestbookOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-white/95 hover:bg-white text-slate-800 border border-slate-200 font-bold text-xs shadow-xl transition-all active:scale-95 cursor-pointer backdrop-blur-md"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-slate-700" />
+                <span>Wishes</span>
+              </button>
+            )}
+          </div>
+        )}
 
       {/* Floating Smooth Navigation Dots */}
       {pages.length > 1 && (
@@ -345,11 +310,10 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
               type="button"
               title={page.name || `Page ${idx + 1}`}
               onClick={() => scrollToPage(idx)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer ${
-                activePageIndex === idx
+              className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer ${activePageIndex === idx
                   ? 'bg-amber-400 scale-125 shadow-sm shadow-amber-400'
                   : 'bg-white/40 hover:bg-white/70'
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -357,24 +321,23 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
 
       {/* Main Invitation Stream (Vertical Pages) */}
       <div
-        className={`relative flex flex-col items-center justify-start transition-all duration-300 ${
-          activeViewport === 'mobile' && !isMobileScreen
+        className={`relative flex flex-col items-center justify-start transition-all duration-300 ${activeViewport === 'mobile' && !isMobileScreen
             ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
             : (activeViewport === 'tablet' || activeViewport === 'desktop') && windowWidth >= 768
-            ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
-            : 'w-full'
-        }`}
+              ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
+              : 'w-full'
+          }`}
         style={{
           width: (!isMobileScreen || activeViewport !== 'mobile') ? frameWidth : '100%',
           maxWidth: '100%',
           ...(isCoverActive && coverCalculatedHeight
             ? {
-                minHeight: `${coverCalculatedHeight}px`,
-                ...(openingPage?.heightMode !== 'viewport' ? { height: `${coverCalculatedHeight}px` } : {})
-              }
+              minHeight: `${coverCalculatedHeight}px`,
+              ...(openingPage?.heightMode !== 'viewport' ? { height: `${coverCalculatedHeight}px` } : {})
+            }
             : showOpeningScreen
-            ? { minHeight: `${pages[0] ? (contentScale !== 1 ? Math.round(getPageHeight(pages[0]) * contentScale) : getPageHeight(pages[0])) : 844}px` }
-            : {})
+              ? { minHeight: `${pages[0] ? (contentScale !== 1 ? Math.round(getPageHeight(pages[0]) * contentScale) : getPageHeight(pages[0])) : 844}px` }
+              : {})
         }}
       >
         {/* Contained Opening Screen inside Frame (Framed like other pages, not a window background) */}
@@ -444,7 +407,7 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                   height: `${canvasHeight}px`,
                   transform: contentScale !== 1 ? `scale(${contentScale})` : undefined,
                   transformOrigin: 'top center',
-                  ...getPageBgStyle(page)
+                  ...getPageBgStyle(page.background, theme.backgroundColor || '#f8fafc')
                 }}
               >
                 {/* Background Video if present */}
@@ -460,27 +423,24 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                       if (el) {
                         el.defaultMuted = true;
                         el.muted = true;
-                        el.play().catch(() => {});
+                        el.play().catch(() => { });
                       }
                     }}
                     onLoadedMetadata={(e) => {
                       const v = e.currentTarget;
                       v.defaultMuted = true;
                       v.muted = true;
-                      v.play().catch(() => {});
+                      v.play().catch(() => { });
                     }}
                     className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
                   />
                 )}
 
                 {/* Background Overlay if specified */}
-                {page.background?.overlayOpacity !== undefined && page.background.overlayOpacity > 0 && (
+                {getBackgroundOverlayStyle(page.background) && (
                   <div
                     className="absolute inset-0 pointer-events-none z-0"
-                    style={{
-                      backgroundColor: page.background.overlayColor || '#000000',
-                      opacity: page.background.overlayOpacity
-                    }}
+                    style={getBackgroundOverlayStyle(page.background)!}
                   />
                 )}
 

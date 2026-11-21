@@ -535,7 +535,7 @@ export const api = {
     invalidateApiCache('/api/media');
     const res = await fetch('/api/media', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     return parseJsonResponse(res, 'Failed to upload media asset');
@@ -545,7 +545,7 @@ export const api = {
     invalidateApiCache('/api/media');
     const res = await fetch(`/api/media/${mediaId}/link`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ invitationId })
     });
     return parseJsonResponse(res, 'Failed to link media');
@@ -555,7 +555,7 @@ export const api = {
     invalidateApiCache('/api/media');
     const res = await fetch(`/api/media/${mediaId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(updates)
     });
     return parseJsonResponse(res, 'Failed to update media');
@@ -564,7 +564,8 @@ export const api = {
   deleteMedia: async (mediaId: string): Promise<{ success: boolean; message: string }> => {
     invalidateApiCache('/api/media');
     const res = await fetch(`/api/media/${mediaId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getAuthHeaders()
     });
     return parseJsonResponse(res, 'Failed to delete media asset');
   },
@@ -572,7 +573,9 @@ export const api = {
   getMediaStats: async (businessId?: string): Promise<{ success: boolean; stats: any }> => {
     const searchParams = new URLSearchParams();
     if (businessId) searchParams.append('businessId', businessId);
-    const res = await fetch(`/api/media/stats?${searchParams.toString()}`);
+    const res = await fetch(`/api/media/stats?${searchParams.toString()}`, {
+      headers: getAuthHeaders()
+    });
     return parseJsonResponse(res, 'Failed to fetch media stats');
   }
 };

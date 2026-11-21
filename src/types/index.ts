@@ -85,10 +85,13 @@ export interface BackgroundConfig {
   texture?: string;
   overlayColor?: string;
   overlayOpacity?: number;
+  overlayEnabled?: boolean;
   blur?: number;
   size?: 'cover' | 'contain' | 'auto';
   repeat?: 'no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y';
   position?: string;
+  zoom?: number;
+  customPosition?: { x: number; y: number };
 }
 
 export type AnimationType =

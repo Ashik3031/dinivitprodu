@@ -1482,13 +1482,20 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           currentInvitationId={invitation.id}
           businessId={invitation.businessId}
           onUpdateElement={handleUpdateElement}
-          onSetAsBackground={(url, type) => handleUpdatePage({
-            background: {
-              type: type === 'video' ? 'video' : 'image',
-              [type === 'video' ? 'videoUrl' : 'imageUrl']: url,
-              size: 'cover'
-            }
-          })}
+          onSetAsBackground={(url, type) => {
+            const currentBg = activePage?.background;
+            handleUpdatePage({
+              background: {
+                ...currentBg,
+                type: type === 'video' ? 'video' : 'image',
+                ...(type === 'video' ? { videoUrl: url } : { imageUrl: url }),
+                size: currentBg?.size || 'cover',
+                position: currentBg?.position || 'center',
+                repeat: currentBg?.repeat || 'no-repeat'
+              }
+            });
+            toast.success('Background applied successfully.');
+          }}
           onSetAsMusic={(audioUrl, title) => updateInvitationState({
             ...invitation,
             music: {

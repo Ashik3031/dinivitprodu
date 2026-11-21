@@ -26,16 +26,17 @@ import {
   FileCheck,
   Film,
   Video,
-  Play
+  Play,
+  Pencil
 } from 'lucide-react';
 
 const ASSET_TYPE_FILTERS = [
   { id: 'all', label: 'All Assets', icon: Layers },
+  { id: 'image', label: 'Photos & Graphics', icon: ImageIcon },
   { id: 'background', label: 'Background Images', icon: ImageIcon },
   { id: 'frame', label: 'Frames & Borders', icon: Crop },
   { id: 'gif', label: 'Animated GIFs', icon: Film },
   { id: 'video', label: 'Stock Videos', icon: Video },
-  { id: 'image', label: 'Photos & Art', icon: ImageIcon },
   { id: 'sticker', label: 'Stickers & Wax Seals', icon: Sparkles },
   { id: 'decoration', label: 'Dividers & Flourishes', icon: Tag },
   { id: 'texture', label: 'Textures & Foil', icon: Layers },
@@ -43,6 +44,8 @@ const ASSET_TYPE_FILTERS = [
 ];
 
 const STOCK_CATEGORY_SUGGESTIONS = [
+  'Photos & Graphics',
+  'Vector Graphics',
   'Background Images',
   'Luxury Backgrounds',
   'Frames & Arches',
@@ -52,11 +55,150 @@ const STOCK_CATEGORY_SUGGESTIONS = [
   'Celebration & Confetti',
   'Floral & Botanical',
   'Wax Seals & Stamps',
+  'Stickers & Wax Seals',
+  'Dividers & Flourishes',
   'Art Deco & Geometric',
   'Vintage & Ornate',
-  'Dividers & Corners',
+  'Audio & Music',
   'Wedding Melodies'
 ];
+
+export function getDefaultCategoryForType(type: MediaAssetType): string {
+  switch (type) {
+    case 'frame':
+      return 'Frames & Arches';
+    case 'background':
+      return 'Background Images';
+    case 'gif':
+      return 'Animated GIFs & Sparkles';
+    case 'video':
+      return 'Stock Videos & Ambient Loops';
+    case 'sticker':
+      return 'Stickers & Wax Seals';
+    case 'decoration':
+      return 'Dividers & Flourishes';
+    case 'texture':
+      return 'Luxury Backgrounds';
+    case 'audio':
+      return 'Audio & Music';
+    case 'image':
+    default:
+      return 'Photos & Graphics';
+  }
+}
+
+export function getDefaultTagsForType(type: MediaAssetType): string {
+  switch (type) {
+    case 'frame':
+      return 'frame, border, luxury';
+    case 'background':
+      return 'background, wallpaper';
+    case 'gif':
+      return 'animated, gif, sparkles';
+    case 'video':
+      return 'video, cinematic, ambient';
+    case 'sticker':
+      return 'sticker, badge, wax-seal';
+    case 'decoration':
+      return 'divider, flourish, ornament';
+    case 'texture':
+      return 'texture, pattern, foil';
+    case 'audio':
+      return 'music, audio, soundtrack';
+    case 'image':
+    default:
+      return 'photo, graphic';
+  }
+}
+
+export function stripUrlQueryAndFragment(rawUrl: string): string {
+  if (!rawUrl) return '';
+  try {
+    const parsed = new URL(rawUrl, 'https://dummy.base');
+    return parsed.pathname;
+  } catch {
+    return rawUrl.split('?')[0].split('#')[0];
+  }
+}
+
+export function detectAssetMetadata(
+  filenameOrUrl: string,
+  mimeType?: string
+): { type: MediaAssetType; category: string; format: string; tags: string } {
+  const cleanPath = stripUrlQueryAndFragment(filenameOrUrl);
+  const ext = cleanPath.split('.').pop()?.toLowerCase() || '';
+  const mime = (mimeType || '').toLowerCase();
+
+  // Audio: MP3, WAV, OGG, M4A, AAC
+  if (mime.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'm4a', 'aac'].includes(ext)) {
+    return {
+      type: 'audio',
+      category: 'Audio & Music',
+      format: ext || 'mp3',
+      tags: 'music, audio'
+    };
+  }
+
+  // Video: MP4, WebM, MOV
+  if (mime.startsWith('video/') || ['mp4', 'webm', 'mov'].includes(ext)) {
+    return {
+      type: 'video',
+      category: 'Stock Videos & Ambient Loops',
+      format: ext || 'mp4',
+      tags: 'video, cinematic'
+    };
+  }
+
+  // Animated GIF
+  if (mime === 'image/gif' || ext === 'gif') {
+    return {
+      type: 'gif',
+      category: 'Animated GIFs & Sparkles',
+      format: 'gif',
+      tags: 'animated, gif'
+    };
+  }
+
+  // SVG: Vector graphics (do NOT classify as frame!)
+  if (mime === 'image/svg+xml' || ext === 'svg') {
+    return {
+      type: 'image',
+      category: 'Vector Graphics',
+      format: 'svg',
+      tags: 'vector, svg, graphic'
+    };
+  }
+
+  // Standard Images (PNG, JPG, WebP)
+  if (mime.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'avif'].includes(ext)) {
+    return {
+      type: 'image',
+      category: 'Photos & Graphics',
+      format: ext === 'jpeg' ? 'jpg' : (ext || 'png'),
+      tags: 'photo, graphic'
+    };
+  }
+
+  // Fallback neutral
+  return {
+    type: 'image',
+    category: 'Photos & Graphics',
+    format: ext || 'jpg',
+    tags: 'photo, graphic'
+  };
+}
+
+const INITIAL_UPLOAD_FORM = {
+  title: '',
+  type: 'image' as MediaAssetType,
+  category: 'Photos & Graphics',
+  tags: '',
+  url: '',
+  isPublic: true,
+  width: 800,
+  height: 800,
+  format: 'png'
+};
 
 export const AdminAssetManager: React.FC = () => {
   const toast = useToast();
@@ -71,22 +213,28 @@ export const AdminAssetManager: React.FC = () => {
   // Preview Modal
   const [previewAsset, setPreviewAsset] = useState<MediaAsset | null>(null);
 
-  // Upload Modal
+  // Upload Modal State
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [uploadTab, setUploadTab] = useState<'file' | 'url'>('file');
-  const [uploadForm, setUploadForm] = useState({
-    title: '',
-    type: 'frame' as MediaAssetType,
-    category: 'Frames & Arches',
-    tags: 'frame, luxury, gold',
-    url: '',
-    isPublic: true,
-    width: 400,
-    height: 600,
-    format: 'svg'
-  });
+  const [uploadForm, setUploadForm] = useState(INITIAL_UPLOAD_FORM);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Flags to preserve user manual customizations
+  const [isCategoryManuallyEdited, setIsCategoryManuallyEdited] = useState(false);
+  const [isTagsManuallyEdited, setIsTagsManuallyEdited] = useState(false);
+  const [isTitleManuallyEdited, setIsTitleManuallyEdited] = useState(false);
+
+  // Edit Asset Modal
+  const [editingAsset, setEditingAsset] = useState<MediaAsset | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    type: 'image' as MediaAssetType,
+    category: '',
+    tags: '',
+    isPublic: true
+  });
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   // Delete Dialog
   const [deleteTarget, setDeleteTarget] = useState<MediaAsset | null>(null);
@@ -137,6 +285,41 @@ export const AdminAssetManager: React.FC = () => {
     });
   }, [assets, selectedType, searchQuery]);
 
+  // Clean form modal handlers
+  const handleOpenUploadModal = () => {
+    setUploadForm(INITIAL_UPLOAD_FORM);
+    setFilePreview(null);
+    setIsCategoryManuallyEdited(false);
+    setIsTagsManuallyEdited(false);
+    setIsTitleManuallyEdited(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setIsUploadModalOpen(true);
+  };
+
+  const handleCloseUploadModal = () => {
+    setIsUploadModalOpen(false);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setUploadForm(INITIAL_UPLOAD_FORM);
+    setIsCategoryManuallyEdited(false);
+    setIsTagsManuallyEdited(false);
+    setIsTitleManuallyEdited(false);
+  };
+
+  // Synchronize category and tags when type changes
+  const handleTypeChange = (newType: MediaAssetType) => {
+    setUploadForm((prev) => ({
+      ...prev,
+      type: newType,
+      category: isCategoryManuallyEdited ? prev.category : getDefaultCategoryForType(newType),
+      tags: isTagsManuallyEdited ? prev.tags : getDefaultTagsForType(newType)
+    }));
+  };
+
   // Handle File Selection & Auto Dimension Detection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -153,66 +336,127 @@ export const AdminAssetManager: React.FC = () => {
       const dataUri = reader.result as string;
       setFilePreview(dataUri);
 
-      // Guess format
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const metadata = detectAssetMetadata(file.name, file.type);
       const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
 
-      if (file.type === 'image/gif' || ext === 'gif') {
+      if (metadata.type === 'gif') {
         const img = new Image();
         img.onload = () => {
           setUploadForm((prev) => ({
             ...prev,
-            title: prev.title || cleanTitle,
+            title: isTitleManuallyEdited ? prev.title : cleanTitle,
             url: dataUri,
             format: 'gif',
             width: img.width || 480,
             height: img.height || 270,
             type: 'gif',
-            category: prev.category === 'Frames & Arches' ? 'Animated GIFs & Sparkles' : prev.category
+            category: isCategoryManuallyEdited ? prev.category : metadata.category,
+            tags: isTagsManuallyEdited ? prev.tags : metadata.tags
           }));
         };
         img.src = dataUri;
-      } else if (file.type.startsWith('video/') || ext === 'mp4' || ext === 'webm') {
+      } else if (metadata.type === 'video') {
         const video = document.createElement('video');
         video.preload = 'metadata';
         video.onloadedmetadata = () => {
           setUploadForm((prev) => ({
             ...prev,
-            title: prev.title || cleanTitle,
+            title: isTitleManuallyEdited ? prev.title : cleanTitle,
             url: dataUri,
-            format: ext,
+            format: metadata.format,
             width: video.videoWidth || 1920,
             height: video.videoHeight || 1080,
             type: 'video',
-            category: prev.category === 'Frames & Arches' ? 'Stock Videos & Ambient Loops' : prev.category
+            category: isCategoryManuallyEdited ? prev.category : metadata.category,
+            tags: isTagsManuallyEdited ? prev.tags : metadata.tags
           }));
         };
         video.src = dataUri;
-      } else if (file.type.startsWith('image/')) {
+      } else if (metadata.type === 'audio') {
+        setUploadForm((prev) => ({
+          ...prev,
+          title: isTitleManuallyEdited ? prev.title : cleanTitle,
+          url: dataUri,
+          format: metadata.format,
+          type: 'audio',
+          category: isCategoryManuallyEdited ? prev.category : metadata.category,
+          tags: isTagsManuallyEdited ? prev.tags : metadata.tags
+        }));
+      } else {
+        // Standard Image or Vector SVG
         const img = new Image();
         img.onload = () => {
           setUploadForm((prev) => ({
             ...prev,
-            title: prev.title || cleanTitle,
+            title: isTitleManuallyEdited ? prev.title : cleanTitle,
             url: dataUri,
-            format: ext,
-            width: img.width || 400,
-            height: img.height || 600,
-            type: ext === 'svg' || file.name.toLowerCase().includes('frame') ? 'frame' : prev.type
+            format: metadata.format,
+            width: img.width || 800,
+            height: img.height || 800,
+            type: metadata.type,
+            category: isCategoryManuallyEdited ? prev.category : metadata.category,
+            tags: isTagsManuallyEdited ? prev.tags : metadata.tags
+          }));
+        };
+        img.onerror = () => {
+          setUploadForm((prev) => ({
+            ...prev,
+            title: isTitleManuallyEdited ? prev.title : cleanTitle,
+            url: dataUri,
+            format: metadata.format,
+            type: metadata.type,
+            category: isCategoryManuallyEdited ? prev.category : metadata.category,
+            tags: isTagsManuallyEdited ? prev.tags : metadata.tags
           }));
         };
         img.src = dataUri;
-      } else {
-        setUploadForm((prev) => ({
-          ...prev,
-          title: prev.title || cleanTitle,
-          url: dataUri,
-          format: ext,
-          type: file.type.startsWith('audio/') ? 'audio' : prev.type
-        }));
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  // Handle URL change with clean query and fragment stripping
+  const handleUrlChange = (val: string) => {
+    const cleanPath = stripUrlQueryAndFragment(val);
+    const ext = cleanPath.split('.').pop()?.toLowerCase() || '';
+
+    const KNOWN_EXTS = ['png', 'jpg', 'jpeg', 'webp', 'svg', 'gif', 'mp4', 'webm', 'mp3', 'wav', 'ogg'];
+    const hasRecognizedExt = KNOWN_EXTS.includes(ext);
+
+    let updatedType = uploadForm.type;
+    let updatedCategory = uploadForm.category;
+    let updatedFormat = uploadForm.format;
+    let updatedTags = uploadForm.tags;
+    let updatedTitle = uploadForm.title;
+
+    if (hasRecognizedExt) {
+      const meta = detectAssetMetadata(cleanPath);
+      updatedType = meta.type;
+      updatedFormat = meta.format;
+      if (!isCategoryManuallyEdited) {
+        updatedCategory = meta.category;
+      }
+      if (!isTagsManuallyEdited) {
+        updatedTags = meta.tags;
+      }
+      if (!isTitleManuallyEdited) {
+        const filename = cleanPath.split('/').pop() || '';
+        const cleanName = filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        if (cleanName.trim()) {
+          updatedTitle = cleanName;
+        }
+      }
+    }
+
+    setUploadForm((prev) => ({
+      ...prev,
+      url: val,
+      type: updatedType,
+      category: updatedCategory,
+      format: updatedFormat,
+      tags: updatedTags,
+      title: updatedTitle
+    }));
   };
 
   // Submit Upload
@@ -245,32 +489,19 @@ export const AdminAssetManager: React.FC = () => {
         type: uploadForm.type,
         format: uploadForm.format,
         dimensions: {
-          width: Number(uploadForm.width) || 400,
-          height: Number(uploadForm.height) || 600
+          width: Number(uploadForm.width) || 800,
+          height: Number(uploadForm.height) || 800
         },
-        category: uploadForm.category.trim(),
+        category: uploadForm.category.trim() || getDefaultCategoryForType(uploadForm.type),
         tags: tagsArray,
         isPublic: true,
         isSuperAdmin: true
       });
 
       setAssets((prev) => [res.media, ...prev]);
-      toast.success(`Asset "${uploadForm.title}" uploaded and made public!`);
+      toast.success(`Asset "${uploadForm.title}" uploaded and published to public library!`);
 
-      // Reset
-      setIsUploadModalOpen(false);
-      setFilePreview(null);
-      setUploadForm({
-        title: '',
-        type: 'frame',
-        category: 'Frames & Arches',
-        tags: 'frame, luxury, gold',
-        url: '',
-        isPublic: true,
-        width: 400,
-        height: 600,
-        format: 'svg'
-      });
+      handleCloseUploadModal();
     } catch (err: any) {
       toast.error(err.message || 'Failed to upload asset');
     } finally {
@@ -284,6 +515,53 @@ export const AdminAssetManager: React.FC = () => {
     setCopiedId(asset.id);
     toast.success('Asset URL copied to clipboard!');
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  // Edit Existing Asset
+  const handleOpenEditModal = (asset: MediaAsset) => {
+    setEditingAsset(asset);
+    setEditForm({
+      title: asset.title || '',
+      type: asset.type,
+      category: asset.category || getDefaultCategoryForType(asset.type),
+      tags: Array.isArray(asset.tags) ? asset.tags.join(', ') : '',
+      isPublic: Boolean(asset.isPublic)
+    });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAsset) return;
+    if (!editForm.title.trim()) {
+      toast.error('Asset title is required');
+      return;
+    }
+
+    try {
+      setIsSavingEdit(true);
+      const tagsArray = editForm.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const res = await api.updateMedia(editingAsset.id, {
+        title: editForm.title.trim(),
+        type: editForm.type,
+        category: editForm.category.trim(),
+        tags: tagsArray,
+        isPublic: editForm.isPublic
+      });
+
+      setAssets((prev) =>
+        prev.map((a) => (a.id === editingAsset.id ? res.media : a))
+      );
+      toast.success(`Asset "${editForm.title}" updated successfully!`);
+      setEditingAsset(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update asset');
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   // Delete Asset
@@ -320,20 +598,20 @@ export const AdminAssetManager: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                <Crop className="w-5 h-5" />
+                <Layers className="w-5 h-5" />
               </span>
               <h2 className="text-xl font-bold text-white tracking-wide">
-                Public Assets, Frames & Elements Library
+                Public Assets & Elements Library
               </h2>
             </div>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Upload and manage public decorative frames, borders, luxury stickers, stock photos, and background audio that all studio users can access inside the invitation editor.
+              Upload and manage public stock photos, vectors, decorative frames, stickers, video loops, and background audio for all studio users.
             </p>
           </div>
 
           <button
             type="button"
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={handleOpenUploadModal}
             className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold rounded-xl text-sm transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
           >
             <Upload className="w-4 h-4" /> Upload Public Asset
@@ -347,10 +625,10 @@ export const AdminAssetManager: React.FC = () => {
             <span className="text-2xl font-bold text-white mt-1 block">{totalAssets}</span>
           </div>
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-emerald-400 block font-medium flex items-center gap-1">
-              <ImageIcon className="w-3.5 h-3.5" /> Backgrounds
+            <span className="text-xs text-blue-400 block font-medium flex items-center gap-1">
+              <ImageIcon className="w-3.5 h-3.5" /> Photos & Graphics
             </span>
-            <span className="text-2xl font-bold text-emerald-300 mt-1 block">{backgroundsCount}</span>
+            <span className="text-2xl font-bold text-blue-300 mt-1 block">{imagesCount}</span>
           </div>
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
             <span className="text-xs text-amber-400 block font-medium flex items-center gap-1">
@@ -359,10 +637,10 @@ export const AdminAssetManager: React.FC = () => {
             <span className="text-2xl font-bold text-amber-300 mt-1 block">{framesCount}</span>
           </div>
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-blue-400 block font-medium flex items-center gap-1">
-              <ImageIcon className="w-3.5 h-3.5" /> Stock Photos
+            <span className="text-xs text-emerald-400 block font-medium flex items-center gap-1">
+              <ImageIcon className="w-3.5 h-3.5" /> Backgrounds
             </span>
-            <span className="text-2xl font-bold text-blue-300 mt-1 block">{imagesCount}</span>
+            <span className="text-2xl font-bold text-emerald-300 mt-1 block">{backgroundsCount}</span>
           </div>
           <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
             <span className="text-xs text-purple-400 block font-medium flex items-center gap-1">
@@ -397,8 +675,8 @@ export const AdminAssetManager: React.FC = () => {
                 type="button"
                 onClick={() => setSelectedType(tab.id)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${isSelected
-                    ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                    : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                  : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
                   }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -422,7 +700,7 @@ export const AdminAssetManager: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search frames, stickers, textures, tags..."
+              placeholder="Search assets, photos, vectors, frames, tags..."
               className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/60"
             />
             {searchQuery && (
@@ -465,11 +743,11 @@ export const AdminAssetManager: React.FC = () => {
           <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
             {searchQuery || selectedType !== 'all'
               ? 'No assets matched the current search or type filter.'
-              : 'Upload your first public frame, border, or sticker asset for studio users.'}
+              : 'Upload your first public stock photo, graphic, frame, or sticker asset for studio users.'}
           </p>
           <button
             type="button"
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={handleOpenUploadModal}
             className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-xl text-sm transition-colors inline-flex items-center gap-2"
           >
             <Upload className="w-4 h-4" /> Upload First Asset
@@ -492,8 +770,8 @@ export const AdminAssetManager: React.FC = () => {
                 {/* Visual Canvas Box */}
                 <div
                   className={`relative aspect-square flex items-center justify-center p-3 overflow-hidden ${isFrame || isSticker
-                      ? 'bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:12px_12px] bg-slate-950'
-                      : 'bg-slate-950'
+                    ? 'bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:12px_12px] bg-slate-950'
+                    : 'bg-slate-950'
                     }`}
                 >
                   {isAudio ? (
@@ -537,17 +815,23 @@ export const AdminAssetManager: React.FC = () => {
                   {/* Type Badge */}
                   <div className="absolute top-2 left-2">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm ${isGif
-                        ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
-                        : isVideo
-                          ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
-                          : 'bg-slate-950/80 text-amber-300 border border-amber-500/30'
+                      ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
+                      : isVideo
+                        ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
+                        : isAudio
+                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                          : isFrame
+                            ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
+                            : asset.type === 'background'
+                              ? 'bg-teal-950/80 text-teal-300 border border-teal-500/30'
+                              : 'bg-slate-900/90 text-slate-300 border border-slate-700/60'
                       }`}>
-                      {isGif ? 'GIF' : isVideo ? 'VIDEO' : asset.type === 'background' ? 'BACKGROUND' : asset.type}
+                      {isGif ? 'GIF' : isVideo ? 'VIDEO' : isAudio ? 'AUDIO' : asset.type === 'background' ? 'BACKGROUND' : asset.type}
                     </span>
                   </div>
 
                   {/* Quick Action Overlay on hover */}
-                  <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2 backdrop-blur-xs">
+                  <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2 backdrop-blur-xs">
                     <button
                       type="button"
                       onClick={() => setPreviewAsset(asset)}
@@ -555,6 +839,14 @@ export const AdminAssetManager: React.FC = () => {
                       title="Preview Full Size"
                     >
                       <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditModal(asset)}
+                      className="p-2 bg-slate-800/90 hover:bg-amber-500 hover:text-slate-950 text-white rounded-lg transition-colors shadow"
+                      title="Edit Asset Classification"
+                    >
+                      <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       type="button"
@@ -610,12 +902,12 @@ export const AdminAssetManager: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white">Upload Public Asset</h3>
-                  <p className="text-xs text-slate-400">Frames, stickers, stock photos, and audio</p>
+                  <p className="text-xs text-slate-400">Photos, vectors, frames, stickers, and audio</p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setIsUploadModalOpen(false)}
+                onClick={handleCloseUploadModal}
                 className="text-slate-400 hover:text-white p-1"
               >
                 <X className="w-5 h-5" />
@@ -629,21 +921,21 @@ export const AdminAssetManager: React.FC = () => {
                   type="button"
                   onClick={() => setUploadTab('file')}
                   className={`py-2 text-xs font-semibold rounded-lg transition-all ${uploadTab === 'file'
-                      ? 'bg-amber-500 text-slate-950 shadow'
-                      : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-slate-950 shadow'
+                    : 'text-slate-400 hover:text-white'
                     }`}
                 >
-                  Upload File (SVG / PNG / MP3)
+                  Upload File (PNG / JPG / SVG / MP3)
                 </button>
                 <button
                   type="button"
                   onClick={() => setUploadTab('url')}
                   className={`py-2 text-xs font-semibold rounded-lg transition-all ${uploadTab === 'url'
-                      ? 'bg-amber-500 text-slate-950 shadow'
-                      : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-slate-950 shadow'
+                    : 'text-slate-400 hover:text-white'
                     }`}
                 >
-                  Paste Image / Asset URL
+                  Paste Direct Asset URL
                 </button>
               </div>
             </div>
@@ -655,7 +947,7 @@ export const AdminAssetManager: React.FC = () => {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/svg+xml,image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,audio/mpeg,audio/mp3,audio/wav"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,video/mp4,video/webm,audio/mpeg,audio/mp3,audio/wav,audio/ogg"
                     onChange={handleFileChange}
                     className="hidden"
                   />
@@ -692,10 +984,10 @@ export const AdminAssetManager: React.FC = () => {
                           <Upload className="w-6 h-6" />
                         </div>
                         <span className="text-sm font-semibold text-slate-200">
-                          Click to browse GIF, MP4 Video, SVG, PNG, or MP3
+                          Click to browse PNG, JPG, WebP, SVG, GIF, MP4, or MP3
                         </span>
                         <span className="text-xs text-slate-500 mt-1">
-                          GIFs, stock videos (MP4), vector SVGs, and transparent PNGs supported (Max 15MB)
+                          Photos, vectors, animated GIFs, stock videos, and audio supported (Max 15MB)
                         </span>
                       </div>
                     )}
@@ -710,23 +1002,13 @@ export const AdminAssetManager: React.FC = () => {
                     type="url"
                     required
                     value={uploadForm.url}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const lower = val.toLowerCase();
-                      let detectedType = uploadForm.type;
-                      let detectedCat = uploadForm.category;
-                      if (lower.endsWith('.gif') || lower.includes('.gif?')) {
-                        detectedType = 'gif';
-                        detectedCat = 'Animated GIFs & Sparkles';
-                      } else if (lower.endsWith('.mp4') || lower.endsWith('.webm')) {
-                        detectedType = 'video';
-                        detectedCat = 'Stock Videos & Ambient Loops';
-                      }
-                      setUploadForm({ ...uploadForm, url: val, type: detectedType, category: detectedCat });
-                    }}
-                    placeholder="https://example.com/assets/sparkle.gif or .mp4"
+                    onChange={(e) => handleUrlChange(e.target.value)}
+                    placeholder="https://example.com/assets/photo.jpg or .png, .svg, .gif, .mp4, .mp3"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Direct links with file extensions will be automatically detected. Query parameters are handled safely.
+                  </p>
                 </div>
               )}
 
@@ -740,8 +1022,11 @@ export const AdminAssetManager: React.FC = () => {
                     type="text"
                     required
                     value={uploadForm.title}
-                    onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
-                    placeholder="e.g., Golden Sparkle Rain GIF"
+                    onChange={(e) => {
+                      setIsTitleManuallyEdited(true);
+                      setUploadForm({ ...uploadForm, title: e.target.value });
+                    }}
+                    placeholder="e.g., Luxury Golden Border"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -752,14 +1037,14 @@ export const AdminAssetManager: React.FC = () => {
                   </label>
                   <select
                     value={uploadForm.type}
-                    onChange={(e: any) => setUploadForm({ ...uploadForm, type: e.target.value })}
+                    onChange={(e: any) => handleTypeChange(e.target.value as MediaAssetType)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   >
+                    <option value="image">Stock Photo / Graphic</option>
                     <option value="background">Background Image</option>
                     <option value="frame">Frame & Border (Cutout)</option>
                     <option value="gif">Animated GIF</option>
                     <option value="video">Stock Video (Cinematic MP4)</option>
-                    <option value="image">Stock Photo / Graphic</option>
                     <option value="sticker">Sticker & Wax Seal</option>
                     <option value="decoration">Divider & Flourish</option>
                     <option value="texture">Texture & Foil Pattern</option>
@@ -779,8 +1064,11 @@ export const AdminAssetManager: React.FC = () => {
                     required
                     list="category-suggestions"
                     value={uploadForm.category}
-                    onChange={(e) => setUploadForm({ ...uploadForm, category: e.target.value })}
-                    placeholder="Frames & Arches"
+                    onChange={(e) => {
+                      setIsCategoryManuallyEdited(true);
+                      setUploadForm({ ...uploadForm, category: e.target.value });
+                    }}
+                    placeholder="Photos & Graphics"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                   <datalist id="category-suggestions">
@@ -797,8 +1085,11 @@ export const AdminAssetManager: React.FC = () => {
                   <input
                     type="text"
                     value={uploadForm.tags}
-                    onChange={(e) => setUploadForm({ ...uploadForm, tags: e.target.value })}
-                    placeholder="wedding, frame, gold, royal"
+                    onChange={(e) => {
+                      setIsTagsManuallyEdited(true);
+                      setUploadForm({ ...uploadForm, tags: e.target.value });
+                    }}
+                    placeholder="photo, graphic, luxury"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
@@ -851,7 +1142,7 @@ export const AdminAssetManager: React.FC = () => {
               <div className="pt-4 flex items-center justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setIsUploadModalOpen(false)}
+                  onClick={handleCloseUploadModal}
                   className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl transition-colors"
                 >
                   Cancel
@@ -862,6 +1153,170 @@ export const AdminAssetManager: React.FC = () => {
                   className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
                 >
                   {isUploading ? 'Uploading...' : 'Publish Public Asset'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT ASSET CLASSIFICATION MODAL */}
+      {editingAsset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl my-8">
+            <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                  <Pencil className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Edit Asset Classification</h3>
+                  <p className="text-xs text-slate-400">Update type, category, title and tags</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingAsset(null)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              {/* Asset Snapshot */}
+              <div className="flex items-center gap-4 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0">
+                  {editingAsset.type === 'audio' ? (
+                    <Music className="w-8 h-8 text-emerald-400" />
+                  ) : editingAsset.type === 'video' ? (
+                    <Film className="w-8 h-8 text-sky-400" />
+                  ) : (
+                    <img
+                      src={editingAsset.url}
+                      alt={editingAsset.title}
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-mono text-amber-400 block truncate">
+                    {editingAsset.id}
+                  </span>
+                  <span className="text-xs text-slate-400 block truncate">
+                    Format: {editingAsset.format?.toUpperCase() || 'N/A'} • {editingAsset.isPublic ? 'Public Asset' : 'Private Asset'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Asset Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Type & Category */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Asset Type *
+                  </label>
+                  <select
+                    value={editForm.type}
+                    onChange={(e: any) => {
+                      const newType = e.target.value as MediaAssetType;
+                      setEditForm((prev) => ({
+                        ...prev,
+                        type: newType,
+                        category: prev.category || getDefaultCategoryForType(newType)
+                      }));
+                    }}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                  >
+                    <option value="image">Stock Photo / Graphic</option>
+                    <option value="background">Background Image</option>
+                    <option value="frame">Frame & Border (Cutout)</option>
+                    <option value="gif">Animated GIF</option>
+                    <option value="video">Stock Video (Cinematic MP4)</option>
+                    <option value="sticker">Sticker & Wax Seal</option>
+                    <option value="decoration">Divider & Flourish</option>
+                    <option value="texture">Texture & Foil Pattern</option>
+                    <option value="audio">Music / Audio Track</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Category *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    list="edit-category-suggestions"
+                    value={editForm.category}
+                    onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                  />
+                  <datalist id="edit-category-suggestions">
+                    {STOCK_CATEGORY_SUGGESTIONS.map((cat) => (
+                      <option key={cat} value={cat} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.tags}
+                  onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
+                  placeholder="e.g., photo, graphic, gold"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {/* Public Toggle */}
+              <div className="pt-2 border-t border-slate-800">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isPublic}
+                    onChange={(e) => setEditForm({ ...editForm, isPublic: e.target.checked })}
+                    className="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700"
+                  />
+                  <span className="text-xs font-medium text-slate-300">
+                    Public Asset (accessible to all studio users in the editor)
+                  </span>
+                </label>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-4 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingAsset(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingEdit}
+                  className="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSavingEdit ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
