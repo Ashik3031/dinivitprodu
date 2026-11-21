@@ -8,7 +8,6 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<boolean>;
-  demoLogin: (roleOrType: 'admin' | 'business_owner' | 'business' | string) => Promise<boolean>;
   logout: () => void;
   setUserDirectly: (user: User | null) => void;
   refreshUser: () => Promise<void>;
@@ -93,15 +92,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const demoLogin = async (roleOrType: 'admin' | 'business_owner' | 'business' | string): Promise<boolean> => {
-    setError(null);
-    if (roleOrType === 'admin') {
-      return login('admin', 'admin123');
-    }
-    // Business owner demo
-    return login('royal_prints', 'royal123');
-  };
-
   const logout = () => {
     setUser(null);
     setError(null);
@@ -133,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         error,
         login,
-        demoLogin,
         logout,
         setUserDirectly,
         refreshUser,

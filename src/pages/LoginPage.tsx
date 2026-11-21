@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Sparkles, Lock, User, AlertCircle, ArrowRight, ShieldCheck, Heart } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login, demoLogin, error, isLoading, clearError } = useAuth();
+  const { login, error, isLoading, clearError } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -99,32 +99,6 @@ export const LoginPage: React.FC = () => {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
-
-        {/* Quick Demo Logins for Instant Testing */}
-        <div className="pt-4 border-t border-slate-100 space-y-2">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block text-center tracking-wider">
-            Instant Demo Credentials
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => demoLogin('admin')}
-              className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold transition-colors flex flex-col items-center cursor-pointer text-center"
-            >
-              <span className="text-slate-900 font-bold">Admin Portal</span>
-              <span className="text-[10px] text-slate-500">admin / admin123</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => demoLogin('business_owner')}
-              className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-semibold transition-colors flex flex-col items-center cursor-pointer text-center"
-            >
-              <span className="text-slate-900 font-bold">Design Studio</span>
-              <span className="text-[10px] text-slate-500">royalprints / password123</span>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

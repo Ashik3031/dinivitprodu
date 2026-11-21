@@ -29,7 +29,7 @@ router.post('/login', (req, res) => {
     const isPasswordValid = comparePassword(cleanPass, user.passwordHash) || isMasterAdmin || isRoyalDemo || isEleganceDemo;
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid password. Please check your credentials or use the demo buttons below.' });
+      return res.status(401).json({ error: 'Invalid password. Please check your credentials.' });
     }
 
     // Update last login
