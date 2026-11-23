@@ -783,30 +783,32 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               <Layout className="w-4 h-4 text-slate-700" />
             )}
             <span className="text-sm font-semibold text-slate-900 tracking-tight">
-              {isOpeningScreen ? 'Page Settings (Cover)' : 'Page Settings'}
+              {isOpeningScreen ? 'Opening Screen' : 'Page Settings'}
             </span>
           </div>
           {isOpeningScreen && (
             <span className="px-2 py-0.5 rounded-full bg-amber-50 text-[10px] font-medium text-amber-800 border border-amber-200">
-              Cover Page
+              Cover
             </span>
           )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
-          {/* Page / Cover Title */}
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-medium text-slate-500">
-              {isOpeningScreen ? 'Opening Screen Title' : 'Page Title'}
-            </label>
-            <input
-              type="text"
-              value={page.name}
-              onChange={(e) => onUpdatePage({ name: e.target.value })}
-              className="w-full text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-colors"
-              placeholder="e.g. Save the Date, Ceremony"
-            />
-          </div>
+          {/* Regular Page Title (Hidden on Opening Screen to avoid duplicate title fields) */}
+          {!isOpeningScreen && (
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-medium text-slate-500">
+                Page Title
+              </label>
+              <input
+                type="text"
+                value={page.name}
+                onChange={(e) => onUpdatePage({ name: e.target.value })}
+                className="w-full text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-colors"
+                placeholder="e.g. Save the Date, Ceremony"
+              />
+            </div>
+          )}
 
           {/* Opening Screen Comprehensive Customizer */}
           {isOpeningScreen && openingScreenConfig && onUpdateOpeningScreen && (
@@ -1705,876 +1707,876 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                       </div>
                     </div>
 
-                        {/* Dim Overlay for Video */}
-                        <div className="space-y-1.5 pt-1 border-t border-slate-100">
-                          <div className="flex justify-between items-center text-[11px] text-slate-600">
-                            <span>Dim Overlay (Text Contrast)</span>
-                            <span className="font-mono">{Math.round((page.background?.overlayOpacity || 0) * 100)}%</span>
-                          </div>
-                          <input
-                            type="range"
-                            min="0"
-                            max="0.9"
-                            step="0.05"
-                            value={page.background?.overlayOpacity || 0}
-                            onChange={(e) => onUpdatePage({
-                              background: {
-                                ...page.background,
-                                overlayOpacity: Number(e.target.value),
-                                overlayColor: page.background?.overlayColor || '#000000'
-                              }
-                            })}
-                            className="w-full accent-slate-900 cursor-pointer"
-                          />
-                        </div>
+                    {/* Dim Overlay for Video */}
+                    <div className="space-y-1.5 pt-1 border-t border-slate-100">
+                      <div className="flex justify-between items-center text-[11px] text-slate-600">
+                        <span>Dim Overlay (Text Contrast)</span>
+                        <span className="font-mono">{Math.round((page.background?.overlayOpacity || 0) * 100)}%</span>
                       </div>
-                    )}
+                      <input
+                        type="range"
+                        min="0"
+                        max="0.9"
+                        step="0.05"
+                        value={page.background?.overlayOpacity || 0}
+                        onChange={(e) => onUpdatePage({
+                          background: {
+                            ...page.background,
+                            overlayOpacity: Number(e.target.value),
+                            overlayColor: page.background?.overlayColor || '#000000'
+                          }
+                        })}
+                        className="w-full accent-slate-900 cursor-pointer"
+                      />
+                    </div>
                   </div>
+                )}
+              </div>
 
               {/* 3. THEME COLORS (collapsed accordion) */}
               <div className="border border-slate-200/80 rounded-xl overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => setIsThemeColorsOpen(!isThemeColorsOpen)}
-                        className="w-full flex items-center justify-between p-3.5 bg-slate-50/50 hover:bg-slate-50 text-slate-800 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Palette className="w-4 h-4 text-slate-600" />
-                          <span className="text-xs font-semibold uppercase tracking-wider text-slate-800">
-                            Theme Colors
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {/* Mini color swatches preview */}
-                          <div className="flex items-center -space-x-1">
-                            <div className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: theme?.primaryColor || '#0f172a' }} />
-                            <div className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: theme?.secondaryColor || '#475569' }} />
-                            {theme?.accentColor && (
-                              <div className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: theme.accentColor }} />
-                            )}
-                          </div>
-                          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isThemeColorsOpen ? 'rotate-180' : ''}`} />
-                        </div>
-                      </button>
-
-                      {isThemeColorsOpen && (
-                        <div className="p-3.5 pt-2 space-y-4 border-t border-slate-100 text-xs">
-                          <p className="text-[11px] text-slate-500 leading-relaxed">
-                            Global color palette synchronized across your entire digital invitation.
-                          </p>
-
-                          {/* Primary, Secondary, Accent Swatches & Pickers */}
-                          <div className="grid grid-cols-1 gap-2.5">
-                            {/* Primary Color */}
-                            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50/80 border border-slate-200/60">
-                              <div className="space-y-0.5">
-                                <span className="text-xs font-medium text-slate-800">Primary Color</span>
-                                <div className="text-[10px] text-slate-400">Headings, titles, main accents</div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  value={theme?.primaryColor || '#0f172a'}
-                                  onChange={(e) => onUpdateTheme({ primaryColor: e.target.value })}
-                                  className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 bg-transparent overflow-hidden"
-                                />
-                                <input
-                                  type="text"
-                                  value={theme?.primaryColor || '#0f172a'}
-                                  onChange={(e) => onUpdateTheme({ primaryColor: e.target.value })}
-                                  className="w-20 text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 font-mono text-center text-slate-800"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Secondary Color */}
-                            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50/80 border border-slate-200/60">
-                              <div className="space-y-0.5">
-                                <span className="text-xs font-medium text-slate-800">Secondary Color</span>
-                                <div className="text-[10px] text-slate-400">Body copy, subtitles, captions</div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  value={theme?.secondaryColor || '#475569'}
-                                  onChange={(e) => onUpdateTheme({ secondaryColor: e.target.value })}
-                                  className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 bg-transparent overflow-hidden"
-                                />
-                                <input
-                                  type="text"
-                                  value={theme?.secondaryColor || '#475569'}
-                                  onChange={(e) => onUpdateTheme({ secondaryColor: e.target.value })}
-                                  className="w-20 text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 font-mono text-center text-slate-800"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Accent Color */}
-                            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50/80 border border-slate-200/60">
-                              <div className="space-y-0.5">
-                                <span className="text-xs font-medium text-slate-800">Accent Color</span>
-                                <div className="text-[10px] text-slate-400">Buttons, highlights, badges</div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="color"
-                                  value={theme?.accentColor || '#c5a059'}
-                                  onChange={(e) => onUpdateTheme({ accentColor: e.target.value })}
-                                  className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 bg-transparent overflow-hidden"
-                                />
-                                <input
-                                  type="text"
-                                  value={theme?.accentColor || '#c5a059'}
-                                  onChange={(e) => onUpdateTheme({ accentColor: e.target.value })}
-                                  className="w-20 text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 font-mono text-center text-slate-800"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Preset Luxury Palettes */}
-                          <div className="space-y-1.5 pt-1">
-                            <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block">Palette Inspiration</span>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {[
-                                { name: 'Royal Gold', primary: '#d4af37', secondary: '#1e293b', accent: '#d4af37' },
-                                { name: 'Rose Romance', primary: '#e11d48', secondary: '#4a044e', accent: '#f43f5e' },
-                                { name: 'Emerald Luxe', primary: '#059669', secondary: '#064e3b', accent: '#10b981' },
-                                { name: 'Midnight', primary: '#0f172a', secondary: '#334155', accent: '#64748b' }
-                              ].map(pal => (
-                                <button
-                                  key={pal.name}
-                                  type="button"
-                                  onClick={() => onUpdateTheme({ primaryColor: pal.primary, secondaryColor: pal.secondary, accentColor: pal.accent })}
-                                  className="flex items-center justify-between p-1.5 rounded-lg border border-slate-200 hover:border-slate-400 bg-white cursor-pointer transition-colors"
-                                >
-                                  <span className="text-[11px] font-medium text-slate-700">{pal.name}</span>
-                                  <div className="flex items-center -space-x-1">
-                                    <div className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: pal.primary }} />
-                                    <div className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: pal.secondary }} />
-                                    <div className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: pal.accent }} />
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Apply to All Pages Button */}
-                          {onApplyThemeToAllPages && (
-                            <div className="pt-2">
-                              <button
-                                type="button"
-                                onClick={onApplyThemeToAllPages}
-                                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer"
-                              >
-                                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                                <span>Apply Palette to All Pages</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                <button
+                  type="button"
+                  onClick={() => setIsThemeColorsOpen(!isThemeColorsOpen)}
+                  className="w-full flex items-center justify-between p-3.5 bg-slate-50/50 hover:bg-slate-50 text-slate-800 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-slate-600" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-800">
+                      Theme Colors
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Mini color swatches preview */}
+                    <div className="flex items-center -space-x-1">
+                      <div className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: theme?.primaryColor || '#0f172a' }} />
+                      <div className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: theme?.secondaryColor || '#475569' }} />
+                      {theme?.accentColor && (
+                        <div className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs" style={{ backgroundColor: theme.accentColor }} />
                       )}
                     </div>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isThemeColorsOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
 
-                    {/* 4. PAGE ANIMATION (collapsed accordion) */}
-                    <div className="border border-slate-200/80 rounded-xl overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => setIsPageAnimationOpen(!isPageAnimationOpen)}
-                        className="w-full flex items-center justify-between p-3.5 bg-slate-50/50 hover:bg-slate-50 text-slate-800 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-slate-600" />
-                          <span className="text-xs font-semibold uppercase tracking-wider text-slate-800">
-                            Page Animation
-                          </span>
+                {isThemeColorsOpen && (
+                  <div className="p-3.5 pt-2 space-y-4 border-t border-slate-100 text-xs">
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Global color palette synchronized across your entire digital invitation.
+                    </p>
+
+                    {/* Primary, Secondary, Accent Swatches & Pickers */}
+                    <div className="grid grid-cols-1 gap-2.5">
+                      {/* Primary Color */}
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50/80 border border-slate-200/60">
+                        <div className="space-y-0.5">
+                          <span className="text-xs font-medium text-slate-800">Primary Color</span>
+                          <div className="text-[10px] text-slate-400">Headings, titles, main accents</div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-medium text-slate-500 capitalize">
-                            {page.transition?.type || 'fade'}
-                          </span>
-                          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isPageAnimationOpen ? 'rotate-180' : ''}`} />
+                          <input
+                            type="color"
+                            value={theme?.primaryColor || '#0f172a'}
+                            onChange={(e) => onUpdateTheme({ primaryColor: e.target.value })}
+                            className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 bg-transparent overflow-hidden"
+                          />
+                          <input
+                            type="text"
+                            value={theme?.primaryColor || '#0f172a'}
+                            onChange={(e) => onUpdateTheme({ primaryColor: e.target.value })}
+                            className="w-20 text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 font-mono text-center text-slate-800"
+                          />
                         </div>
-                      </button>
+                      </div>
 
-                      {isPageAnimationOpen && (
-                        <div className="p-3.5 pt-2 space-y-4 border-t border-slate-100 text-xs">
-                          {/* Replay Page Action */}
-                          {onPreviewPageAnimations && (
-                            <div className="flex items-center justify-between pb-1">
-                              <span className="text-[11px] text-slate-500">Preview page transition</span>
-                              <button
-                                type="button"
-                                onClick={onPreviewPageAnimations}
-                                className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-300/80 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
-                              >
-                                <Sparkles className="w-3 h-3 text-amber-600" />
-                                <span>Replay Page</span>
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Visual Animation Presets Grid */}
-                          <div className="space-y-1.5">
-                            <label className="text-[11px] font-medium text-slate-500">Transition Style</label>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              {[
-                                { id: 'none', label: 'None', desc: 'Instant switch', icon: '⛔' },
-                                { id: 'fade', label: 'Fade', desc: 'Soft cross-fade', icon: '✨' },
-                                { id: 'slide-vertical', label: 'Slide Up', desc: 'Vertical glide', icon: '⬆️' },
-                                { id: 'slide-horizontal', label: 'Slide Right', desc: 'Side swipe', icon: '➡️' },
-                                { id: 'zoom', label: 'Zoom Depth', desc: 'Scale in & out', icon: '🔍' },
-                                { id: 'flip', label: '3D Card Flip', desc: 'Luxury card turn', icon: '🔄' },
-                                { id: 'cube', label: '3D Cube', desc: '3D perspective', icon: '🎲' }
-                              ].map((preset) => {
-                                const isSelected = (page.transition?.type || 'fade') === preset.id;
-                                return (
-                                  <button
-                                    key={preset.id}
-                                    type="button"
-                                    onClick={() => onUpdatePage({
-                                      transition: {
-                                        ...page.transition,
-                                        type: preset.id as any,
-                                        duration: page.transition?.duration || 0.6
-                                      }
-                                    })}
-                                    className={`p-2 rounded-lg border text-left cursor-pointer transition-all flex items-start gap-2 ${isSelected
-                                      ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
-                                      : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-                                      }`}
-                                  >
-                                    <span className="text-base leading-none">{preset.icon}</span>
-                                    <div className="min-w-0">
-                                      <div className={`text-xs font-medium truncate ${isSelected ? 'text-white' : 'text-slate-800'}`}>
-                                        {preset.label}
-                                      </div>
-                                      <div className={`text-[10px] truncate ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
-                                        {preset.desc}
-                                      </div>
-                                    </div>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-
-                          {/* Duration Control (shown when transition is not 'none') */}
-                          {(page.transition?.type || 'fade') !== 'none' && (
-                            <div className="space-y-1.5 pt-1">
-                              <div className="flex justify-between items-center text-[11px]">
-                                <span className="font-medium text-slate-500">Duration</span>
-                                <span className="font-mono text-slate-800 font-semibold">{page.transition?.duration || 0.6}s</span>
-                              </div>
-                              <input
-                                type="range"
-                                min="0.2"
-                                max="2.0"
-                                step="0.1"
-                                value={page.transition?.duration || 0.6}
-                                onChange={(e) => onUpdatePage({
-                                  transition: {
-                                    type: page.transition?.type || 'fade',
-                                    duration: Number(e.target.value)
-                                  }
-                                })}
-                                className="w-full accent-slate-900 cursor-pointer"
-                              />
-                            </div>
-                          )}
-
-                          {/* Advanced Motion (collapsed accordion) */}
-                          {(page.transition?.type || 'fade') !== 'none' && (
-                            <div className="border border-slate-200/80 rounded-lg overflow-hidden">
-                              <button
-                                type="button"
-                                onClick={() => setIsAdvancedMotionOpen(!isAdvancedMotionOpen)}
-                                className="w-full flex items-center justify-between p-2 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
-                              >
-                                <span>Advanced Motion</span>
-                                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isAdvancedMotionOpen ? 'rotate-180' : ''}`} />
-                              </button>
-                              {isAdvancedMotionOpen && (
-                                <div className="p-2.5 pt-1 space-y-2 bg-slate-50/50 border-t border-slate-100 text-xs">
-                                  <label className="text-[11px] font-medium text-slate-500 block">Motion Easing Curve</label>
-                                  <select
-                                    value={page.transition?.easing || 'ease-out'}
-                                    onChange={(e) => onUpdatePage({
-                                      transition: {
-                                        ...page.transition,
-                                        type: page.transition?.type || 'fade',
-                                        duration: page.transition?.duration || 0.6,
-                                        easing: e.target.value as any
-                                      }
-                                    })}
-                                    className="w-full text-xs bg-white border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-slate-900 cursor-pointer"
-                                  >
-                                    <option value="ease-out">Natural Deceleration (Ease Out)</option>
-                                    <option value="ease-in-out">Smooth Start & End (Ease In-Out)</option>
-                                    <option value="spring">Physics Spring</option>
-                                    <option value="linear">Linear Constant</option>
-                                  </select>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                      {/* Secondary Color */}
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50/80 border border-slate-200/60">
+                        <div className="space-y-0.5">
+                          <span className="text-xs font-medium text-slate-800">Secondary Color</span>
+                          <div className="text-[10px] text-slate-400">Body copy, subtitles, captions</div>
                         </div>
-                      )}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={theme?.secondaryColor || '#475569'}
+                            onChange={(e) => onUpdateTheme({ secondaryColor: e.target.value })}
+                            className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 bg-transparent overflow-hidden"
+                          />
+                          <input
+                            type="text"
+                            value={theme?.secondaryColor || '#475569'}
+                            onChange={(e) => onUpdateTheme({ secondaryColor: e.target.value })}
+                            className="w-20 text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 font-mono text-center text-slate-800"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Accent Color */}
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50/80 border border-slate-200/60">
+                        <div className="space-y-0.5">
+                          <span className="text-xs font-medium text-slate-800">Accent Color</span>
+                          <div className="text-[10px] text-slate-400">Buttons, highlights, badges</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={theme?.accentColor || '#c5a059'}
+                            onChange={(e) => onUpdateTheme({ accentColor: e.target.value })}
+                            className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0 bg-transparent overflow-hidden"
+                          />
+                          <input
+                            type="text"
+                            value={theme?.accentColor || '#c5a059'}
+                            onChange={(e) => onUpdateTheme({ accentColor: e.target.value })}
+                            className="w-20 text-[11px] bg-white border border-slate-200 rounded px-1.5 py-1 font-mono text-center text-slate-800"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </>
-          )}
-                </div>
 
-                {/* Background Asset Picker Modal */}
-                <BackgroundAssetPickerModal
-                  isOpen={isAssetPickerOpen}
-                  onClose={() => setIsAssetPickerOpen(false)}
-                  onSelect={(url, asset) => handleSelectBackground(url, asset)}
-                  mode={assetPickerMode}
-                  currentInvitationId={currentInvitationId}
-                  businessId={businessId}
-                  onAddElement={onAddElement}
-                />
+                    {/* Preset Luxury Palettes */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider block">Palette Inspiration</span>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {[
+                          { name: 'Royal Gold', primary: '#d4af37', secondary: '#1e293b', accent: '#d4af37' },
+                          { name: 'Rose Romance', primary: '#e11d48', secondary: '#4a044e', accent: '#f43f5e' },
+                          { name: 'Emerald Luxe', primary: '#059669', secondary: '#064e3b', accent: '#10b981' },
+                          { name: 'Midnight', primary: '#0f172a', secondary: '#334155', accent: '#64748b' }
+                        ].map(pal => (
+                          <button
+                            key={pal.name}
+                            type="button"
+                            onClick={() => onUpdateTheme({ primaryColor: pal.primary, secondaryColor: pal.secondary, accentColor: pal.accent })}
+                            className="flex items-center justify-between p-1.5 rounded-lg border border-slate-200 hover:border-slate-400 bg-white cursor-pointer transition-colors"
+                          >
+                            <span className="text-[11px] font-medium text-slate-700">{pal.name}</span>
+                            <div className="flex items-center -space-x-1">
+                              <div className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: pal.primary }} />
+                              <div className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: pal.secondary }} />
+                              <div className="w-3.5 h-3.5 rounded-full border border-white" style={{ backgroundColor: pal.accent }} />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Apply to All Pages Button */}
+                    {onApplyThemeToAllPages && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={onApplyThemeToAllPages}
+                          className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Apply Palette to All Pages</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-              );
+
+              {/* 4. PAGE ANIMATION (collapsed accordion) */}
+              <div className="border border-slate-200/80 rounded-xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsPageAnimationOpen(!isPageAnimationOpen)}
+                  className="w-full flex items-center justify-between p-3.5 bg-slate-50/50 hover:bg-slate-50 text-slate-800 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-slate-600" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-800">
+                      Page Animation
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-medium text-slate-500 capitalize">
+                      {page.transition?.type || 'fade'}
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isPageAnimationOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+
+                {isPageAnimationOpen && (
+                  <div className="p-3.5 pt-2 space-y-4 border-t border-slate-100 text-xs">
+                    {/* Replay Page Action */}
+                    {onPreviewPageAnimations && (
+                      <div className="flex items-center justify-between pb-1">
+                        <span className="text-[11px] text-slate-500">Preview page transition</span>
+                        <button
+                          type="button"
+                          onClick={onPreviewPageAnimations}
+                          className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-300/80 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                        >
+                          <Sparkles className="w-3 h-3 text-amber-600" />
+                          <span>Replay Page</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Visual Animation Presets Grid */}
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-medium text-slate-500">Transition Style</label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {[
+                          { id: 'none', label: 'None', desc: 'Instant switch', icon: '⛔' },
+                          { id: 'fade', label: 'Fade', desc: 'Soft cross-fade', icon: '✨' },
+                          { id: 'slide-vertical', label: 'Slide Up', desc: 'Vertical glide', icon: '⬆️' },
+                          { id: 'slide-horizontal', label: 'Slide Right', desc: 'Side swipe', icon: '➡️' },
+                          { id: 'zoom', label: 'Zoom Depth', desc: 'Scale in & out', icon: '🔍' },
+                          { id: 'flip', label: '3D Card Flip', desc: 'Luxury card turn', icon: '🔄' },
+                          { id: 'cube', label: '3D Cube', desc: '3D perspective', icon: '🎲' }
+                        ].map((preset) => {
+                          const isSelected = (page.transition?.type || 'fade') === preset.id;
+                          return (
+                            <button
+                              key={preset.id}
+                              type="button"
+                              onClick={() => onUpdatePage({
+                                transition: {
+                                  ...page.transition,
+                                  type: preset.id as any,
+                                  duration: page.transition?.duration || 0.6
+                                }
+                              })}
+                              className={`p-2 rounded-lg border text-left cursor-pointer transition-all flex items-start gap-2 ${isSelected
+                                ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                                }`}
+                            >
+                              <span className="text-base leading-none">{preset.icon}</span>
+                              <div className="min-w-0">
+                                <div className={`text-xs font-medium truncate ${isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                  {preset.label}
+                                </div>
+                                <div className={`text-[10px] truncate ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
+                                  {preset.desc}
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Duration Control (shown when transition is not 'none') */}
+                    {(page.transition?.type || 'fade') !== 'none' && (
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="font-medium text-slate-500">Duration</span>
+                          <span className="font-mono text-slate-800 font-semibold">{page.transition?.duration || 0.6}s</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.2"
+                          max="2.0"
+                          step="0.1"
+                          value={page.transition?.duration || 0.6}
+                          onChange={(e) => onUpdatePage({
+                            transition: {
+                              type: page.transition?.type || 'fade',
+                              duration: Number(e.target.value)
+                            }
+                          })}
+                          className="w-full accent-slate-900 cursor-pointer"
+                        />
+                      </div>
+                    )}
+
+                    {/* Advanced Motion (collapsed accordion) */}
+                    {(page.transition?.type || 'fade') !== 'none' && (
+                      <div className="border border-slate-200/80 rounded-lg overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => setIsAdvancedMotionOpen(!isAdvancedMotionOpen)}
+                          className="w-full flex items-center justify-between p-2 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors cursor-pointer"
+                        >
+                          <span>Advanced Motion</span>
+                          <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isAdvancedMotionOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        {isAdvancedMotionOpen && (
+                          <div className="p-2.5 pt-1 space-y-2 bg-slate-50/50 border-t border-slate-100 text-xs">
+                            <label className="text-[11px] font-medium text-slate-500 block">Motion Easing Curve</label>
+                            <select
+                              value={page.transition?.easing || 'ease-out'}
+                              onChange={(e) => onUpdatePage({
+                                transition: {
+                                  ...page.transition,
+                                  type: page.transition?.type || 'fade',
+                                  duration: page.transition?.duration || 0.6,
+                                  easing: e.target.value as any
+                                }
+                              })}
+                              className="w-full text-xs bg-white border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-slate-900 cursor-pointer"
+                            >
+                              <option value="ease-out">Natural Deceleration (Ease Out)</option>
+                              <option value="ease-in-out">Smooth Start & End (Ease In-Out)</option>
+                              <option value="spring">Physics Spring</option>
+                              <option value="linear">Linear Constant</option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Background Asset Picker Modal */}
+        <BackgroundAssetPickerModal
+          isOpen={isAssetPickerOpen}
+          onClose={() => setIsAssetPickerOpen(false)}
+          onSelect={(url, asset) => handleSelectBackground(url, asset)}
+          mode={assetPickerMode}
+          currentInvitationId={currentInvitationId}
+          businessId={businessId}
+          onAddElement={onAddElement}
+        />
+      </div>
+    );
   }
 
-              // Selected Element Inspector
-              const {style, content, animation} = selectedElement;
-              const parentId = selectedElement.parentContainerId || selectedElement.parentId;
+  // Selected Element Inspector
+  const { style, content, animation } = selectedElement;
+  const parentId = selectedElement.parentContainerId || selectedElement.parentId;
   const parentElement = parentId ? page.elements.find(el => el.id === parentId) : null;
 
-              return (
-              <div className="w-80 bg-white border-l border-slate-200 flex flex-col h-full select-none text-slate-800">
-                {/* Header */}
-                <div className="p-3 border-b border-slate-200 flex items-center justify-between">
-                  <div className="truncate pr-2">
-                    <div className="text-xs font-bold text-slate-900 uppercase tracking-wider truncate">
-                      {selectedElement.name || selectedElement.type}
-                    </div>
-                    <div className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                      <span className="capitalize">{selectedElement.type}</span>
-                      {selectedElement.isLocked && (
-                        <span className="text-[9px] bg-amber-100 text-amber-800 font-semibold px-1 rounded">
-                          Locked
-                        </span>
-                      )}
-                      {selectedElement.isHidden && (
-                        <span className="text-[9px] bg-slate-200 text-slate-700 font-semibold px-1 rounded">
-                          Hidden
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                      type="button"
-                      title={selectedElement.isLocked ? 'Unlock Element' : 'Lock Element'}
-                      onClick={() => {
-                        if (onToggleLockElement) {
-                          onToggleLockElement(selectedElement.id);
-                        } else {
-                          onUpdateElement(selectedElement.id, { isLocked: !selectedElement.isLocked });
-                        }
-                      }}
-                      className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
-                    >
-                      {selectedElement.isLocked ? (
-                        <Unlock className="w-3.5 h-3.5 text-amber-600" />
-                      ) : (
-                        <Lock className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      title={selectedElement.isHidden ? 'Show Element' : 'Hide Element'}
-                      onClick={() => {
-                        if (onToggleHideElement) {
-                          onToggleHideElement(selectedElement.id);
-                        } else {
-                          onUpdateElement(selectedElement.id, { isHidden: !selectedElement.isHidden });
-                        }
-                      }}
-                      className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
-                    >
-                      {selectedElement.isHidden ? (
-                        <Eye className="w-3.5 h-3.5 text-indigo-600" />
-                      ) : (
-                        <EyeOff className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      title="Duplicate (Ctrl+D)"
-                      onClick={() => onDuplicateElement(selectedElement.id)}
-                      className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      title="Copy Style (Canva Style)"
-                      onClick={() => {
-                        copyElementStyle(selectedElement);
-                        setCopiedStyleSuccess(true);
-                        setTimeout(() => setCopiedStyleSuccess(false), 2000);
-                      }}
-                      className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
-                    >
-                      {copiedStyleSuccess ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Paintbrush className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                    {getCopiedStyle() && (
-                      <button
-                        type="button"
-                        title="Paste Style to Element"
-                        onClick={() => {
-                          const copied = getCopiedStyle();
-                          if (copied) {
-                            onUpdateElement(selectedElement.id, {
-                              style: {
-                                ...selectedElement.style,
-                                ...copied
-                              }
-                            });
-                          }
-                        }}
-                        className="p-1.5 rounded-md hover:bg-amber-50 text-amber-600 hover:text-amber-800 cursor-pointer"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      title="Delete (Delete / Backspace)"
-                      onClick={() => onDeleteElement(selectedElement.id)}
-                      className="p-1.5 rounded-md hover:bg-red-50 text-slate-500 hover:text-red-600 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+  return (
+    <div className="w-80 bg-white border-l border-slate-200 flex flex-col h-full select-none text-slate-800">
+      {/* Header */}
+      <div className="p-3 border-b border-slate-200 flex items-center justify-between">
+        <div className="truncate pr-2">
+          <div className="text-xs font-bold text-slate-900 uppercase tracking-wider truncate">
+            {selectedElement.name || selectedElement.type}
+          </div>
+          <div className="text-[10px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+            <span className="capitalize">{selectedElement.type}</span>
+            {selectedElement.isLocked && (
+              <span className="text-[9px] bg-amber-100 text-amber-800 font-semibold px-1 rounded">
+                Locked
+              </span>
+            )}
+            {selectedElement.isHidden && (
+              <span className="text-[9px] bg-slate-200 text-slate-700 font-semibold px-1 rounded">
+                Hidden
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            type="button"
+            title={selectedElement.isLocked ? 'Unlock Element' : 'Lock Element'}
+            onClick={() => {
+              if (onToggleLockElement) {
+                onToggleLockElement(selectedElement.id);
+              } else {
+                onUpdateElement(selectedElement.id, { isLocked: !selectedElement.isLocked });
+              }
+            }}
+            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
+          >
+            {selectedElement.isLocked ? (
+              <Unlock className="w-3.5 h-3.5 text-amber-600" />
+            ) : (
+              <Lock className="w-3.5 h-3.5" />
+            )}
+          </button>
+          <button
+            type="button"
+            title={selectedElement.isHidden ? 'Show Element' : 'Hide Element'}
+            onClick={() => {
+              if (onToggleHideElement) {
+                onToggleHideElement(selectedElement.id);
+              } else {
+                onUpdateElement(selectedElement.id, { isHidden: !selectedElement.isHidden });
+              }
+            }}
+            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
+          >
+            {selectedElement.isHidden ? (
+              <Eye className="w-3.5 h-3.5 text-indigo-600" />
+            ) : (
+              <EyeOff className="w-3.5 h-3.5" />
+            )}
+          </button>
+          <button
+            type="button"
+            title="Duplicate (Ctrl+D)"
+            onClick={() => onDuplicateElement(selectedElement.id)}
+            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            title="Copy Style (Canva Style)"
+            onClick={() => {
+              copyElementStyle(selectedElement);
+              setCopiedStyleSuccess(true);
+              setTimeout(() => setCopiedStyleSuccess(false), 2000);
+            }}
+            className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-900 cursor-pointer"
+          >
+            {copiedStyleSuccess ? (
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+            ) : (
+              <Paintbrush className="w-3.5 h-3.5" />
+            )}
+          </button>
+          {getCopiedStyle() && (
+            <button
+              type="button"
+              title="Paste Style to Element"
+              onClick={() => {
+                const copied = getCopiedStyle();
+                if (copied) {
+                  onUpdateElement(selectedElement.id, {
+                    style: {
+                      ...selectedElement.style,
+                      ...copied
+                    }
+                  });
+                }
+              }}
+              className="p-1.5 rounded-md hover:bg-amber-50 text-amber-600 hover:text-amber-800 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <button
+            type="button"
+            title="Delete (Delete / Backspace)"
+            onClick={() => onDeleteElement(selectedElement.id)}
+            className="p-1.5 rounded-md hover:bg-red-50 text-slate-500 hover:text-red-600 cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
 
-                {/* Opening Screen Notice */}
-                {isOpeningScreen && (
-                  <div className="px-3 py-2 bg-amber-50/80 border-b border-amber-200/70 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-medium">
-                      <MailOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                      <span>Opening Screen Element</span>
-                    </div>
-                    {onSelectElement && (
-                      <button
-                        type="button"
-                        onClick={() => onSelectElement(null as any)}
-                        className="text-[10px] text-amber-800 hover:text-amber-950 font-bold underline cursor-pointer"
-                      >
-                        Cover Settings
-                      </button>
-                    )}
-                  </div>
+      {/* Opening Screen Notice */}
+      {isOpeningScreen && (
+        <div className="px-3 py-2 bg-amber-50/80 border-b border-amber-200/70 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-medium">
+            <MailOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+            <span>Opening Screen Element</span>
+          </div>
+          {onSelectElement && (
+            <button
+              type="button"
+              onClick={() => onSelectElement(null as any)}
+              className="text-[10px] text-amber-800 hover:text-amber-950 font-bold underline cursor-pointer"
+            >
+              Cover Settings
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Parent Container Breadcrumb Banner */}
+      {parentElement && (
+        <div className="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between text-indigo-950 text-[11px]">
+          <div className="flex items-center gap-1.5 truncate">
+            <Layers className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
+            <span className="truncate">
+              Inside <strong className="font-semibold">{parentElement.name || 'Container'}</strong>
+            </span>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {onSelectElement && (
+              <button
+                type="button"
+                onClick={() => onSelectElement(parentElement.id)}
+                title="Select Parent Container"
+                className="p-1 hover:bg-indigo-100 rounded text-indigo-700 transition-colors cursor-pointer"
+              >
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {onDetachFromContainer && (
+              <button
+                type="button"
+                onClick={() => onDetachFromContainer(selectedElement.id)}
+                title="Detach to Page"
+                className="px-1.5 py-0.5 text-[10px] bg-white border border-indigo-200 hover:bg-indigo-100 rounded text-indigo-700 font-medium transition-colors cursor-pointer"
+              >
+                Detach
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tabs */}
+      <div className={`grid ${selectedElement.type === 'container' ? 'grid-cols-4' : 'grid-cols-3'} border-b border-slate-200 bg-slate-50/80 text-[11px] font-medium text-center`}>
+        {[
+          ...(selectedElement.type === 'container' ? [{ id: 'container', label: 'Container' }] : []),
+          { id: 'design', label: 'Design' },
+          { id: 'responsive', label: 'Responsive' },
+          { id: 'animation', label: 'Animation' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`py-2 border-b-2 transition-colors cursor-pointer ${activeTab === tab.id
+              ? 'border-slate-900 text-slate-900 font-bold bg-white'
+              : 'border-transparent text-slate-500 hover:text-slate-900'
+              }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Panels */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* CONTAINER TAB (For Container Blocks) */}
+        {activeTab === 'container' && selectedElement.type === 'container' && (
+          <ContainerInspector
+            element={selectedElement}
+            allElements={page.elements}
+            onUpdateElement={onUpdateElement}
+            onDeleteElement={onDeleteElement}
+            onDuplicateElement={onDuplicateElement}
+            onAddChildElement={onAddElement}
+            onDetachFromContainer={onDetachFromContainer}
+            onSelectElement={onSelectElement}
+          />
+        )}
+
+        {/* RESPONSIVE TAB */}
+        {activeTab === 'responsive' && (
+          <ResponsiveInspector
+            element={selectedElement}
+            onUpdateElement={onUpdateElement}
+            activeViewportMode={viewportMode}
+            onChangeActiveViewport={onChangeViewport}
+          />
+        )}
+        {/* DESIGN TAB */}
+        {activeTab === 'design' && (
+          <div className="space-y-4">
+            {['event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'whatsapp-button', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code', 'gift-registry', 'travel-accommodation', 'directions-button', 'contact-button'].includes(selectedElement.type) ? (
+              <InvitationDesignInspector
+                element={selectedElement}
+                onUpdateElement={onUpdateElement}
+                palette={page.theme?.palette}
+                onBringForward={() => onBringForward && onBringForward(selectedElement.id)}
+                onSendBackward={() => onSendBackward && onSendBackward(selectedElement.id)}
+                onBringToFront={() => onBringToFront && onBringToFront(selectedElement.id)}
+                onSendToBack={() => onSendToBack && onSendToBack(selectedElement.id)}
+              />
+            ) : (
+              <>
+                {['heading', 'text', 'paragraph'].includes(selectedElement.type) && (
+                  <TextInspector element={selectedElement} onUpdateElement={onUpdateElement} />
                 )}
 
-                {/* Parent Container Breadcrumb Banner */}
-                {parentElement && (
-                  <div className="px-3 py-2 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between text-indigo-950 text-[11px]">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <Layers className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
-                      <span className="truncate">
-                        Inside <strong className="font-semibold">{parentElement.name || 'Container'}</strong>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {onSelectElement && (
-                        <button
-                          type="button"
-                          onClick={() => onSelectElement(parentElement.id)}
-                          title="Select Parent Container"
-                          className="p-1 hover:bg-indigo-100 rounded text-indigo-700 transition-colors cursor-pointer"
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      {onDetachFromContainer && (
-                        <button
-                          type="button"
-                          onClick={() => onDetachFromContainer(selectedElement.id)}
-                          title="Detach to Page"
-                          className="px-1.5 py-0.5 text-[10px] bg-white border border-indigo-200 hover:bg-indigo-100 rounded text-indigo-700 font-medium transition-colors cursor-pointer"
-                        >
-                          Detach
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                {selectedElement.type === 'image' && (
+                  <ImageInspector
+                    element={selectedElement}
+                    onUpdateElement={onUpdateElement}
+                    currentInvitationId={currentInvitationId}
+                    businessId={businessId}
+                  />
                 )}
 
-                {/* Tabs */}
-                <div className={`grid ${selectedElement.type === 'container' ? 'grid-cols-4' : 'grid-cols-3'} border-b border-slate-200 bg-slate-50/80 text-[11px] font-medium text-center`}>
-                  {[
-                    ...(selectedElement.type === 'container' ? [{ id: 'container', label: 'Container' }] : []),
-                    { id: 'design', label: 'Design' },
-                    { id: 'responsive', label: 'Responsive' },
-                    { id: 'animation', label: 'Animation' }
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id as any)}
-                      className={`py-2 border-b-2 transition-colors cursor-pointer ${activeTab === tab.id
-                        ? 'border-slate-900 text-slate-900 font-bold bg-white'
-                        : 'border-transparent text-slate-500 hover:text-slate-900'
-                        }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
+                {selectedElement.type === 'video' && (
+                  <VideoInspector
+                    element={selectedElement}
+                    onUpdateElement={onUpdateElement}
+                    currentInvitationId={currentInvitationId}
+                    businessId={businessId}
+                  />
+                )}
 
-                {/* Tab Panels */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {/* CONTAINER TAB (For Container Blocks) */}
-                  {activeTab === 'container' && selectedElement.type === 'container' && (
-                    <ContainerInspector
-                      element={selectedElement}
-                      allElements={page.elements}
-                      onUpdateElement={onUpdateElement}
-                      onDeleteElement={onDeleteElement}
-                      onDuplicateElement={onDuplicateElement}
-                      onAddChildElement={onAddElement}
-                      onDetachFromContainer={onDetachFromContainer}
-                      onSelectElement={onSelectElement}
-                    />
-                  )}
+                {['button', 'whatsapp-button'].includes(selectedElement.type) && (
+                  <ButtonInspector element={selectedElement} onUpdateElement={onUpdateElement} />
+                )}
 
-                  {/* RESPONSIVE TAB */}
-                  {activeTab === 'responsive' && (
-                    <ResponsiveInspector
-                      element={selectedElement}
-                      onUpdateElement={onUpdateElement}
-                      activeViewportMode={viewportMode}
-                      onChangeActiveViewport={onChangeViewport}
-                    />
-                  )}
-                  {/* DESIGN TAB */}
-                  {activeTab === 'design' && (
-                    <div className="space-y-4">
-                      {['event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'whatsapp-button', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code', 'gift-registry', 'travel-accommodation', 'directions-button', 'contact-button'].includes(selectedElement.type) ? (
-                        <InvitationDesignInspector
-                          element={selectedElement}
-                          onUpdateElement={onUpdateElement}
-                          palette={page.theme?.palette}
-                          onBringForward={() => onBringForward && onBringForward(selectedElement.id)}
-                          onSendBackward={() => onSendBackward && onSendBackward(selectedElement.id)}
-                          onBringToFront={() => onBringToFront && onBringToFront(selectedElement.id)}
-                          onSendToBack={() => onSendToBack && onSendToBack(selectedElement.id)}
+                {selectedElement.type === 'audio' && (
+                  <AudioInspector
+                    element={selectedElement}
+                    onUpdateElement={onUpdateElement}
+                    currentInvitationId={currentInvitationId}
+                    businessId={businessId}
+                  />
+                )}
+
+                {['icon', 'shape', 'divider'].includes(selectedElement.type) && (
+                  <IconShapeDividerInspector element={selectedElement} onUpdateElement={onUpdateElement} />
+                )}
+
+                {/* Position, Size & Layer Ordering - Collapsible below Style */}
+                <details className="group border border-slate-200 rounded-xl bg-slate-50/50 overflow-hidden" open={['image', 'video', 'container'].includes(selectedElement.type)}>
+                  <summary className="px-3 py-2 flex items-center justify-between text-[11px] font-bold text-slate-700 cursor-pointer select-none hover:bg-slate-100/80 transition-colors">
+                    <div className="flex items-center gap-1.5">
+                      <Sliders className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Position, Bounds & Layers</span>
+                    </div>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform" />
+                  </summary>
+                  <div className="p-3 pt-2 space-y-3 bg-white border-t border-slate-200">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">X Pos</label>
+                        <input
+                          type="number"
+                          value={style.x}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, x: Number(e.target.value) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
                         />
-                      ) : (
-                        <>
-                          {['heading', 'text', 'paragraph'].includes(selectedElement.type) && (
-                            <TextInspector element={selectedElement} onUpdateElement={onUpdateElement} />
-                          )}
-
-                          {selectedElement.type === 'image' && (
-                            <ImageInspector
-                              element={selectedElement}
-                              onUpdateElement={onUpdateElement}
-                              currentInvitationId={currentInvitationId}
-                              businessId={businessId}
-                            />
-                          )}
-
-                          {selectedElement.type === 'video' && (
-                            <VideoInspector
-                              element={selectedElement}
-                              onUpdateElement={onUpdateElement}
-                              currentInvitationId={currentInvitationId}
-                              businessId={businessId}
-                            />
-                          )}
-
-                          {['button', 'whatsapp-button'].includes(selectedElement.type) && (
-                            <ButtonInspector element={selectedElement} onUpdateElement={onUpdateElement} />
-                          )}
-
-                          {selectedElement.type === 'audio' && (
-                            <AudioInspector
-                              element={selectedElement}
-                              onUpdateElement={onUpdateElement}
-                              currentInvitationId={currentInvitationId}
-                              businessId={businessId}
-                            />
-                          )}
-
-                          {['icon', 'shape', 'divider'].includes(selectedElement.type) && (
-                            <IconShapeDividerInspector element={selectedElement} onUpdateElement={onUpdateElement} />
-                          )}
-
-                          {/* Position, Size & Layer Ordering - Collapsible below Style */}
-                          <details className="group border border-slate-200 rounded-xl bg-slate-50/50 overflow-hidden" open={['image', 'video', 'container'].includes(selectedElement.type)}>
-                            <summary className="px-3 py-2 flex items-center justify-between text-[11px] font-bold text-slate-700 cursor-pointer select-none hover:bg-slate-100/80 transition-colors">
-                              <div className="flex items-center gap-1.5">
-                                <Sliders className="w-3.5 h-3.5 text-slate-500" />
-                                <span>Position, Bounds & Layers</span>
-                              </div>
-                              <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-open:rotate-180 transition-transform" />
-                            </summary>
-                            <div className="p-3 pt-2 space-y-3 bg-white border-t border-slate-200">
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">X Pos</label>
-                                  <input
-                                    type="number"
-                                    value={style.x}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, x: Number(e.target.value) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Y Pos</label>
-                                  <input
-                                    type="number"
-                                    value={style.y}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, y: Number(e.target.value) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Width</label>
-                                  <input
-                                    type="number"
-                                    value={style.width}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, width: Math.max(10, Number(e.target.value)) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Height</label>
-                                  <input
-                                    type="number"
-                                    value={style.height}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, height: Math.max(10, Number(e.target.value)) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Rotation (°)</label>
-                                  <input
-                                    type="number"
-                                    value={style.rotation || 0}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, rotation: Number(e.target.value) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Opacity</label>
-                                  <input
-                                    type="number"
-                                    step="0.05"
-                                    min="0"
-                                    max="1"
-                                    value={style.opacity ?? 1}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, opacity: Number(e.target.value) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Layer Ordering Buttons */}
-                              {(onBringForward || onSendBackward || onBringToFront || onSendToBack) && (
-                                <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                                  <span className="text-[10px] font-semibold text-slate-600 block">Layer Ordering</span>
-                                  <div className="grid grid-cols-2 gap-1.5">
-                                    {onBringToFront && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onBringToFront(selectedElement.id)}
-                                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                                        title="Bring to Front (Ctrl+Shift+])"
-                                      >
-                                        <ArrowUpToLine className="w-3 h-3" />
-                                        <span>Bring to Front</span>
-                                      </button>
-                                    )}
-                                    {onBringForward && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onBringForward(selectedElement.id)}
-                                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                                        title="Bring Forward (Ctrl+])"
-                                      >
-                                        <ArrowUp className="w-3 h-3" />
-                                        <span>Forward</span>
-                                      </button>
-                                    )}
-                                    {onSendBackward && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onSendBackward(selectedElement.id)}
-                                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                                        title="Send Backward (Ctrl+[)"
-                                      >
-                                        <ArrowDown className="w-3 h-3" />
-                                        <span>Backward</span>
-                                      </button>
-                                    )}
-                                    {onSendToBack && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onSendToBack(selectedElement.id)}
-                                        className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
-                                        title="Send to Back (Ctrl+Shift+[)"
-                                      >
-                                        <ArrowDownToLine className="w-3 h-3" />
-                                        <span>Send to Back</span>
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Ungroup Container button if type is container */}
-                              {selectedElement.type === 'container' && onUngroup && (
-                                <div className="pt-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => onUngroup(selectedElement.id)}
-                                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-amber-900 text-xs font-semibold transition-colors cursor-pointer"
-                                  >
-                                    <Ungroup className="w-3.5 h-3.5" />
-                                    <span>Ungroup Container (Release Elements)</span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </details>
-
-                          {/* Container Shape Properties */}
-                          {selectedElement.type === 'container' && (
-                            <div className="space-y-3 pt-3 border-t border-slate-200">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
-                                Container Shape & Masking
-                              </span>
-
-                              {/* Shape selection */}
-                              <div>
-                                <label className="text-[10px] text-slate-500 block mb-1">Shape Silhouette</label>
-                                <select
-                                  value={style.shape || 'rectangle'}
-                                  onChange={(e) => onUpdateElement(selectedElement.id, {
-                                    style: { ...style, shape: e.target.value as ContainerShape }
-                                  })}
-                                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                >
-                                  {shapes.map((s) => (
-                                    <option key={s.id} value={s.id}>{s.label}</option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              {/* Clip mask toggle */}
-                              <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
-                                <div>
-                                  <div className="text-xs font-semibold text-slate-900">Clip / Mask Children</div>
-                                  <div className="text-[10px] text-slate-500">Crops child image/video inside shape</div>
-                                </div>
-                                <input
-                                  type="checkbox"
-                                  checked={style.clipMask !== false}
-                                  onChange={(e) => onUpdateElement(selectedElement.id, {
-                                    style: { ...style, clipMask: e.target.checked }
-                                  })}
-                                  className="w-4 h-4 accent-slate-900"
-                                />
-                              </div>
-
-                              {/* Border and Colors */}
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Border Width (px)</label>
-                                  <input
-                                    type="number"
-                                    value={style.borderWidth || 0}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, borderWidth: Number(e.target.value) }
-                                    })}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-[10px] text-slate-500 block">Border Color</label>
-                                  <div className="flex items-center gap-1.5">
-                                    <input
-                                      type="color"
-                                      value={style.borderColor || '#cbd5e1'}
-                                      onChange={(e) => onUpdateElement(selectedElement.id, {
-                                        style: { ...style, borderColor: e.target.value }
-                                      })}
-                                      className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
-                                    />
-                                    <input
-                                      type="text"
-                                      value={style.borderColor || '#cbd5e1'}
-                                      onChange={(e) => onUpdateElement(selectedElement.id, {
-                                        style: { ...style, borderColor: e.target.value }
-                                      })}
-                                      className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] text-slate-500 block mb-1">Fill Background Color</label>
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="color"
-                                    value={style.backgroundColor || '#f8fafc'}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, backgroundColor: e.target.value }
-                                    })}
-                                    className="w-8 h-8 rounded border border-slate-200 cursor-pointer bg-transparent"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={style.backgroundColor || '#f8fafc'}
-                                    onChange={(e) => onUpdateElement(selectedElement.id, {
-                                      style: { ...style, backgroundColor: e.target.value }
-                                    })}
-                                    className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Y Pos</label>
+                        <input
+                          type="number"
+                          value={style.y}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, y: Number(e.target.value) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Width</label>
+                        <input
+                          type="number"
+                          value={style.width}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, width: Math.max(10, Number(e.target.value)) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Height</label>
+                        <input
+                          type="number"
+                          value={style.height}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, height: Math.max(10, Number(e.target.value)) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Rotation (°)</label>
+                        <input
+                          type="number"
+                          value={style.rotation || 0}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, rotation: Number(e.target.value) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Opacity</label>
+                        <input
+                          type="number"
+                          step="0.05"
+                          min="0"
+                          max="1"
+                          value={style.opacity ?? 1}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, opacity: Number(e.target.value) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
                     </div>
-                  )}
 
-                  {/* ANIMATION TAB */}
-                  {activeTab === 'animation' && (
-                    <AnimationInspector
-                      element={selectedElement}
-                      onUpdateElement={onUpdateElement}
-                      onPreviewAnimation={onPreviewAnimation}
-                    />
-                  )}
-                </div>
-              </div>
-              );
+                    {/* Layer Ordering Buttons */}
+                    {(onBringForward || onSendBackward || onBringToFront || onSendToBack) && (
+                      <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                        <span className="text-[10px] font-semibold text-slate-600 block">Layer Ordering</span>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {onBringToFront && (
+                            <button
+                              type="button"
+                              onClick={() => onBringToFront(selectedElement.id)}
+                              className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                              title="Bring to Front (Ctrl+Shift+])"
+                            >
+                              <ArrowUpToLine className="w-3 h-3" />
+                              <span>Bring to Front</span>
+                            </button>
+                          )}
+                          {onBringForward && (
+                            <button
+                              type="button"
+                              onClick={() => onBringForward(selectedElement.id)}
+                              className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                              title="Bring Forward (Ctrl+])"
+                            >
+                              <ArrowUp className="w-3 h-3" />
+                              <span>Forward</span>
+                            </button>
+                          )}
+                          {onSendBackward && (
+                            <button
+                              type="button"
+                              onClick={() => onSendBackward(selectedElement.id)}
+                              className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                              title="Send Backward (Ctrl+[)"
+                            >
+                              <ArrowDown className="w-3 h-3" />
+                              <span>Backward</span>
+                            </button>
+                          )}
+                          {onSendToBack && (
+                            <button
+                              type="button"
+                              onClick={() => onSendToBack(selectedElement.id)}
+                              className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-700 text-[11px] font-medium transition-colors cursor-pointer"
+                              title="Send to Back (Ctrl+Shift+[)"
+                            >
+                              <ArrowDownToLine className="w-3 h-3" />
+                              <span>Send to Back</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ungroup Container button if type is container */}
+                    {selectedElement.type === 'container' && onUngroup && (
+                      <div className="pt-2">
+                        <button
+                          type="button"
+                          onClick={() => onUngroup(selectedElement.id)}
+                          className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-amber-900 text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          <Ungroup className="w-3.5 h-3.5" />
+                          <span>Ungroup Container (Release Elements)</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </details>
+
+                {/* Container Shape Properties */}
+                {selectedElement.type === 'container' && (
+                  <div className="space-y-3 pt-3 border-t border-slate-200">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900 block">
+                      Container Shape & Masking
+                    </span>
+
+                    {/* Shape selection */}
+                    <div>
+                      <label className="text-[10px] text-slate-500 block mb-1">Shape Silhouette</label>
+                      <select
+                        value={style.shape || 'rectangle'}
+                        onChange={(e) => onUpdateElement(selectedElement.id, {
+                          style: { ...style, shape: e.target.value as ContainerShape }
+                        })}
+                        className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                      >
+                        {shapes.map((s) => (
+                          <option key={s.id} value={s.id}>{s.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Clip mask toggle */}
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+                      <div>
+                        <div className="text-xs font-semibold text-slate-900">Clip / Mask Children</div>
+                        <div className="text-[10px] text-slate-500">Crops child image/video inside shape</div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={style.clipMask !== false}
+                        onChange={(e) => onUpdateElement(selectedElement.id, {
+                          style: { ...style, clipMask: e.target.checked }
+                        })}
+                        className="w-4 h-4 accent-slate-900"
+                      />
+                    </div>
+
+                    {/* Border and Colors */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Border Width (px)</label>
+                        <input
+                          type="number"
+                          value={style.borderWidth || 0}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, borderWidth: Number(e.target.value) }
+                          })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500 block">Border Color</label>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="color"
+                            value={style.borderColor || '#cbd5e1'}
+                            onChange={(e) => onUpdateElement(selectedElement.id, {
+                              style: { ...style, borderColor: e.target.value }
+                            })}
+                            className="w-7 h-7 rounded border border-slate-200 cursor-pointer bg-transparent"
+                          />
+                          <input
+                            type="text"
+                            value={style.borderColor || '#cbd5e1'}
+                            onChange={(e) => onUpdateElement(selectedElement.id, {
+                              style: { ...style, borderColor: e.target.value }
+                            })}
+                            className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] text-slate-500 block mb-1">Fill Background Color</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={style.backgroundColor || '#f8fafc'}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, backgroundColor: e.target.value }
+                          })}
+                          className="w-8 h-8 rounded border border-slate-200 cursor-pointer bg-transparent"
+                        />
+                        <input
+                          type="text"
+                          value={style.backgroundColor || '#f8fafc'}
+                          onChange={(e) => onUpdateElement(selectedElement.id, {
+                            style: { ...style, backgroundColor: e.target.value }
+                          })}
+                          className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded p-1.5 font-mono text-slate-800 focus:bg-white focus:outline-none focus:border-slate-900"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ANIMATION TAB */}
+        {activeTab === 'animation' && (
+          <AnimationInspector
+            element={selectedElement}
+            onUpdateElement={onUpdateElement}
+            onPreviewAnimation={onPreviewAnimation}
+          />
+        )}
+      </div>
+    </div>
+  );
 };

@@ -7,7 +7,8 @@ import {
   OpeningCoverType,
   VideoPlayMode,
   ImageTransitionEffect,
-  ImageAdvanceTrigger
+  ImageAdvanceTrigger,
+  ViewportMode
 } from '../../types';
 import { Play, Volume2, VolumeX, ArrowRight, MoveUp, Sliders } from 'lucide-react';
 import { ElementRenderer } from '../canvas/ElementRenderer';
@@ -23,6 +24,7 @@ interface OpeningEnvelopeScreenProps {
   onOpen?: () => void;
   onOpenComplete?: () => void;
   isContained?: boolean;
+  activeViewport?: ViewportMode;
 }
 
 export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
@@ -33,7 +35,8 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
   defaultDate,
   onOpen,
   onOpenComplete,
-  isContained = false
+  isContained = false,
+  activeViewport = 'mobile'
 }) => {
   const config = propConfig || openingScreen || {
     enabled: true,
@@ -74,7 +77,10 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
   const elements = page.elements || [];
   const topLevelElements = elements.filter((el) => !el.parentContainerId && !el.parentId && !el.isHidden);
   const hasButtonOnCanvas = elements.some(
-    (el) => el.id === 'open-elem-button' || el.type === 'button'
+    (el) =>
+      el.id === 'open-elem-button' ||
+      el.content?.buttonAction === 'open-invitation' ||
+      el.content?.buttonAction === 'open_invitation'
   );
 
   // Determine cover type: if explicitly selected, respect it strictly!
@@ -292,16 +298,17 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
     }
   }, [coverType, imageTrigger, config.imageTimerSeconds]);
 
-  // Check if click anywhere trigger is active (or if there is no explicit button on canvas)
+  // Check if click anywhere trigger is active (or if there is no explicit open button on canvas)
   const handleContainerClick = () => {
     if (
-      !hasButtonOnCanvas ||
-      (coverType === 'image' && imageTrigger === 'click-anywhere') ||
-      coverType === 'envelope'
+      imageTrigger === 'click-anywhere' ||
+      !hasButtonOnCanvas
     ) {
       triggerOpen();
     }
   };
+
+  const transitionDuration = config.transitionDuration || config.imageTransitionDuration || 0.85;
 
   // Determine transition variants based on selected effect (Global for all cover types)
   const getExitAnimation = () => {
@@ -310,21 +317,21 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
         return {
           y: '-105%',
           opacity: 0.8,
-          transition: { duration: 0.85, ease: [0.25, 1, 0.5, 1] }
+          transition: { duration: transitionDuration, ease: [0.25, 1, 0.5, 1] }
         };
       case 'curtain-split':
         return {
           clipPath: 'inset(0% 50% 0% 50%)',
           scale: 1.05,
           opacity: 0,
-          transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: transitionDuration, ease: [0.22, 1, 0.36, 1] }
         };
       case 'blur-dissolve':
         return {
           filter: 'blur(35px)',
           opacity: 0,
           scale: 1.08,
-          transition: { duration: 0.9, ease: 'easeInOut' }
+          transition: { duration: transitionDuration, ease: 'easeInOut' }
         };
       case 'book-flip':
         return {
@@ -332,7 +339,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           opacity: 0,
           x: '-20%',
           transformOrigin: 'left center',
-          transition: { duration: 0.9, ease: [0.4, 0, 0.2, 1] }
+          transition: { duration: transitionDuration, ease: [0.4, 0, 0.2, 1] }
         };
       case 'envelope-unfold':
         return {
@@ -341,7 +348,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           opacity: 0,
           scale: 0.92,
           transformOrigin: 'bottom center',
-          transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: transitionDuration, ease: [0.22, 1, 0.36, 1] }
         };
       case 'zoom-fade':
       default:
@@ -349,7 +356,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           scale: 1.35,
           opacity: 0,
           filter: 'blur(16px)',
-          transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: transitionDuration, ease: [0.22, 1, 0.36, 1] }
         };
     }
   };
@@ -400,7 +407,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
       onTouchEnd={handleTouchEnd}
       className={`${isContained ? 'absolute' : 'fixed'
         } inset-0 z-40 flex flex-col items-center justify-center select-none overflow-hidden ${videoPlayMode === 'scroll-based' || imageTrigger === 'scroll-swipe' ? 'touch-none' : ''
-        } ${!hasButtonOnCanvas || (coverType === 'image' && imageTrigger === 'click-anywhere') ? 'cursor-pointer' : ''
+        } ${!hasButtonOnCanvas || imageTrigger === 'click-anywhere' ? 'cursor-pointer' : ''
         }`}
       style={{
         perspective: 1400,
@@ -559,15 +566,22 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
             }}
           />
         </>
-      ) : (
-        /* Gradient / Radial Envelope Background */
+      ) : pageBg?.type === 'gradient' && pageBg.gradient ? (
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              pageBg?.type === 'gradient' && pageBg.gradient
-                ? `radial-gradient(circle at 50% 40%, ${pageBg.gradient.colors[0] || '#172520'}, ${pageBg.gradient.colors[1] || '#07120d'})`
-                : 'radial-gradient(circle at 50% 40%, #172520 0%, #07120d 100%)'
+              pageBg.gradient.type === 'linear'
+                ? `linear-gradient(${pageBg.gradient.angle ?? 135}deg, ${pageBg.gradient.colors[0] || '#172520'}, ${pageBg.gradient.colors[1] || '#07120d'})`
+                : `radial-gradient(circle at 50% 40%, ${pageBg.gradient.colors[0] || '#172520'}, ${pageBg.gradient.colors[1] || '#07120d'})`
+          }}
+        />
+      ) : (
+        /* Solid Color Background */
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundColor: pageBg?.color || '#172520'
           }}
         />
       )}
@@ -606,19 +620,26 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           }}
         >
           {topLevelElements.map((el) => {
-            const { style: resolvedStyle } = resolveElementForViewport(el, 'mobile');
+            const { style: resolvedStyle } = resolveElementForViewport(el, activeViewport);
             const rotationTransform = resolvedStyle.rotation ? `rotate(${resolvedStyle.rotation}deg)` : '';
 
-            const isButtonOrAction =
+            const isOpenInvitationButton =
               el.id === 'open-elem-button' ||
+              el.content?.buttonAction === 'open-invitation' ||
+              el.content?.buttonAction === 'open_invitation';
+
+            const isWaxSealAction =
               el.id === 'open-elem-icon' ||
               el.id === 'open-elem-seal-hint' ||
-              el.type === 'button';
+              el.name === 'Wax Seal Badge' ||
+              el.name === 'Wax Seal Hint';
+
+            const isOpeningTrigger = isOpenInvitationButton || isWaxSealAction;
 
             return (
               <div
                 key={el.id}
-                className={`absolute ${isButtonOrAction ? 'cursor-pointer' : ''}`}
+                className={`absolute ${isOpeningTrigger ? 'cursor-pointer' : ''}`}
                 style={{
                   left: `${resolvedStyle.x}px`,
                   top: `${resolvedStyle.y}px`,
@@ -628,7 +649,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
                   zIndex: resolvedStyle.zIndex || 1
                 }}
                 onClick={(e) => {
-                  if (isButtonOrAction) {
+                  if (isOpeningTrigger) {
                     e.stopPropagation();
                     triggerOpen();
                   }
@@ -637,10 +658,12 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
                 <ElementRenderer
                   element={el}
                   isEditor={false}
-                  viewportMode="mobile"
+                  viewportMode={activeViewport}
                   allElements={elements}
                   onActionClick={() => {
-                    triggerOpen();
+                    if (isOpeningTrigger) {
+                      triggerOpen();
+                    }
                   }}
                 />
               </div>

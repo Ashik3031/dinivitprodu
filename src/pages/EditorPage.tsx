@@ -562,8 +562,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     const nextConfig: OpeningScreenConfig = {
       ...(invitation.openingScreen || {
         enabled: true,
-        style: 'envelope',
-        title: invitation.title || 'Wedding Invitation'
+        coverType: 'custom-page',
+        style: 'custom-page'
       }),
       enabled
     };
@@ -574,8 +574,8 @@ export const EditorPage: React.FC<EditorPageProps> = ({
     if (!invitation) return;
     const currentOpening = invitation.openingScreen || {
       enabled: true,
-      style: 'envelope',
-      title: invitation.title || 'Wedding Invitation'
+      coverType: 'custom-page',
+      style: 'custom-page'
     };
     const nextConfig: OpeningScreenConfig = {
       ...currentOpening,
@@ -599,7 +599,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           ? 'image'
           : updatedPage.background?.type === 'video'
             ? 'video'
-            : 'envelope'),
+            : 'custom-page'),
       background: updatedPage.background,
       page: updatedPage
     };

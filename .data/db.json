@@ -3,7 +3,7 @@
     {
       "id": "usr-1795074225335-3r6d",
       "username": "Tester",
-      "passwordHash": "$2b$10$g5.B82pVxXGhr2akWr5a3.cLojIOzHNMMSYVg18CPq7xl/P0q5hYK",
+      "passwordHash": "$2b$10$WzKm1QxF91vssAZjGo4Y/eBdo1eFWrPWE29mPSF95y3Mc2Yo4p.Ti",
       "businessName": "Testing Account",
       "ownerName": "Testing",
       "email": "test@xyraco.com",
@@ -11,7 +11,7 @@
       "role": "business",
       "isActive": true,
       "createdAt": "2026-11-19T07:43:45.585Z",
-      "lastLogin": "2026-11-19T07:53:46.738Z"
+      "lastLogin": "2026-11-22T06:10:17.296Z"
     },
     {
       "id": "usr-biz-royal",
@@ -38,7 +38,7 @@
       "role": "admin",
       "isActive": true,
       "createdAt": "2026-01-01T00:00:00.000Z",
-      "lastLogin": "2026-11-21T07:35:29.467Z"
+      "lastLogin": "2026-11-21T16:15:56.697Z"
     },
     {
       "id": "usr-biz-elegance",
@@ -56,173 +56,6 @@
     }
   ],
   "invitations": [
-    {
-      "id": "inv-1795089541870-trgc",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "new",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "new-umk3v",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "new",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795089541870-jt45",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": [
-            {
-              "id": "el-1795090058117-f7nn",
-              "type": "countdown",
-              "name": "countdown",
-              "parentContainerId": null,
-              "parentId": null,
-              "style": {
-                "x": 25,
-                "y": 251,
-                "width": 340,
-                "height": 84
-              },
-              "content": {
-                "countdownTarget": "2026-10-24T16:00:00",
-                "countdownStyle": "boxes"
-              },
-              "animation": {
-                "type": "fadeIn",
-                "duration": 0.8,
-                "delay": 0.2
-              }
-            },
-            {
-              "id": "el-1795090074939-cfld",
-              "type": "google-maps",
-              "name": "google-maps",
-              "parentContainerId": null,
-              "parentId": null,
-              "style": {
-                "x": 30,
-                "y": 50,
-                "width": 340,
-                "height": 190,
-                "borderRadius": 12,
-                "color": "#059669",
-                "backgroundColor": "#0f172a",
-                "borderColor": "#fde68a",
-                "fontFamily": "'Playfair Display', serif",
-                "borderWidth": 1,
-                "borderStyle": "solid"
-              },
-              "content": {
-                "venueName": "The Biltmore Estate",
-                "venueAddress": "1 Lodge St, Asheville, NC 28803",
-                "mapQuery": "Biltmore+Estate",
-                "mapZoom": 14
-              },
-              "animation": {
-                "type": "fadeIn",
-                "duration": 0.8,
-                "delay": 0.2
-              }
-            },
-            {
-              "id": "el-1795090138023-yxm9",
-              "type": "rsvp-form",
-              "name": "rsvp-form",
-              "parentContainerId": null,
-              "parentId": null,
-              "style": {
-                "x": 25,
-                "y": 365,
-                "width": 350,
-                "height": 250,
-                "borderRadius": 16
-              },
-              "content": {},
-              "animation": {
-                "type": "fadeIn",
-                "duration": 0.8,
-                "delay": 0.2
-              }
-            },
-            {
-              "id": "el-1795090165391-sjh6",
-              "type": "calendar",
-              "name": "calendar",
-              "parentContainerId": null,
-              "parentId": null,
-              "style": {
-                "x": 32,
-                "y": 615,
-                "width": 330,
-                "height": 260,
-                "backgroundColor": "#0f172a",
-                "borderRadius": 16
-              },
-              "content": {
-                "eventDate": "2026-10-24",
-                "calendarMonth": "October",
-                "calendarYear": 2026,
-                "calendarDay": 24,
-                "calendarShowAddToCal": true,
-                "calendarEventTitle": "Alexander & Sophia Wedding"
-              },
-              "animation": {
-                "type": "fadeIn",
-                "duration": 0.8,
-                "delay": 0.2
-              }
-            }
-          ]
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T11:59:01.870Z",
-      "updatedAt": "2026-11-19T12:53:36.187Z"
-    },
     {
       "id": "inv-1789313218147-hqft",
       "businessId": "usr-biz-royal",
@@ -986,201 +819,6 @@
       "updatedAt": "2026-09-18T17:17:04.121Z"
     },
     {
-      "id": "inv-1795085154477-33fe",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "new",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "new-5xajj",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "new",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795085154469-cb36",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T10:45:54.477Z",
-      "updatedAt": "2026-11-19T10:45:54.477Z"
-    },
-    {
-      "id": "inv-1795085121913-t68l",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "testing",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "testing-rk4ud",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "testing",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795085121902-s29w",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T10:45:21.913Z",
-      "updatedAt": "2026-11-19T10:45:21.913Z"
-    },
-    {
-      "id": "inv-1795074895096-ngr5",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "testing theme",
-      "customerName": "testing",
-      "eventDate": "2026-11-20",
-      "eventType": "wedding",
-      "slug": "testing-theme-gvm37",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "testing theme",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795074895089-d58z",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T07:54:55.096Z",
-      "updatedAt": "2026-11-19T10:08:49.935Z"
-    },
-    {
       "id": "inv-1789320898929-ivy2",
       "businessId": "usr-admin-1",
       "title": "Wedding Invitation",
@@ -1355,201 +993,6 @@
       "viewsCount": 0,
       "createdAt": "2026-11-19T07:37:11.889Z",
       "updatedAt": "2026-11-19T07:37:52.653Z"
-    },
-    {
-      "id": "inv-1795087279316-bprx",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "new",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "new-v0rre",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "new",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795087279310-x8or",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T11:21:19.316Z",
-      "updatedAt": "2026-11-19T11:21:19.316Z"
-    },
-    {
-      "id": "inv-1795088793299-gxap",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "new",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "new-lkshf",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "new",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795088793295-5e5e",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T11:46:33.299Z",
-      "updatedAt": "2026-11-19T11:46:33.299Z"
-    },
-    {
-      "id": "inv-1795088848820-fsho",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "new",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "new-r79af",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "new",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795088848820-909l",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T11:47:28.820Z",
-      "updatedAt": "2026-11-19T11:47:28.820Z"
     },
     {
       "id": "inv-1789312801269-78vg",
@@ -2911,71 +2354,6 @@
       "customerName": "Rahul & Priya"
     },
     {
-      "id": "inv-1795086207330-5lmw",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "test 2",
-      "customerName": "",
-      "eventDate": "",
-      "eventType": "wedding",
-      "slug": "test-2-srlja",
-      "category": "wedding",
-      "status": "draft",
-      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
-      "theme": {
-        "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
-        "fontHeading": "'Cinzel', serif",
-        "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
-      },
-      "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "test 2",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
-        "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
-      },
-      "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
-        "loop": true,
-        "floatingBadge": false
-      },
-      "pages": [
-        {
-          "id": "page-1795086207328-vqbg",
-          "name": "Section 1",
-          "order": 0,
-          "heightMode": "viewport",
-          "height": 844,
-          "isFullHeight": true,
-          "background": {
-            "type": "color",
-            "color": "#f8fafc"
-          },
-          "elements": []
-        }
-      ],
-      "settings": {
-        "enableAutoScroll": false,
-        "autoScrollSpeed": 30,
-        "showPageNavDots": true,
-        "allowGuestComments": true,
-        "allowRSVP": true,
-        "enableConfettiOnOpen": true
-      },
-      "viewsCount": 0,
-      "createdAt": "2026-11-19T11:03:27.330Z",
-      "updatedAt": "2026-11-19T11:03:27.330Z"
-    },
-    {
       "id": "inv-1789314005048-peau",
       "businessId": "usr-biz-royal",
       "title": "Wedding Invitation",
@@ -3795,56 +3173,1394 @@
       "updatedAt": "2026-09-13T15:44:36.151Z"
     },
     {
-      "id": "inv-1795175154350-d3yr",
+      "id": "inv-1795327921339-blb4",
       "businessId": "usr-1795074225335-3r6d",
-      "title": "test",
-      "customerName": "",
+      "title": "sample",
+      "customerName": "tst",
       "eventDate": "",
       "eventType": "wedding",
-      "slug": "test-o2qbf",
+      "slug": "althaf-aysha",
       "category": "wedding",
-      "status": "draft",
+      "status": "published",
       "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
       "theme": {
         "primaryColor": "#d4af37",
-        "secondaryColor": "#0a3d2c",
-        "accentColor": "#f9f6ee",
+        "secondaryColor": "#1a3628",
+        "accentColor": "#d4af37",
+        "backgroundColor": "#f8fafc",
         "fontHeading": "'Cinzel', serif",
         "fontBody": "'Montserrat', sans-serif",
-        "fontScript": "'Great Vibes', cursive",
-        "backgroundColor": "#f8fafc"
+        "fontScript": "'Parisienne', cursive"
       },
       "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "test",
-        "openButtonText": "Open Invitation",
-        "envelopeColor": "#071811",
+        "enabled": true,
+        "style": "card-flip",
+        "musicAutoplayOnOpen": true,
+        "envelopeColor": "#1a3628",
         "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
+        "showOpenButton": true,
+        "title": "Formal Invitation",
+        "subtitle": "You are cordially invited",
+        "coupleNames": "Abdullah\n&\nReem",
+        "openButtonText": "open",
+        "coverType": "image",
+        "background": {
+          "type": "image",
+          "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243418/download.jpg",
+          "size": "cover",
+          "position": "center",
+          "overlayColor": "#000000",
+          "overlayOpacity": 0.4
+        },
+        "page": {
+          "id": "opening-screen-page",
+          "name": "Opening Screen",
+          "order": -1,
+          "width": 520,
+          "height": 400,
+          "heightMode": "custom",
+          "isFullHeight": false,
+          "background": {
+            "type": "image",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243418/download.jpg",
+            "size": "cover",
+            "position": "center",
+            "overlayColor": "#000000",
+            "overlayOpacity": 0.4
+          },
+          "elements": [
+            {
+              "id": "el-1795328221346-aeh0",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 77,
+                "y": 18,
+                "width": 360,
+                "height": 164,
+                "fontSize": 26,
+                "color": "#e4e7ec",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 700
+              },
+              "content": {
+                "text": "Abdullah\n&\nReem"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795328285239-qac4",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 99,
+                "y": 185,
+                "width": 330,
+                "height": 60,
+                "fontSize": 17,
+                "color": "#f9fafa",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 500
+              },
+              "content": {
+                "text": "Cordially Invites"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "open-elem-button",
+              "type": "button",
+              "name": "Open Invitation Button",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 119,
+                "y": 278,
+                "width": 300,
+                "height": 52,
+                "backgroundColor": "#d4af37",
+                "color": "#07120d",
+                "fontSize": 13,
+                "fontWeight": 800,
+                "borderRadius": 9999,
+                "boxShadow": "0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 25px rgba(212, 175, 55, 0.4)",
+                "letterSpacing": 1.5,
+                "zIndex": 20
+              },
+              "content": {
+                "buttonText": "open",
+                "buttonAction": "open-invitation",
+                "buttonShape": "pill"
+              },
+              "animation": {
+                "type": "bounce",
+                "duration": 1.5,
+                "delay": 0.6,
+                "repeat": "infinite"
+              }
+            }
+          ]
+        },
+        "showTextOnCover": false,
+        "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243418/download.jpg",
+        "coverTransitionEffect": "zoom-fade",
+        "imageTransitionEffect": "zoom-fade",
+        "imageAdvanceTrigger": "click-button"
       },
       "music": {
-        "enabled": false,
-        "audioUrl": "",
-        "title": "No Music Selected",
-        "artist": "",
-        "autoPlay": false,
+        "enabled": true,
+        "audioUrl": "https://cdn.freesound.org/previews/467/467269_4939433-lq.mp3",
+        "title": "Romantic Prelude Strings",
+        "artist": "Studio Symphony",
+        "autoPlay": true,
         "loop": true,
-        "floatingBadge": false
+        "floatingBadge": true
       },
       "pages": [
         {
-          "id": "page-1795175154348-erbk",
+          "id": "page-1795327935515-0",
           "name": "Section 1",
           "order": 0,
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243418/download.jpg",
+            "size": "cover",
+            "position": "59% 52%",
+            "repeat": "no-repeat",
+            "customPosition": {
+              "x": 59,
+              "y": 52
+            },
+            "zoom": 100,
+            "overlayEnabled": true,
+            "overlayOpacity": 0.05,
+            "overlayColor": "#ffffff"
+          },
+          "elements": [
+            {
+              "id": "el-1795271371029-9mdt",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 20,
+                "y": 26,
+                "width": 330,
+                "height": 60,
+                "fontSize": 24,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Great Vibes', cursive"
+              },
+              "content": {
+                "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795271433811-qgl8",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 29,
+                "y": 75,
+                "width": 330,
+                "height": 60,
+                "fontSize": 12,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Prata', serif"
+              },
+              "content": {
+                "text": "IN THE NAME OF ALLAH, THE MOST MERCIFUL\n\n"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795271507627-j0cb",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 31,
+                "y": 113,
+                "width": 330,
+                "height": 60,
+                "fontSize": 10,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "With hearts filled with gratitude and joy,\nwe invite you to witness the beginning of a beautiful forever.\n\n"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795271548595-zg0d",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 27,
+                "y": 172,
+                "width": 330,
+                "height": 117,
+                "fontSize": 24,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Marcellus', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "ALTHAF\n&\nAYSHA"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "page-1795327935515-1",
+          "name": "Section 2",
+          "order": 1,
           "heightMode": "viewport",
           "height": 844,
           "isFullHeight": true,
           "background": {
-            "type": "color",
-            "color": "#f8fafc"
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_1.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.05,
+            "overlayColor": "#000000"
           },
-          "elements": []
+          "elements": [
+            {
+              "id": "el-1795324319399-dbrx",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 28,
+                "y": 85,
+                "width": 330,
+                "height": 60,
+                "fontSize": 30,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontWeight": 600,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "CEREMONY INFO"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324413463-ge5w",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 1,
+                "y": 173,
+                "width": 184,
+                "height": 26,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "Mr. & Mrs."
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324431598-qudj",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 203,
+                "y": 176,
+                "width": 184,
+                "height": 26,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "zIndex": 4
+              },
+              "content": {
+                "text": "Mr. & Mrs."
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324491916-2wv7",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": -45,
+                "y": 190,
+                "width": 258,
+                "height": 36,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Abdullah Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324584299-jiao",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 155,
+                "y": 191,
+                "width": 258,
+                "height": 36,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600,
+                "zIndex": 6
+              },
+              "content": {
+                "text": "Abdullah Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324615133-m131",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": -33,
+                "y": 216,
+                "width": 230,
+                "height": 29,
+                "fontSize": 13,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "Reem Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324638234-mgcv",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 173,
+                "y": 215,
+                "width": 230,
+                "height": 29,
+                "fontSize": 13,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "zIndex": 8
+              },
+              "content": {
+                "text": "Reem Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324675342-xrg3",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 25,
+                "y": 263,
+                "width": 330,
+                "height": 60,
+                "fontSize": 16,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cormorant Garamond', serif",
+                "fontWeight": 700
+              },
+              "content": {
+                "text": "WE JOYFULLY ANNOUNCE\nTHE WEDDING OF OUR CHILDREN"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324746294-j443",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 7,
+                "y": 331,
+                "width": 374,
+                "height": 90,
+                "fontSize": 29,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Abdullah Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324833757-qb6e",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 36,
+                "y": 386,
+                "width": 310,
+                "height": 64,
+                "fontSize": 29,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600,
+                "zIndex": 11
+              },
+              "content": {
+                "text": "&"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324872846-74s6",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 9,
+                "y": 420,
+                "width": 374,
+                "height": 75,
+                "fontSize": 29,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600,
+                "zIndex": 12
+              },
+              "content": {
+                "text": "Reem Al Harbi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324924171-px1g",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 39,
+                "y": 499,
+                "width": 328,
+                "height": 45,
+                "fontSize": 11,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "KATB AL-KITAB\nAl Faisaliah Ballroom"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324984812-d8lz",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 113,
+                "y": 538,
+                "width": 191,
+                "height": 29,
+                "fontSize": 10,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "AT 18:30 TUESDAY"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325046953-nyzy",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 111,
+                "y": 563,
+                "width": 104,
+                "height": 67,
+                "fontSize": 37,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "09"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325077995-mnr8",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 193,
+                "y": 563,
+                "width": 104,
+                "height": 67,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "zIndex": 16,
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "MARCH\n2027"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325162505-wycr",
+              "type": "divider",
+              "name": "divider",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 146,
+                "y": 198,
+                "width": 85,
+                "height": 20,
+                "dividerStyle": "solid",
+                "borderColor": "#5e7156",
+                "rotation": 90,
+                "color": "#5e7156"
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325316359-llsx",
+              "type": "divider",
+              "name": "divider (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 179,
+                "y": 586,
+                "width": 43,
+                "height": 22,
+                "dividerStyle": "solid",
+                "borderColor": "#5e7156",
+                "rotation": 90,
+                "color": "#5e7156",
+                "zIndex": 18
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "page-1795327935515-2",
+          "name": "Section 3",
+          "order": 2,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_3.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.1,
+            "overlayColor": "#000000"
+          },
+          "elements": [
+            {
+              "id": "el-1795325469486-777j",
+              "type": "photo-gallery",
+              "name": "photo-gallery",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 26,
+                "y": 37,
+                "width": 340,
+                "height": 290,
+                "borderRadius": 0,
+                "color": "#ffffff"
+              },
+              "content": {
+                "galleryLayout": "coverflow",
+                "galleryImages": [
+                  {
+                    "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                    "caption": "The Proposal"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Engagement Memories"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Forever & Always"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Celebration of Love"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Sacred Vows"
+                  }
+                ]
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "responsive": {
+                "desktop": {
+                  "x": 23,
+                  "y": 37,
+                  "width": 731,
+                  "height": 345
+                },
+                "tablet": {
+                  "x": 11,
+                  "y": 16,
+                  "width": 749,
+                  "height": 325
+                }
+              }
+            },
+            {
+              "id": "el-1795325713192-nwfl",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 30,
+                "y": 357,
+                "width": 330,
+                "height": 60,
+                "fontSize": 25,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "RECEPTION INFO"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325790606-mwg8",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 19,
+                "y": 408,
+                "width": 353,
+                "height": 60,
+                "fontSize": 17,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontWeight": 300,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "The reception will take place at:"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325893792-2tun",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 102,
+                "y": 462,
+                "width": 191,
+                "height": 29,
+                "fontSize": 10,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "zIndex": 5
+              },
+              "content": {
+                "text": "AT 18:30 TUESDAY"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325893792-k4gm",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 100,
+                "y": 487,
+                "width": 104,
+                "height": 67,
+                "fontSize": 37,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "zIndex": 5
+              },
+              "content": {
+                "text": "09"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325893792-dtg8",
+              "type": "text",
+              "name": "text (Copy) (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 182,
+                "y": 487,
+                "width": 104,
+                "height": 67,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "zIndex": 5,
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "MARCH\n2027"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325893792-l8eu",
+              "type": "divider",
+              "name": "divider (Copy) (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 168,
+                "y": 510,
+                "width": 43,
+                "height": 22,
+                "dividerStyle": "solid",
+                "borderColor": "#5e7156",
+                "rotation": 90,
+                "color": "#5e7156",
+                "zIndex": 5
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325929486-mgjy",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 44,
+                "y": 571,
+                "width": 295,
+                "height": 52,
+                "fontSize": 14,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Welcome               Reception\n17:30                      20:00\n"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326125372-tzfl",
+              "type": "countdown",
+              "name": "countdown",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 30,
+                "y": 676,
+                "width": 340,
+                "height": 84,
+                "color": "#ffffff",
+                "colors": {
+                  "body": "transparent",
+                  "label": "#0f172a",
+                  "cardBackground": "transparent",
+                  "numberColor": "#020617"
+                }
+              },
+              "content": {
+                "countdownTarget": "2026-12-09T16:00",
+                "countdownStyle": "boxes"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326238757-ogdc",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 78,
+                "y": 653,
+                "width": 226,
+                "height": 25,
+                "fontSize": 17,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontWeight": 600,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "Countdown"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326315593-nrxf",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 46,
+                "y": 1,
+                "width": 302,
+                "height": 42,
+                "fontSize": 18,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Photo Gallery"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "page-1795327935515-3",
+          "name": "Section 4",
+          "order": 3,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_2.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.05,
+            "overlayColor": "#000000"
+          },
+          "elements": [
+            {
+              "id": "el-1795326412638-dp3r",
+              "type": "event-date",
+              "name": "event-date",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 18,
+                "y": 30,
+                "width": 350,
+                "height": 80,
+                "fontSize": 20,
+                "color": "#0f172a"
+              },
+              "content": {
+                "eventDate": "Saturday, October 24, 2026",
+                "text": "Celebration Date"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326444606-705p",
+              "type": "calendar",
+              "name": "calendar",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 33,
+                "y": 118,
+                "width": 330,
+                "height": 260,
+                "backgroundColor": "transparent",
+                "borderRadius": 0,
+                "color": "#0f172a",
+                "borderColor": "#e2e8f0",
+                "fontFamily": "'Montserrat', sans-serif",
+                "borderWidth": 1,
+                "borderStyle": "solid",
+                "colors": {
+                  "body": "#0f172a",
+                  "numberColor": "#0f172a"
+                },
+                "opacity": 0.8,
+                "boxShadow": "0 0 20px rgba(212,175,55,0.35)"
+              },
+              "content": {
+                "eventDate": "2026-10-24",
+                "calendarMonth": "October",
+                "calendarYear": 2026,
+                "calendarDay": 24,
+                "calendarShowAddToCal": true,
+                "calendarEventTitle": "Alexander & Sophia Wedding"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326661630-z4g0",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 36,
+                "y": 432,
+                "width": 329,
+                "height": 40,
+                "fontSize": 20,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Wedding Reception Venue"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326706735-03lk",
+              "type": "google-maps",
+              "name": "google-maps",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 9,
+                "y": 484,
+                "width": 370,
+                "height": 186,
+                "borderRadius": 12,
+                "color": "#f8fafc",
+                "backgroundColor": "#090d16",
+                "borderColor": "#334155",
+                "fontFamily": "'Playfair Display', serif",
+                "borderWidth": 1,
+                "borderStyle": "solid"
+              },
+              "content": {
+                "venueName": "The Biltmore Estate",
+                "venueAddress": "1 Lodge St, Asheville, NC 28803",
+                "mapQuery": "Biltmore+Estate",
+                "mapZoom": 14
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795327091180-mg5e",
+              "type": "event-time",
+              "name": "event-time",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 16,
+                "y": 713,
+                "width": 350,
+                "height": 80,
+                "fontSize": 18,
+                "color": "#334155"
+              },
+              "content": {
+                "eventTime": "04:00 PM – 10:00 PM",
+                "text": "Reception Time"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "page-1795327935515-4",
+          "name": "Section 5",
+          "order": 4,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_1.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.2,
+            "overlayColor": "#1e293b"
+          },
+          "elements": [
+            {
+              "id": "el-1795327232354-iv0f",
+              "type": "guestbook",
+              "name": "guestbook",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 21,
+                "y": 115,
+                "width": 350,
+                "height": 324,
+                "borderRadius": 0,
+                "color": "#f8fafc",
+                "backgroundColor": "transparent",
+                "borderColor": "#334155",
+                "fontFamily": "'Playfair Display', serif",
+                "borderWidth": 0,
+                "borderStyle": "none",
+                "colors": {
+                  "body": "#cbd5e1"
+                }
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795327357695-10aq",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 32,
+                "y": 498,
+                "width": 327,
+                "height": 52,
+                "fontSize": 16,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Your presence would be the greatest gift we could receive!"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795327412152-scil",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 55,
+                "y": 576,
+                "width": 287,
+                "height": 33,
+                "fontSize": 13,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Playfair Display', serif",
+                "fontWeight": 500,
+                "zIndex": 4
+              },
+              "content": {
+                "text": "SAVE THE DATE"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            }
+          ]
         }
       ],
       "settings": {
@@ -3855,18 +4571,18 @@
         "allowRSVP": true,
         "enableConfettiOnOpen": true
       },
-      "viewsCount": 0,
-      "createdAt": "2026-11-20T11:45:54.350Z",
-      "updatedAt": "2026-11-20T11:45:54.350Z"
+      "viewsCount": 12,
+      "createdAt": "2026-11-22T06:12:01.338Z",
+      "updatedAt": "2026-11-22T06:21:27.875Z"
     },
     {
-      "id": "inv-1795175219798-zllf",
+      "id": "inv-1795328557957-pivz",
       "businessId": "usr-1795074225335-3r6d",
-      "title": "test",
-      "customerName": "",
+      "title": "sampl",
+      "customerName": "jhob",
       "eventDate": "",
       "eventType": "wedding",
-      "slug": "test-lwrfw",
+      "slug": "sampl-mae42",
       "category": "wedding",
       "status": "draft",
       "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
@@ -3882,7 +4598,7 @@
       "openingScreen": {
         "enabled": false,
         "style": "envelope",
-        "title": "test",
+        "title": "sampl",
         "openButtonText": "Open Invitation",
         "envelopeColor": "#071811",
         "sealColor": "#d4af37",
@@ -3899,7 +4615,7 @@
       },
       "pages": [
         {
-          "id": "page-1795175219798-hia1",
+          "id": "page-1795328557957-opk5",
           "name": "Section 1",
           "order": 0,
           "heightMode": "viewport",
@@ -3907,7 +4623,9 @@
           "isFullHeight": true,
           "background": {
             "type": "color",
-            "color": "#f8fafc"
+            "color": "#f8fafc",
+            "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4",
+            "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
           },
           "elements": []
         }
@@ -3921,17 +4639,17 @@
         "enableConfettiOnOpen": true
       },
       "viewsCount": 0,
-      "createdAt": "2026-11-20T11:46:59.798Z",
-      "updatedAt": "2026-11-20T11:53:39.604Z"
+      "createdAt": "2026-11-22T06:22:37.957Z",
+      "updatedAt": "2026-11-22T06:26:09.306Z"
     },
     {
-      "id": "inv-1795178112971-cqkd",
-      "businessId": "usr-1795074225335-3r6d",
-      "title": "ash",
+      "id": "inv-1795428711250-39su",
+      "businessId": "usr-admin-1",
+      "title": "note",
       "customerName": "",
       "eventDate": "",
       "eventType": "wedding",
-      "slug": "ash-ceeeg",
+      "slug": "note-ofnk2",
       "category": "wedding",
       "status": "draft",
       "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
@@ -3945,13 +4663,199 @@
         "backgroundColor": "#f8fafc"
       },
       "openingScreen": {
-        "enabled": false,
-        "style": "envelope",
-        "title": "ash",
-        "openButtonText": "Open Invitation",
+        "enabled": true,
+        "style": "card-flip",
+        "musicAutoplayOnOpen": false,
         "envelopeColor": "#071811",
         "sealColor": "#d4af37",
-        "musicAutoplayOnOpen": false
+        "showOpenButton": true,
+        "title": "note",
+        "openButtonText": "Open Invitation",
+        "coverType": "image",
+        "background": {
+          "type": "color",
+          "gradient": {
+            "type": "radial",
+            "colors": [
+              "#172520",
+              "#07120d"
+            ],
+            "angle": 180
+          },
+          "overlayColor": "#000000",
+          "overlayOpacity": 0.4,
+          "color": "#172520",
+          "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+          "size": "cover",
+          "position": "center",
+          "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4"
+        },
+        "page": {
+          "id": "opening-screen-page",
+          "name": "Opening Screen",
+          "order": -1,
+          "width": 520,
+          "height": 400,
+          "heightMode": "custom",
+          "isFullHeight": false,
+          "background": {
+            "type": "color",
+            "gradient": {
+              "type": "radial",
+              "colors": [
+                "#172520",
+                "#07120d"
+              ],
+              "angle": 180
+            },
+            "overlayColor": "#000000",
+            "overlayOpacity": 0.4,
+            "color": "#172520",
+            "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            "size": "cover",
+            "position": "center",
+            "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4"
+          },
+          "elements": [
+            {
+              "id": "open-container-card",
+              "type": "shape",
+              "name": "Minimal Cover Frame",
+              "style": {
+                "x": 20,
+                "y": 20,
+                "width": 480,
+                "height": 360,
+                "backgroundColor": "#071811",
+                "borderRadius": 16,
+                "borderWidth": 1,
+                "borderColor": "rgba(255, 255, 255, 0.12)",
+                "boxShadow": "0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(255, 255, 255, 0.05)",
+                "zIndex": 1,
+                "shapeType": "rectangle"
+              },
+              "content": {},
+              "animation": {
+                "type": "zoomIn",
+                "duration": 0.8,
+                "delay": 0.1
+              }
+            },
+            {
+              "id": "open-elem-couple",
+              "type": "heading",
+              "name": "Two Names",
+              "style": {
+                "x": 30,
+                "y": 122,
+                "width": 460,
+                "height": 68,
+                "fontSize": 32,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 700,
+                "color": "#ffffff",
+                "textAlign": "center",
+                "lineHeight": 1.25,
+                "letterSpacing": 1,
+                "zIndex": 10
+              },
+              "content": {
+                "text": "note  hfhdsa"
+              },
+              "animation": {
+                "type": "slideUp",
+                "duration": 0.8,
+                "delay": 0.25
+              }
+            },
+            {
+              "id": "open-elem-button",
+              "type": "button",
+              "name": "Open Invitation Button",
+              "style": {
+                "x": 135,
+                "y": 218,
+                "width": 250,
+                "height": 44,
+                "backgroundColor": "#d4af37",
+                "color": "#09090b",
+                "fontSize": 12,
+                "fontWeight": 800,
+                "borderRadius": 9999,
+                "boxShadow": "0 8px 24px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(197, 160, 89, 0.35)",
+                "letterSpacing": 1.5,
+                "zIndex": 20
+              },
+              "content": {
+                "buttonText": "Open Invitation",
+                "buttonAction": "open-invitation",
+                "buttonShape": "pill"
+              },
+              "animation": {
+                "type": "bounce",
+                "duration": 1.5,
+                "delay": 0.6,
+                "repeat": "infinite"
+              }
+            },
+            {
+              "id": "open-elem-title",
+              "type": "heading",
+              "name": "Overline Title",
+              "style": {
+                "x": 30,
+                "y": 104,
+                "width": 460,
+                "height": 20,
+                "fontSize": 10,
+                "fontWeight": 700,
+                "color": "#d4af37",
+                "textAlign": "center",
+                "letterSpacing": 3,
+                "zIndex": 10
+              },
+              "content": {
+                "text": "note"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.6,
+                "delay": 0.3
+              }
+            },
+            {
+              "id": "open-elem-date",
+              "type": "text",
+              "name": "Date / Subtitle",
+              "style": {
+                "x": 30,
+                "y": 202,
+                "width": 460,
+                "height": 24,
+                "fontSize": 12,
+                "fontWeight": 500,
+                "color": "#94a3b8",
+                "textAlign": "center",
+                "letterSpacing": 2,
+                "zIndex": 10
+              },
+              "content": {
+                "text": "Saturday, October 24, 2026"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.6,
+                "delay": 0.6
+              }
+            }
+          ]
+        },
+        "coupleNames": "note  hfhdsa",
+        "coverTransitionEffect": "zoom-fade",
+        "imageTransitionEffect": "zoom-fade",
+        "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+        "subtitle": "Saturday, October 24, 2026",
+        "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4"
       },
       "music": {
         "enabled": false,
@@ -3964,7 +4868,7 @@
       },
       "pages": [
         {
-          "id": "page-1795178112970-p84t",
+          "id": "page-1795428711250-8pow",
           "name": "Section 1",
           "order": 0,
           "heightMode": "viewport",
@@ -3986,8 +4890,148 @@
         "enableConfettiOnOpen": true
       },
       "viewsCount": 0,
-      "createdAt": "2026-11-20T12:35:12.971Z",
-      "updatedAt": "2026-11-20T12:35:24.498Z"
+      "createdAt": "2026-11-23T10:11:51.250Z",
+      "updatedAt": "2026-11-23T11:58:25.285Z"
+    },
+    {
+      "id": "inv-1795435291899-vd33",
+      "businessId": "usr-admin-1",
+      "title": "new",
+      "customerName": "",
+      "eventDate": "",
+      "eventType": "wedding",
+      "slug": "new-3qv2m",
+      "category": "wedding",
+      "status": "draft",
+      "thumbnail": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+      "theme": {
+        "primaryColor": "#d4af37",
+        "secondaryColor": "#0a3d2c",
+        "accentColor": "#f9f6ee",
+        "fontHeading": "'Cinzel', serif",
+        "fontBody": "'Montserrat', sans-serif",
+        "fontScript": "'Great Vibes', cursive",
+        "backgroundColor": "#f8fafc"
+      },
+      "openingScreen": {
+        "enabled": true,
+        "style": "card-flip",
+        "musicAutoplayOnOpen": false,
+        "envelopeColor": "#0e261d",
+        "sealColor": "#d4af37",
+        "showOpenButton": false,
+        "coverType": "image",
+        "coverTransitionEffect": "zoom-fade",
+        "background": {
+          "type": "image",
+          "color": "#f8fafc",
+          "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+          "size": "cover",
+          "position": "center",
+          "overlayColor": "#000000",
+          "overlayOpacity": 0.4,
+          "gradient": {
+            "type": "radial",
+            "colors": [
+              "#172520",
+              "#07120d"
+            ],
+            "angle": 180
+          },
+          "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4"
+        },
+        "page": {
+          "id": "opening-screen-page",
+          "name": "Opening Screen",
+          "order": -1,
+          "width": 520,
+          "height": 400,
+          "heightMode": "custom",
+          "isFullHeight": false,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+            "size": "cover",
+            "position": "center",
+            "overlayColor": "#000000",
+            "overlayOpacity": 0.4,
+            "gradient": {
+              "type": "radial",
+              "colors": [
+                "#172520",
+                "#07120d"
+              ],
+              "angle": 180
+            },
+            "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4"
+          },
+          "elements": [
+            {
+              "id": "el-1795435491558-cbl2",
+              "type": "text",
+              "name": "Heading Element",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 120,
+                "y": 120,
+                "width": 280,
+                "height": 60,
+                "fontSize": 24,
+                "fontWeight": 700,
+                "color": "#ffffff",
+                "textAlign": "center"
+              },
+              "content": {
+                "text": "You Are Cordially Invited"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        "imageUrl": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+        "videoUrl": "https://assets.mixkit.co/videos/preview/mixkit-glittering-golden-bokeh-lights-background-41221-large.mp4"
+      },
+      "music": {
+        "enabled": false,
+        "audioUrl": "",
+        "title": "No Music Selected",
+        "artist": "",
+        "autoPlay": false,
+        "loop": true,
+        "floatingBadge": false
+      },
+      "pages": [
+        {
+          "id": "page-1795435291898-ul9r",
+          "name": "Section 1",
+          "order": 0,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "color",
+            "color": "#f8fafc"
+          },
+          "elements": []
+        }
+      ],
+      "settings": {
+        "enableAutoScroll": false,
+        "autoScrollSpeed": 30,
+        "showPageNavDots": true,
+        "allowGuestComments": true,
+        "allowRSVP": true,
+        "enableConfettiOnOpen": true
+      },
+      "viewsCount": 0,
+      "createdAt": "2026-11-23T12:01:31.899Z",
+      "updatedAt": "2026-11-23T12:05:29.828Z"
     }
   ],
   "templates": [
@@ -4127,11 +5171,1216 @@
             "overlayOpacity": 0.05,
             "overlayColor": "#ffffff"
           },
-          "elements": []
+          "elements": [
+            {
+              "id": "el-1795271371029-9mdt",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 20,
+                "y": 26,
+                "width": 330,
+                "height": 60,
+                "fontSize": 24,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Great Vibes', cursive"
+              },
+              "content": {
+                "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795271433811-qgl8",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 29,
+                "y": 75,
+                "width": 330,
+                "height": 60,
+                "fontSize": 12,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Prata', serif"
+              },
+              "content": {
+                "text": "IN THE NAME OF ALLAH, THE MOST MERCIFUL\n\n"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795271507627-j0cb",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 31,
+                "y": 113,
+                "width": 330,
+                "height": 60,
+                "fontSize": 10,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "With hearts filled with gratitude and joy,\nwe invite you to witness the beginning of a beautiful forever.\n\n"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795271548595-zg0d",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 27,
+                "y": 172,
+                "width": 330,
+                "height": 117,
+                "fontSize": 24,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Marcellus', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "ALTHAF\n&\nAYSHA"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "page-1795271708726-myno",
+          "name": "Section 2",
+          "order": 1,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_1.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.05,
+            "overlayColor": "#000000"
+          },
+          "elements": [
+            {
+              "id": "el-1795324319399-dbrx",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 28,
+                "y": 85,
+                "width": 330,
+                "height": 60,
+                "fontSize": 30,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontWeight": 600,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "CEREMONY INFO"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324413463-ge5w",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 1,
+                "y": 173,
+                "width": 184,
+                "height": 26,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "Mr. & Mrs."
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324431598-qudj",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 203,
+                "y": 176,
+                "width": 184,
+                "height": 26,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "zIndex": 4
+              },
+              "content": {
+                "text": "Mr. & Mrs."
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324491916-2wv7",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": -45,
+                "y": 190,
+                "width": 258,
+                "height": 36,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Abdullah Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324584299-jiao",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 155,
+                "y": 191,
+                "width": 258,
+                "height": 36,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600,
+                "zIndex": 6
+              },
+              "content": {
+                "text": "Abdullah Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324615133-m131",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": -33,
+                "y": 216,
+                "width": 230,
+                "height": 29,
+                "fontSize": 13,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "Reem Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324638234-mgcv",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 173,
+                "y": 215,
+                "width": 230,
+                "height": 29,
+                "fontSize": 13,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "zIndex": 8
+              },
+              "content": {
+                "text": "Reem Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324675342-xrg3",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 25,
+                "y": 263,
+                "width": 330,
+                "height": 60,
+                "fontSize": 16,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cormorant Garamond', serif",
+                "fontWeight": 700
+              },
+              "content": {
+                "text": "WE JOYFULLY ANNOUNCE\nTHE WEDDING OF OUR CHILDREN"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324746294-j443",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 7,
+                "y": 331,
+                "width": 374,
+                "height": 90,
+                "fontSize": 29,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Abdullah Al Otaibi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324833757-qb6e",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 36,
+                "y": 386,
+                "width": 310,
+                "height": 64,
+                "fontSize": 29,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600,
+                "zIndex": 11
+              },
+              "content": {
+                "text": "&"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324872846-74s6",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 9,
+                "y": 420,
+                "width": 374,
+                "height": 75,
+                "fontSize": 29,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600,
+                "zIndex": 12
+              },
+              "content": {
+                "text": "Reem Al Harbi"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795324924171-px1g",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 39,
+                "y": 499,
+                "width": 328,
+                "height": 45,
+                "fontSize": 11,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "KATB AL-KITAB\nAl Faisaliah Ballroom"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795324984812-d8lz",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 113,
+                "y": 538,
+                "width": 191,
+                "height": 29,
+                "fontSize": 10,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6
+              },
+              "content": {
+                "text": "AT 18:30 TUESDAY"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325046953-nyzy",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 111,
+                "y": 563,
+                "width": 104,
+                "height": 67,
+                "fontSize": 37,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "09"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325077995-mnr8",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 193,
+                "y": 563,
+                "width": 104,
+                "height": 67,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "zIndex": 16,
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "MARCH\n2027"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325162505-wycr",
+              "type": "divider",
+              "name": "divider",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 146,
+                "y": 198,
+                "width": 85,
+                "height": 20,
+                "dividerStyle": "solid",
+                "borderColor": "#5e7156",
+                "rotation": 90,
+                "color": "#5e7156"
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325316359-llsx",
+              "type": "divider",
+              "name": "divider (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 179,
+                "y": 586,
+                "width": 43,
+                "height": 22,
+                "dividerStyle": "solid",
+                "borderColor": "#5e7156",
+                "rotation": 90,
+                "color": "#5e7156",
+                "zIndex": 18
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "page-1795325430940-5avp",
+          "name": "Section 3",
+          "order": 2,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_3.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.1,
+            "overlayColor": "#000000"
+          },
+          "elements": [
+            {
+              "id": "el-1795325469486-777j",
+              "type": "photo-gallery",
+              "name": "photo-gallery",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 26,
+                "y": 37,
+                "width": 340,
+                "height": 290,
+                "borderRadius": 0,
+                "color": "#ffffff"
+              },
+              "content": {
+                "galleryLayout": "coverflow",
+                "galleryImages": [
+                  {
+                    "url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+                    "caption": "The Proposal"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Engagement Memories"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Forever & Always"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Celebration of Love"
+                  },
+                  {
+                    "url": "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80",
+                    "caption": "Sacred Vows"
+                  }
+                ]
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "responsive": {
+                "desktop": {
+                  "x": 23,
+                  "y": 37,
+                  "width": 731,
+                  "height": 345
+                },
+                "tablet": {
+                  "x": 11,
+                  "y": 16,
+                  "width": 749,
+                  "height": 325
+                }
+              }
+            },
+            {
+              "id": "el-1795325713192-nwfl",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 30,
+                "y": 357,
+                "width": 330,
+                "height": 60,
+                "fontSize": 25,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "RECEPTION INFO"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325790606-mwg8",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 19,
+                "y": 408,
+                "width": 353,
+                "height": 60,
+                "fontSize": 17,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontWeight": 300,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "The reception will take place at:"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795325893792-2tun",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 102,
+                "y": 462,
+                "width": 191,
+                "height": 29,
+                "fontSize": 10,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "zIndex": 5
+              },
+              "content": {
+                "text": "AT 18:30 TUESDAY"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325893792-k4gm",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 100,
+                "y": 487,
+                "width": 104,
+                "height": 67,
+                "fontSize": 37,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "zIndex": 5
+              },
+              "content": {
+                "text": "09"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325893792-dtg8",
+              "type": "text",
+              "name": "text (Copy) (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 182,
+                "y": 487,
+                "width": 104,
+                "height": 67,
+                "fontSize": 15,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "zIndex": 5,
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "MARCH\n2027"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325893792-l8eu",
+              "type": "divider",
+              "name": "divider (Copy) (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 168,
+                "y": 510,
+                "width": 43,
+                "height": 22,
+                "dividerStyle": "solid",
+                "borderColor": "#5e7156",
+                "rotation": 90,
+                "color": "#5e7156",
+                "zIndex": 5
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            },
+            {
+              "id": "el-1795325929486-mgjy",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 44,
+                "y": 571,
+                "width": 295,
+                "height": 52,
+                "fontSize": 14,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Welcome               Reception\n17:30                      20:00\n"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326125372-tzfl",
+              "type": "countdown",
+              "name": "countdown",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 30,
+                "y": 676,
+                "width": 340,
+                "height": 84,
+                "color": "#ffffff",
+                "colors": {
+                  "body": "transparent",
+                  "label": "#0f172a",
+                  "cardBackground": "transparent",
+                  "numberColor": "#020617"
+                }
+              },
+              "content": {
+                "countdownTarget": "2026-12-09T16:00",
+                "countdownStyle": "boxes"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326238757-ogdc",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 78,
+                "y": 653,
+                "width": 226,
+                "height": 25,
+                "fontSize": 17,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontWeight": 600,
+                "fontFamily": "'Cinzel', serif"
+              },
+              "content": {
+                "text": "Countdown"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326315593-nrxf",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 46,
+                "y": 1,
+                "width": 302,
+                "height": 42,
+                "fontSize": 18,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Photo Gallery"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "page-1795326352679-40p1",
+          "name": "Section 4",
+          "order": 3,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_2.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.05,
+            "overlayColor": "#000000"
+          },
+          "elements": [
+            {
+              "id": "el-1795326412638-dp3r",
+              "type": "event-date",
+              "name": "event-date",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 18,
+                "y": 30,
+                "width": 350,
+                "height": 80,
+                "fontSize": 20,
+                "color": "#0f172a"
+              },
+              "content": {
+                "eventDate": "Saturday, October 24, 2026",
+                "text": "Celebration Date"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326444606-705p",
+              "type": "calendar",
+              "name": "calendar",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 33,
+                "y": 118,
+                "width": 330,
+                "height": 260,
+                "backgroundColor": "transparent",
+                "borderRadius": 0,
+                "color": "#0f172a",
+                "borderColor": "#e2e8f0",
+                "fontFamily": "'Montserrat', sans-serif",
+                "borderWidth": 1,
+                "borderStyle": "solid",
+                "colors": {
+                  "body": "#0f172a",
+                  "numberColor": "#0f172a"
+                },
+                "opacity": 0.8,
+                "boxShadow": "0 0 20px rgba(212,175,55,0.35)"
+              },
+              "content": {
+                "eventDate": "2026-10-24",
+                "calendarMonth": "October",
+                "calendarYear": 2026,
+                "calendarDay": 24,
+                "calendarShowAddToCal": true,
+                "calendarEventTitle": "Alexander & Sophia Wedding"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326661630-z4g0",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 36,
+                "y": 432,
+                "width": 329,
+                "height": 40,
+                "fontSize": 20,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Wedding Reception Venue"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795326706735-03lk",
+              "type": "google-maps",
+              "name": "google-maps",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 9,
+                "y": 484,
+                "width": 370,
+                "height": 186,
+                "borderRadius": 12,
+                "color": "#f8fafc",
+                "backgroundColor": "#090d16",
+                "borderColor": "#334155",
+                "fontFamily": "'Playfair Display', serif",
+                "borderWidth": 1,
+                "borderStyle": "solid"
+              },
+              "content": {
+                "venueName": "The Biltmore Estate",
+                "venueAddress": "1 Lodge St, Asheville, NC 28803",
+                "mapQuery": "Biltmore+Estate",
+                "mapZoom": 14
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795327091180-mg5e",
+              "type": "event-time",
+              "name": "event-time",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 16,
+                "y": 713,
+                "width": 350,
+                "height": 80,
+                "fontSize": 18,
+                "color": "#334155"
+              },
+              "content": {
+                "eventTime": "04:00 PM – 10:00 PM",
+                "text": "Reception Time"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            }
+          ]
+        },
+        {
+          "id": "page-1795327136777-p8ba",
+          "name": "Section 5",
+          "order": 4,
+          "heightMode": "viewport",
+          "height": 844,
+          "isFullHeight": true,
+          "background": {
+            "type": "image",
+            "color": "#f8fafc",
+            "imageUrl": "https://res.cloudinary.com/bhzf5vmm/image/upload/v1795243417/download_1.jpg",
+            "size": "cover",
+            "position": "center",
+            "repeat": "no-repeat",
+            "overlayEnabled": true,
+            "overlayOpacity": 0.2,
+            "overlayColor": "#1e293b"
+          },
+          "elements": [
+            {
+              "id": "el-1795327232354-iv0f",
+              "type": "guestbook",
+              "name": "guestbook",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 21,
+                "y": 115,
+                "width": 350,
+                "height": 324,
+                "borderRadius": 0,
+                "color": "#f8fafc",
+                "backgroundColor": "transparent",
+                "borderColor": "#334155",
+                "fontFamily": "'Playfair Display', serif",
+                "borderWidth": 0,
+                "borderStyle": "none",
+                "colors": {
+                  "body": "#cbd5e1"
+                }
+              },
+              "content": {},
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795327357695-10aq",
+              "type": "text",
+              "name": "text",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 32,
+                "y": 498,
+                "width": 327,
+                "height": 52,
+                "fontSize": 16,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Cinzel', serif",
+                "fontWeight": 600
+              },
+              "content": {
+                "text": "Your presence would be the greatest gift we could receive!"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              }
+            },
+            {
+              "id": "el-1795327412152-scil",
+              "type": "text",
+              "name": "text (Copy)",
+              "parentContainerId": null,
+              "parentId": null,
+              "style": {
+                "x": 55,
+                "y": 576,
+                "width": 287,
+                "height": 33,
+                "fontSize": 13,
+                "color": "#334155",
+                "textAlign": "center",
+                "lineHeight": 1.6,
+                "fontFamily": "'Playfair Display', serif",
+                "fontWeight": 500,
+                "zIndex": 4
+              },
+              "content": {
+                "text": "SAVE THE DATE"
+              },
+              "animation": {
+                "type": "fadeIn",
+                "duration": 0.8,
+                "delay": 0.2
+              },
+              "children": []
+            }
+          ]
         }
       ],
       "createdAt": "2026-11-21T06:38:27.151Z",
-      "updatedAt": "2026-11-21T09:05:50.452Z"
+      "updatedAt": "2026-11-22T06:08:29.691Z"
     }
   ],
   "rsvps": [],
@@ -4919,6 +7168,7 @@
     {
       "id": "med-1795246640375-47uu",
       "businessId": "admin",
+      "invitationId": null,
       "invitationIds": [],
       "title": "download",
       "name": "download",
@@ -4931,6 +7181,7 @@
         "width": 800,
         "height": 800
       },
+      "duration": null,
       "category": "Background Images",
       "tags": [
         "background",
@@ -4945,6 +7196,7 @@
     {
       "id": "med-1795246653671-o3yr",
       "businessId": "admin",
+      "invitationId": null,
       "invitationIds": [],
       "title": "download 1",
       "name": "download-1",
@@ -4957,6 +7209,7 @@
         "width": 800,
         "height": 800
       },
+      "duration": null,
       "category": "Background Images",
       "tags": [
         "background",
@@ -4971,6 +7224,7 @@
     {
       "id": "med-1795246668347-169l",
       "businessId": "admin",
+      "invitationId": null,
       "invitationIds": [],
       "title": "download 2",
       "name": "download-2",
@@ -4983,6 +7237,7 @@
         "width": 800,
         "height": 800
       },
+      "duration": null,
       "category": "Background Images",
       "tags": [
         "background",
@@ -4997,6 +7252,7 @@
     {
       "id": "med-1795246687271-y6x4",
       "businessId": "admin",
+      "invitationId": null,
       "invitationIds": [],
       "title": "download 3",
       "name": "download-3",
@@ -5009,6 +7265,7 @@
         "width": 800,
         "height": 800
       },
+      "duration": null,
       "category": "Background Images",
       "tags": [
         "background",

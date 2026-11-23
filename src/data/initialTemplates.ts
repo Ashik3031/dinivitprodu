@@ -42,11 +42,9 @@ export function createBlankInvitation(businessId: string, customTitle?: string, 
     },
     openingScreen: {
       enabled: false,
-      style: 'envelope',
-      title: customTitle || 'Wedding Invitation',
-      openButtonText: 'Open Invitation',
-      envelopeColor: '#071811',
-      sealColor: '#d4af37',
+      coverType: 'custom-page',
+      style: 'custom-page',
+      coverTransitionEffect: 'zoom-fade',
       musicAutoplayOnOpen: false
     },
     music: {

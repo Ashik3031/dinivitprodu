@@ -191,6 +191,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                   defaultTitle={template.title}
                   onOpen={() => setIsOpeningScreenOpen(false)}
                   onOpenComplete={() => setIsOpeningScreenOpen(false)}
+                  activeViewport={viewportMode}
                 />
               </div>
               <button

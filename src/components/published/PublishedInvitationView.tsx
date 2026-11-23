@@ -214,8 +214,8 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                 type="button"
                 onClick={() => setPreviewViewport('desktop')}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${activeViewport === 'desktop'
-                    ? 'bg-slate-700 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-700 text-white font-bold shadow-xs'
+                  : 'text-slate-400 hover:text-white'
                   }`}
               >
                 <Monitor className="w-3.5 h-3.5" />
@@ -225,8 +225,8 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                 type="button"
                 onClick={() => setPreviewViewport('tablet')}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${activeViewport === 'tablet'
-                    ? 'bg-slate-700 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                  ? 'bg-slate-700 text-white font-bold shadow-xs'
+                  : 'text-slate-400 hover:text-white'
                   }`}
               >
                 <Tablet className="w-3.5 h-3.5" />
@@ -236,8 +236,8 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
                 type="button"
                 onClick={() => setPreviewViewport('mobile')}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${activeViewport === 'mobile'
-                    ? 'bg-emerald-600 text-white font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white'
                   }`}
               >
                 <Smartphone className="w-3.5 h-3.5" />
@@ -273,9 +273,10 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
         />
       )}
 
-      {/* Quick Action Floating Bar for RSVP & Guestbook (Mobile-First Touch Optimized) */}
-      {((settings.enableRSVP !== false && settings.allowRSVP !== false) ||
-        (settings.enableGuestbook !== false && settings.allowGuestComments !== false)) && (
+      {/* Quick Action Floating Bar for RSVP & Guestbook (Only shown when not on cover) */}
+      {!isCoverActive &&
+        ((settings.enableRSVP !== false && settings.allowRSVP !== false) ||
+          (settings.enableGuestbook !== false && settings.allowGuestComments !== false)) && (
           <div className="fixed bottom-5 left-4 sm:left-6 z-40 flex items-center gap-2">
             {settings.enableRSVP !== false && settings.allowRSVP !== false && (
               <button
@@ -301,8 +302,8 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
           </div>
         )}
 
-      {/* Floating Smooth Navigation Dots */}
-      {pages.length > 1 && (
+      {/* Floating Smooth Navigation Dots (Only shown when not on cover) */}
+      {!isCoverActive && pages.length > 1 && (
         <div className="fixed right-3 sm:right-4 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-2 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-xl">
           {pages.map((page, idx) => (
             <button
@@ -319,181 +320,198 @@ export const PublishedInvitationView: React.FC<PublishedInvitationViewProps> = (
         </div>
       )}
 
-      {/* Main Invitation Stream (Vertical Pages) */}
-      <div
-        className={`relative flex flex-col items-center justify-start transition-all duration-300 ${activeViewport === 'mobile' && !isMobileScreen
-            ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
-            : (activeViewport === 'tablet' || activeViewport === 'desktop') && windowWidth >= 768
+      {/* Contained Opening Screen - Centered in viewport */}
+      {isCoverActive ? (
+        <div
+          className={`w-full ${!isLiveViewer || showPreviewControls ? 'min-h-[calc(100vh-120px)] flex-1' : 'min-h-screen h-screen'
+            } flex items-center justify-center relative overflow-hidden select-none`}
+        >
+          <div
+            className={`relative flex items-center justify-center transition-all duration-300 ${activeViewport === 'mobile' && !isMobileScreen
+                ? 'shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
+                : (activeViewport === 'tablet' || activeViewport === 'desktop') && windowWidth >= 768
+                  ? 'shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
+                  : 'w-full h-full'
+              }`}
+            style={{
+              width: !isMobileScreen || activeViewport !== 'mobile' ? frameWidth : '100%',
+              maxWidth: '100%',
+              height:
+                openingPage?.heightMode === 'viewport' || !openingPage?.heightMode
+                  ? '100%'
+                  : `${coverCalculatedHeight || 400}px`,
+              maxHeight: '100%'
+            }}
+          >
+            <AnimatePresence>
+              <OpeningEnvelopeScreen
+                config={invitation.openingScreen}
+                theme={theme}
+                defaultTitle={invitation.title}
+                defaultDate={invitation.eventDate}
+                onOpen={handleOpenInvitation}
+                isContained={true}
+                activeViewport={activeViewport}
+              />
+            </AnimatePresence>
+          </div>
+        </div>
+      ) : (
+        /* Main Invitation Stream (Vertical Pages) */
+        <div
+          className={`relative flex flex-col items-center justify-start transition-all duration-300 ${activeViewport === 'mobile' && !isMobileScreen
               ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
-              : 'w-full'
-          }`}
-        style={{
-          width: (!isMobileScreen || activeViewport !== 'mobile') ? frameWidth : '100%',
-          maxWidth: '100%',
-          ...(isCoverActive && coverCalculatedHeight
-            ? {
-              minHeight: `${coverCalculatedHeight}px`,
-              ...(openingPage?.heightMode !== 'viewport' ? { height: `${coverCalculatedHeight}px` } : {})
-            }
-            : showOpeningScreen
-              ? { minHeight: `${pages[0] ? (contentScale !== 1 ? Math.round(getPageHeight(pages[0]) * contentScale) : getPageHeight(pages[0])) : 844}px` }
-              : {})
-        }}
-      >
-        {/* Contained Opening Screen inside Frame (Framed like other pages, not a window background) */}
-        <AnimatePresence>
-          {showOpeningScreen && invitation.openingScreen && invitation.openingScreen.enabled !== false && (
-            <OpeningEnvelopeScreen
-              config={invitation.openingScreen}
-              theme={theme}
-              defaultTitle={invitation.title}
-              defaultDate={invitation.eventDate}
-              onOpen={handleOpenInvitation}
-              isContained={true}
-            />
-          )}
-        </AnimatePresence>
-        {pages.map((page, index) => {
-          const topLevelElements = (page.elements || []).filter((el) => {
-            if (el.parentContainerId || el.isHidden) return false;
-            // Check responsive visibility
-            const { isHidden } = resolveElementForViewport(el, activeViewport);
-            if (isHidden) return false;
+              : (activeViewport === 'tablet' || activeViewport === 'desktop') && windowWidth >= 768
+                ? 'my-6 shadow-2xl rounded-3xl border border-neutral-800 overflow-hidden'
+                : 'w-full'
+            }`}
+          style={{
+            width: !isMobileScreen || activeViewport !== 'mobile' ? frameWidth : '100%',
+            maxWidth: '100%'
+          }}
+        >
+          {pages.map((page, index) => {
+            const topLevelElements = (page.elements || []).filter((el) => {
+              if (el.parentContainerId || el.isHidden) return false;
+              // Check responsive visibility
+              const { isHidden } = resolveElementForViewport(el, activeViewport);
+              if (isHidden) return false;
 
-            // Respect owner feature flags
-            if (el.type === 'countdown' && settings.enableCountdown === false) return false;
-            if (el.type === 'calendar' && settings.enableCalendar === false) return false;
-            if ((el.type === 'google-maps' || el.type === 'venue') && settings.enableMap === false) return false;
-            if (el.type === 'timeline' && settings.enableTimeline === false) return false;
-            if (el.type === 'photo-gallery' && settings.enableGallery === false) return false;
-            if (
-              el.type === 'guestbook' &&
-              (settings.enableGuestbook === false || settings.allowGuestComments === false)
-            )
-              return false;
-            if (
-              el.type === 'rsvp-form' &&
-              (settings.enableRSVP === false || settings.allowRSVP === false)
-            )
-              return false;
-            return true;
-          });
+              // Respect owner feature flags
+              if (el.type === 'countdown' && settings.enableCountdown === false) return false;
+              if (el.type === 'calendar' && settings.enableCalendar === false) return false;
+              if ((el.type === 'google-maps' || el.type === 'venue') && settings.enableMap === false) return false;
+              if (el.type === 'timeline' && settings.enableTimeline === false) return false;
+              if (el.type === 'photo-gallery' && settings.enableGallery === false) return false;
+              if (
+                el.type === 'guestbook' &&
+                (settings.enableGuestbook === false || settings.allowGuestComments === false)
+              )
+                return false;
+              if (
+                el.type === 'rsvp-form' &&
+                (settings.enableRSVP === false || settings.allowRSVP === false)
+              )
+                return false;
+              return true;
+            });
 
-          const canvasHeight = getPageHeight(page);
-          const scaledHeight = contentScale !== 1 ? Math.round(canvasHeight * contentScale) : canvasHeight;
+            const canvasHeight = getPageHeight(page);
+            const scaledHeight = contentScale !== 1 ? Math.round(canvasHeight * contentScale) : canvasHeight;
 
-          const transitionType = page.transition?.type || 'fade';
-          const transitionDuration = page.transition?.duration || 0.6;
-          const pageTransition = getPageTransitionVariants(transitionType, transitionDuration);
+            const transitionType = page.transition?.type || 'fade';
+            const transitionDuration = page.transition?.duration || 0.6;
+            const pageTransition = getPageTransitionVariants(transitionType, transitionDuration);
 
-          return (
-            <motion.section
-              key={page.id}
-              id={`page-${index}`}
-              className="relative w-full overflow-hidden flex justify-center items-center flex-shrink-0"
-              initial={pageTransition.initial}
-              whileInView={pageTransition.animate}
-              viewport={{ once: true, margin: '-50px' }}
-              style={{
-                height: `${scaledHeight}px`,
-                minHeight: `${scaledHeight}px`
-              }}
-            >
-              {/* Inner Exact-Dimension Design Canvas */}
-              <div
-                className="relative shrink-0 overflow-hidden"
+            return (
+              <motion.section
+                key={page.id}
+                id={`page-${index}`}
+                className="relative w-full overflow-hidden flex justify-center items-center flex-shrink-0"
+                initial={pageTransition.initial}
+                whileInView={pageTransition.animate}
+                viewport={{ once: true, margin: '-50px' }}
                 style={{
-                  width: `${targetCanvasWidth}px`,
-                  height: `${canvasHeight}px`,
-                  transform: contentScale !== 1 ? `scale(${contentScale})` : undefined,
-                  transformOrigin: 'top center',
-                  ...getPageBgStyle(page.background, theme.backgroundColor || '#f8fafc')
+                  height: `${scaledHeight}px`,
+                  minHeight: `${scaledHeight}px`
                 }}
               >
-                {/* Background Video if present */}
-                {page.background?.type === 'video' && page.background.videoUrl && (
-                  <video
-                    src={page.background.videoUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    ref={(el) => {
-                      if (el) {
-                        el.defaultMuted = true;
-                        el.muted = true;
-                        el.play().catch(() => { });
-                      }
-                    }}
-                    onLoadedMetadata={(e) => {
-                      const v = e.currentTarget;
-                      v.defaultMuted = true;
-                      v.muted = true;
-                      v.play().catch(() => { });
-                    }}
-                    className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-                  />
-                )}
-
-                {/* Background Overlay if specified */}
-                {getBackgroundOverlayStyle(page.background) && (
-                  <div
-                    className="absolute inset-0 pointer-events-none z-0"
-                    style={getBackgroundOverlayStyle(page.background)!}
-                  />
-                )}
-
-                {/* Elements */}
-                {topLevelElements.map((element) => {
-                  const { style: resolvedStyle } = resolveElementForViewport(element, activeViewport);
-
-                  // Calculate Parallax Offset if enabled
-                  let parallaxTransform = '';
-                  if (element.animation?.parallax?.enabled) {
-                    const pSpeed = element.animation.parallax.speed || 0.2;
-                    const pOffset = (scrollY - index * 800) * pSpeed * 0.15;
-                    if (element.animation.parallax.direction === 'horizontal') {
-                      parallaxTransform = `translateX(${pOffset}px) `;
-                    } else {
-                      parallaxTransform = `translateY(${pOffset}px) `;
-                    }
-                  }
-
-                  const rotationTransform = resolvedStyle.rotation
-                    ? `rotate(${resolvedStyle.rotation}deg)`
-                    : '';
-
-                  return (
-                    <div
-                      key={element.id}
-                      className="absolute"
-                      style={{
-                        left: `${resolvedStyle.x}px`,
-                        top: `${resolvedStyle.y}px`,
-                        width: `${resolvedStyle.width}px`,
-                        height: `${resolvedStyle.height}px`,
-                        transform: `${parallaxTransform}${rotationTransform}`.trim() || undefined,
-                        zIndex: resolvedStyle.zIndex || 1,
-                        willChange: element.animation?.parallax?.enabled ? 'transform' : undefined
+                {/* Inner Exact-Dimension Design Canvas */}
+                <div
+                  className="relative shrink-0 overflow-hidden"
+                  style={{
+                    width: `${targetCanvasWidth}px`,
+                    height: `${canvasHeight}px`,
+                    transform: contentScale !== 1 ? `scale(${contentScale})` : undefined,
+                    transformOrigin: 'top center',
+                    ...getPageBgStyle(page.background, theme.backgroundColor || '#f8fafc')
+                  }}
+                >
+                  {/* Background Video if present */}
+                  {page.background?.type === 'video' && page.background.videoUrl && (
+                    <video
+                      src={page.background.videoUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      ref={(el) => {
+                        if (el) {
+                          el.defaultMuted = true;
+                          el.muted = true;
+                          el.play().catch(() => { });
+                        }
                       }}
-                    >
-                      <ElementRenderer
-                        element={element}
-                        viewportMode={activeViewport}
-                        isEditor={false}
-                        onOpenRSVP={() => setIsRSVPOpen(true)}
-                        onOpenGuestbook={() => setIsGuestbookOpen(true)}
-                        allElements={page.elements}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.section>
-          );
-        })}
-      </div>
+                      onLoadedMetadata={(e) => {
+                        const v = e.currentTarget;
+                        v.defaultMuted = true;
+                        v.muted = true;
+                        v.play().catch(() => { });
+                      }}
+                      className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
+                    />
+                  )}
+
+                  {/* Background Overlay if specified */}
+                  {getBackgroundOverlayStyle(page.background) && (
+                    <div
+                      className="absolute inset-0 pointer-events-none z-0"
+                      style={getBackgroundOverlayStyle(page.background)!}
+                    />
+                  )}
+
+                  {/* Elements */}
+                  {topLevelElements.map((element) => {
+                    const { style: resolvedStyle } = resolveElementForViewport(element, activeViewport);
+
+                    // Calculate Parallax Offset if enabled
+                    let parallaxTransform = '';
+                    if (element.animation?.parallax?.enabled) {
+                      const pSpeed = element.animation.parallax.speed || 0.2;
+                      const pOffset = (scrollY - index * 800) * pSpeed * 0.15;
+                      if (element.animation.parallax.direction === 'horizontal') {
+                        parallaxTransform = `translateX(${pOffset}px) `;
+                      } else {
+                        parallaxTransform = `translateY(${pOffset}px) `;
+                      }
+                    }
+
+                    const rotationTransform = resolvedStyle.rotation
+                      ? `rotate(${resolvedStyle.rotation}deg)`
+                      : '';
+
+                    return (
+                      <div
+                        key={element.id}
+                        className="absolute"
+                        style={{
+                          left: `${resolvedStyle.x}px`,
+                          top: `${resolvedStyle.y}px`,
+                          width: `${resolvedStyle.width}px`,
+                          height: `${resolvedStyle.height}px`,
+                          transform: `${parallaxTransform}${rotationTransform}`.trim() || undefined,
+                          zIndex: resolvedStyle.zIndex || 1,
+                          willChange: element.animation?.parallax?.enabled ? 'transform' : undefined
+                        }}
+                      >
+                        <ElementRenderer
+                          element={element}
+                          viewportMode={activeViewport}
+                          isEditor={false}
+                          onOpenRSVP={() => setIsRSVPOpen(true)}
+                          onOpenGuestbook={() => setIsGuestbookOpen(true)}
+                          allElements={page.elements}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.section>
+            );
+          })}
+        </div>
+      )}
 
       {/* RSVP Modal */}
       {isRSVPOpen && (

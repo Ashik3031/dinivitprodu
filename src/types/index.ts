@@ -545,6 +545,7 @@ export interface OpeningScreenConfig {
   imageAdvanceTrigger?: ImageAdvanceTrigger; // 'click-button' | 'click-anywhere' | 'scroll-swipe' | 'auto-timer'
   imageTimerSeconds?: number;
   imageTransitionDuration?: number;
+  transitionDuration?: number;
 
   // Typography & Content
   showTextOnCover?: boolean;

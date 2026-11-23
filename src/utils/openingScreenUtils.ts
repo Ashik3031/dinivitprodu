@@ -14,23 +14,44 @@ export const DEFAULT_COVER_WIDTH = 520;
 export const DEFAULT_COVER_HEIGHT = 400;
 
 /**
+ * Calculates a responsive, centered position for an opening button.
+ */
+export function calculateCenteredButtonPosition(
+  canvasWidth: number = DEFAULT_COVER_WIDTH,
+  canvasHeight: number = DEFAULT_COVER_HEIGHT,
+  buttonWidth: number = 240,
+  buttonHeight: number = 44
+) {
+  const x = Math.max(0, Math.round((canvasWidth - buttonWidth) / 2));
+  const y = Math.max(0, Math.round(canvasHeight * 0.65));
+  return { x, y, width: buttonWidth, height: buttonHeight };
+}
+
+/**
  * Creates an editable, selectable Open Invitation Button canvas element.
+ * Default button is stationary (no continuous bounce or movement).
  */
 export function createOpenInvitationButtonElement(
   theme?: Partial<InvitationTheme>,
   buttonText: string = 'Open Invitation',
   sealColor: string = '#c5a059',
-  y: number = 245,
-  x: number = 140,
-  width: number = 240
+  y?: number,
+  x?: number,
+  width: number = 240,
+  canvasWidth: number = DEFAULT_COVER_WIDTH,
+  canvasHeight: number = DEFAULT_COVER_HEIGHT
 ): CanvasElement {
+  const centered = calculateCenteredButtonPosition(canvasWidth, canvasHeight, width);
+  const posX = x !== undefined ? x : centered.x;
+  const posY = y !== undefined ? y : centered.y;
+
   return {
     id: 'open-elem-button',
     type: 'button',
     name: 'Open Invitation Button',
     style: {
-      x,
-      y,
+      x: posX,
+      y: posY,
       width,
       height: 44,
       backgroundColor: sealColor || theme?.primaryColor || '#c5a059',
@@ -48,10 +69,7 @@ export function createOpenInvitationButtonElement(
       buttonShape: 'pill'
     },
     animation: {
-      type: 'bounce',
-      duration: 1.5,
-      delay: 0.6,
-      repeat: 'infinite'
+      type: 'none'
     }
   };
 }
@@ -680,72 +698,53 @@ export function getOrCreateOpeningScreenPage(invitation: Partial<Invitation>): I
   const envelopeColor = opening?.envelopeColor || '#0e261d';
   const sealColor = opening?.sealColor || theme.primaryColor || '#d4af37';
   const sealIcon = opening?.sealIcon || 'heart';
+  const hasExistingEnvelope =
+    opening?.coverType === 'envelope' ||
+    (opening?.style === 'envelope' && Boolean(opening?.envelopeTemplate || opening?.page?.elements?.some(el => el.id === 'open-container-card')));
+
   const coverType: OpeningCoverType =
     opening?.coverType ||
-    (opening?.style === 'video-cover'
+    (opening?.style === 'video-cover' || opening?.videoUrl
       ? 'video'
-      : opening?.style === 'card-flip'
-      ? 'image'
-      : opening?.style === 'custom-page'
-      ? 'custom-page'
-      : opening?.imageUrl
-      ? 'image'
-      : opening?.videoUrl
-      ? 'video'
-      : 'envelope');
+      : opening?.style === 'card-flip' || (opening?.imageUrl && !opening?.videoUrl)
+        ? 'image'
+        : hasExistingEnvelope
+          ? 'envelope'
+          : 'custom-page');
   const showButton = opening?.showOpenButton !== false;
 
-  // Determine Background Config based on Cover Type
+  // Determine Background Config: preserve background, or fallback to legacy videoUrl/imageUrl/theme
   let background: BackgroundConfig;
 
-  if (coverType === 'video') {
+  if (opening?.background) {
+    background = opening.background;
+  } else if (opening?.page?.background) {
+    background = opening.page.background;
+  } else if (opening?.videoUrl) {
     background = {
       type: 'video',
-      videoUrl: opening?.videoUrl || DEFAULT_STOCK_VIDEO,
+      videoUrl: opening.videoUrl || DEFAULT_STOCK_VIDEO,
       overlayColor: '#000000',
       overlayOpacity: 0.35
     };
-  } else if (coverType === 'image') {
+  } else if (opening?.imageUrl) {
     background = {
       type: 'image',
-      imageUrl: opening?.imageUrl || DEFAULT_STOCK_IMAGE,
+      imageUrl: opening.imageUrl || DEFAULT_STOCK_IMAGE,
       size: 'cover',
       position: 'center',
       overlayColor: '#000000',
       overlayOpacity: opening?.imageOverlayOpacity ?? 0.4
     };
   } else {
-    // Envelope or Custom default background
-    background = opening?.background || {
-      type: 'gradient',
-      gradient: {
-        type: 'radial',
-        colors: ['#172520', '#07120d'],
-        angle: 180
-      },
-      overlayColor: sealColor,
-      overlayOpacity: 0.05
-    };
-  }
-
-  // If custom-page, return blank canvas or preserved elements
-  if (coverType === 'custom-page') {
-    return {
-      id: opening?.page?.id || 'opening-screen-page',
-      name: 'Opening Screen',
-      order: -1,
-      width: opening?.page?.width || DEFAULT_COVER_WIDTH,
-      height: opening?.page?.height || DEFAULT_COVER_HEIGHT,
-      heightMode: opening?.page?.heightMode || 'custom',
-      isFullHeight: opening?.page?.isFullHeight || false,
-      background,
-      elements: opening?.page?.elements || []
+    background = {
+      type: 'color',
+      color: theme.backgroundColor || '#071912'
     };
   }
 
   // If page already exists and has elements, preserve user's customizations!
   if (opening?.page?.elements && opening.page.elements.length > 0) {
-    // Normalize any legacy elements that were trapped in container
     let normalizedElements = opening.page.elements.map(el => {
       if (el.parentContainerId === 'open-container-card' || el.parentId === 'open-container-card') {
         const { parentContainerId, parentId, ...rest } = el;
@@ -760,46 +759,6 @@ export function getOrCreateOpeningScreenPage(invitation: Partial<Invitation>): I
       return el;
     });
 
-    const hasButton = normalizedElements.some(
-      el => el.id === 'open-elem-button' || el.content?.buttonAction === 'open-invitation' || el.type === 'button'
-    );
-
-    if (showButton && !hasButton) {
-      // User has button enabled, add the editable button
-      normalizedElements.push(
-        createOpenInvitationButtonElement(
-          theme,
-          buttonText,
-          sealColor,
-          245,
-          140,
-          240
-        )
-      );
-    } else if (showButton && hasButton) {
-      // Ensure button isn't placed off-canvas (e.g. legacy y: 560 or y: 690)
-      normalizedElements = normalizedElements.map(el => {
-        if ((el.id === 'open-elem-button' || el.content?.buttonAction === 'open-invitation') && el.style?.y && el.style.y > 340) {
-          return {
-            ...el,
-            style: {
-              ...el.style,
-              y: 245,
-              x: el.style.x !== undefined ? el.style.x : 140,
-              width: el.style.width || 240,
-              zIndex: Math.max(el.style?.zIndex || 0, 20)
-            }
-          };
-        }
-        return el;
-      });
-    } else if (!showButton && hasButton) {
-      // User disabled button
-      normalizedElements = normalizedElements.filter(
-        el => el.id !== 'open-elem-button' && el.content?.buttonAction !== 'open-invitation'
-      );
-    }
-
     return {
       ...opening.page,
       width: opening.page.width || DEFAULT_COVER_WIDTH,
@@ -811,37 +770,9 @@ export function getOrCreateOpeningScreenPage(invitation: Partial<Invitation>): I
     };
   }
 
-  // Generate fresh template elements for the chosen coverType
-  let elements: CanvasElement[];
-  const titleOptions = {
-    showTextOnCover: opening?.showTextOnCover,
-    showOverline: opening?.showOverline,
-    showCoupleNames: opening?.showCoupleNames,
-    showDateSubtitle: opening?.showDateSubtitle
-  };
-
-  if (coverType === 'video') {
-    elements = buildVideoCoverElements(opening || { enabled: true, style: 'envelope' }, theme, coupleNames, subtitle, title, buttonText, sealColor);
-  } else if (coverType === 'image') {
-    elements = buildImageCoverElements(opening, theme, coupleNames, subtitle, title, buttonText, sealColor, showButton);
-  } else {
-    elements = buildEnvelopeElements(
-      theme,
-      coupleNames,
-      subtitle,
-      title,
-      buttonText,
-      envelopeColor,
-      sealColor,
-      sealIcon,
-      showButton,
-      opening?.envelopeTemplate || 'simple-modern',
-      titleOptions
-    );
-  }
-
+  // For any new opening screen, start with pure blank canvas (elements: [])
   return {
-    id: 'opening-screen-page',
+    id: opening?.page?.id || 'opening-screen-page',
     name: 'Opening Screen',
     order: -1,
     width: opening?.page?.width || DEFAULT_COVER_WIDTH,
@@ -849,7 +780,7 @@ export function getOrCreateOpeningScreenPage(invitation: Partial<Invitation>): I
     heightMode: opening?.page?.heightMode || 'custom',
     isFullHeight: opening?.page?.isFullHeight || false,
     background,
-    elements
+    elements: []
   };
 }
 
@@ -872,25 +803,29 @@ export function syncPageWithOpeningConfig(
   const sealIcon = opening.sealIcon || 'heart';
   const coverType: OpeningCoverType =
     opening.coverType ||
-    (opening.style === 'card-flip' || prevPage?.background?.type === 'image' || opening.background?.type === 'image'
-      ? 'image'
-      : opening.style === 'video-cover' || prevPage?.background?.type === 'video' || opening.background?.type === 'video'
+    (opening.style === 'video-cover' || opening.videoUrl
       ? 'video'
-      : opening.style === 'custom-page'
-      ? 'custom-page'
-      : 'envelope');
+      : opening.style === 'card-flip' || (opening.imageUrl && !opening.videoUrl)
+        ? 'image'
+        : opening.style === 'envelope' || opening.envelopeTemplate
+          ? 'envelope'
+          : 'custom-page');
   const showButton = opening.showOpenButton !== false;
 
-  // 1. Establish the appropriate background
+  // Establish the appropriate background
   let background: BackgroundConfig;
-  if (coverType === 'video') {
+  if (opening.background) {
+    background = opening.background;
+  } else if (prevPage?.background) {
+    background = prevPage.background;
+  } else if (opening.videoUrl) {
     background = {
       type: 'video',
       videoUrl: opening.videoUrl || DEFAULT_STOCK_VIDEO,
       overlayColor: '#000000',
       overlayOpacity: 0.35
     };
-  } else if (coverType === 'image') {
+  } else if (opening.imageUrl) {
     background = {
       type: 'image',
       imageUrl: opening.imageUrl || DEFAULT_STOCK_IMAGE,
@@ -899,266 +834,24 @@ export function syncPageWithOpeningConfig(
       overlayColor: '#000000',
       overlayOpacity: opening.imageOverlayOpacity ?? 0.4
     };
-  } else if (coverType === 'custom-page') {
-    background = prevPage?.background || opening.background || {
-      type: 'gradient',
-      gradient: { type: 'radial', colors: ['#172520', '#07120d'], angle: 180 },
-      overlayColor: sealColor,
-      overlayOpacity: 0.05
-    };
   } else {
-    // Envelope
     background = {
-      type: 'gradient',
-      gradient: { type: 'radial', colors: ['#172520', '#07120d'], angle: 180 },
-      overlayColor: sealColor,
-      overlayOpacity: 0.05
+      type: 'color',
+      color: theme.backgroundColor || '#071912'
     };
   }
 
-  // If custom-page, provide a clean blank canvas if switching from a template
-  if (coverType === 'custom-page') {
-    const isFromTemplate = prevPage?.elements?.some(el => el.id === 'open-container-card');
-    return {
-      id: prevPage?.id || 'opening-screen-page',
-      name: 'Opening Screen',
-      order: -1,
-      width: prevPage?.width || DEFAULT_COVER_WIDTH,
-      height: prevPage?.height || DEFAULT_COVER_HEIGHT,
-      heightMode: prevPage?.heightMode || 'custom',
-      isFullHeight: prevPage?.isFullHeight || false,
-      background,
-      elements: isFromTemplate ? [] : (prevPage?.elements || [])
-    };
-  }
-
-  // Check if we need to regenerate elements due to coverType change
-  const hadEnvelopeCard = prevPage?.elements?.some(el => el.id === 'open-container-card');
-  const needsElementsRegen = (coverType === 'envelope' && !hadEnvelopeCard) ||
-    ((coverType === 'video' || coverType === 'image') && hadEnvelopeCard);
-
-  const titleOptions = {
-    showTextOnCover: opening.showTextOnCover,
-    showOverline: opening.showOverline,
-    showCoupleNames: opening.showCoupleNames,
-    showDateSubtitle: opening.showDateSubtitle
-  };
-
-  if (needsElementsRegen || !prevPage?.elements || prevPage.elements.length === 0) {
-    let elements: CanvasElement[];
-    if (coverType === 'video') {
-      elements = buildVideoCoverElements(opening, theme, coupleNames, subtitle, title, buttonText, sealColor);
-    } else if (coverType === 'image') {
-      elements = buildImageCoverElements(opening, theme, coupleNames, subtitle, title, buttonText, sealColor, showButton);
-    } else {
-      elements = buildEnvelopeElements(
-        theme,
-        coupleNames,
-        subtitle,
-        title,
-        buttonText,
-        envelopeColor,
-        sealColor,
-        sealIcon,
-        showButton,
-        opening.envelopeTemplate || 'simple-modern',
-        titleOptions
-      );
-    }
-
-    return {
-      id: 'opening-screen-page',
-      name: 'Opening Screen',
-      order: -1,
-      width: prevPage?.width || DEFAULT_COVER_WIDTH,
-      height: prevPage?.height || DEFAULT_COVER_HEIGHT,
-      heightMode: prevPage?.heightMode || 'custom',
-      isFullHeight: prevPage?.isFullHeight || false,
-      background,
-      elements
-    };
-  }
-
-  // Otherwise, incrementally update elements
-  let updatedElements = prevPage.elements.map(el => {
-    if (el.id === 'open-elem-button') {
-      return {
-        ...el,
-        content: { ...el.content, buttonText: buttonText },
-        style: { ...el.style, backgroundColor: sealColor }
-      };
-    }
-    if (el.id === 'open-elem-couple') {
-      return { ...el, content: { ...el.content, text: coupleNames } };
-    }
-    if (el.id === 'open-elem-date') {
-      return { ...el, content: { ...el.content, text: subtitle } };
-    }
-    if (el.id === 'open-elem-title') {
-      return { ...el, content: { ...el.content, text: title }, style: { ...el.style, color: sealColor } };
-    }
-    if (el.id === 'open-container-card') {
-      return { ...el, style: { ...el.style, backgroundColor: envelopeColor } };
-    }
-    if (el.id === 'open-elem-icon') {
-      return {
-        ...el,
-        content: { ...el.content, iconName: sealIcon, iconColor: sealColor },
-        style: { ...el.style, color: sealColor, borderColor: sealColor }
-      };
-    }
-    return el;
-  });
-
-  // Handle optional titles visibility
-  const showText = opening.showTextOnCover !== false;
-  const showOverline = showText && opening.showOverline !== false;
-  const showCouple = showText && opening.showCoupleNames !== false;
-  const showDate = showText && opening.showDateSubtitle !== false;
-
-  // Filter out any titles that are now disabled
-  updatedElements = updatedElements.filter(el => {
-    if (el.id === 'open-elem-title' && !showOverline) return false;
-    if (el.id === 'open-elem-couple' && !showCouple) return false;
-    if (el.id === 'open-elem-date' && !showDate) return false;
-    return true;
-  });
-
-  // If a title was re-enabled and missing, re-add it
-  if (showOverline && !updatedElements.some(el => el.id === 'open-elem-title')) {
-    updatedElements.push({
-      id: 'open-elem-title',
-      type: 'heading',
-      name: 'Overline Title',
-      style: {
-        x: 30,
-        y: coverType === 'envelope' ? 104 : 45,
-        width: 460,
-        height: 20,
-        fontSize: 10,
-        fontWeight: 700,
-        color: sealColor,
-        textAlign: 'center',
-        letterSpacing: 3,
-        zIndex: 10
-      },
-      content: { text: title },
-      animation: { type: 'fadeIn', duration: 0.6, delay: 0.3 }
-    });
-  }
-
-  if (showCouple && !updatedElements.some(el => el.id === 'open-elem-couple')) {
-    updatedElements.push({
-      id: 'open-elem-couple',
-      type: 'heading',
-      name: 'Couple / Event Names',
-      style: {
-        x: 30,
-        y: coverType === 'envelope' ? 128 : 72,
-        width: 460,
-        height: 54,
-        fontSize: 26,
-        fontFamily: theme.fontHeading || "'Cinzel', serif",
-        fontWeight: 700,
-        color: '#ffffff',
-        textAlign: 'center',
-        lineHeight: 1.2,
-        zIndex: 10
-      },
-      content: { text: coupleNames },
-      animation: { type: 'slideUp', duration: 0.7, delay: 0.4 }
-    });
-  }
-
-  if (showDate && !updatedElements.some(el => el.id === 'open-elem-date')) {
-    updatedElements.push({
-      id: 'open-elem-date',
-      type: 'text',
-      name: 'Date / Subtitle',
-      style: {
-        x: 30,
-        y: coverType === 'envelope' ? 202 : 132,
-        width: 460,
-        height: 24,
-        fontSize: 12,
-        fontWeight: 500,
-        color: '#94a3b8',
-        textAlign: 'center',
-        letterSpacing: 2,
-        zIndex: 10
-      },
-      content: { text: subtitle },
-      animation: { type: 'fadeIn', duration: 0.6, delay: 0.6 }
-    });
-  }
-
-  // Handle center play button for video mode
-  if (coverType === 'video') {
-    const isClickToPlay = opening.videoPlayMode === 'click-to-play';
-    const hasPlayBtn = updatedElements.some(el => el.id === 'open-elem-play-btn');
-    if (isClickToPlay && !hasPlayBtn) {
-      updatedElements.push({
-        id: 'open-elem-play-btn',
-        type: 'icon',
-        name: 'Center Play Button',
-        style: {
-          x: 228,
-          y: 172,
-          width: 64,
-          height: 64,
-          color: '#07120d',
-          backgroundColor: sealColor || '#d4af37',
-          borderRadius: 9999,
-          borderWidth: 3,
-          borderColor: 'rgba(255, 255, 255, 0.4)',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.6), 0 0 35px rgba(212, 175, 55, 0.5)',
-          zIndex: 15
-        },
-        content: {
-          iconName: 'play',
-          iconColor: '#07120d',
-          iconSize: 28
-        },
-        animation: { type: 'pulse', duration: 2, delay: 0.5, repeat: 'infinite' }
-      });
-    } else if (!isClickToPlay && hasPlayBtn) {
-      updatedElements = updatedElements.filter(el => el.id !== 'open-elem-play-btn');
-    }
-  }
-
-  // Handle open button visibility toggle
-  const hasButton = updatedElements.some(
-    el => el.id === 'open-elem-button' || el.content?.buttonAction === 'open-invitation' || el.type === 'button'
-  );
-  if (!showButton && hasButton) {
-    updatedElements = updatedElements.filter(
-      el => el.id !== 'open-elem-button' && el.content?.buttonAction !== 'open-invitation'
-    );
-    if (coverType === 'envelope' && !updatedElements.some(el => el.id === 'open-elem-seal-hint')) {
-      const hint = buildEnvelopeElements(theme, coupleNames, subtitle, title, buttonText, envelopeColor, sealColor, sealIcon, false, opening.envelopeTemplate || 'simple-modern', titleOptions).find(el => el.id === 'open-elem-seal-hint');
-      if (hint) updatedElements.push(hint);
-    }
-  } else if (showButton && !hasButton) {
-    updatedElements = updatedElements.filter(el => el.id !== 'open-elem-seal-hint');
-    const newBtn = createOpenInvitationButtonElement(
-      theme,
-      buttonText,
-      sealColor,
-      245,
-      140,
-      240
-    );
-    updatedElements.push(newBtn);
-  }
-
+  // Preserve existing canvas elements (do not auto-generate any elements)
   return {
-    ...prevPage,
+    id: prevPage?.id || 'opening-screen-page',
+    name: 'Opening Screen',
+    order: -1,
     width: prevPage?.width || DEFAULT_COVER_WIDTH,
     height: prevPage?.height || DEFAULT_COVER_HEIGHT,
     heightMode: prevPage?.heightMode || 'custom',
     isFullHeight: prevPage?.isFullHeight || false,
     background,
-    elements: updatedElements
+    elements: prevPage?.elements || []
   };
 }
 
@@ -1174,14 +867,16 @@ export function syncOpeningScreenWithPage(
   );
   const hasButton = Boolean(buttonElem);
 
-  // Derive cover type from page background if available
-  let resolvedCoverType: OpeningCoverType = currentConfig?.coverType || 'envelope';
-  if (page.background?.type === 'image') {
+  // Derive cover type from current config (defaulting to custom-page)
+  let resolvedCoverType: OpeningCoverType = currentConfig?.coverType || 'custom-page';
+  if (currentConfig?.coverType === 'custom-page') {
+    resolvedCoverType = 'custom-page';
+  } else if (currentConfig?.coverType === 'envelope') {
+    resolvedCoverType = 'envelope';
+  } else if (page.background?.type === 'image') {
     resolvedCoverType = 'image';
   } else if (page.background?.type === 'video') {
     resolvedCoverType = 'video';
-  } else if (currentConfig?.coverType === 'custom-page') {
-    resolvedCoverType = 'custom-page';
   }
 
   const nextConfig: OpeningScreenConfig = {
@@ -1190,10 +885,10 @@ export function syncOpeningScreenWithPage(
       resolvedCoverType === 'video'
         ? 'video-cover'
         : resolvedCoverType === 'image'
-        ? 'card-flip'
-        : resolvedCoverType === 'custom-page'
-        ? 'custom-page'
-        : 'envelope',
+          ? 'card-flip'
+          : resolvedCoverType === 'custom-page'
+            ? 'custom-page'
+            : 'envelope',
     musicAutoplayOnOpen: currentConfig?.musicAutoplayOnOpen !== undefined ? currentConfig.musicAutoplayOnOpen : true,
     envelopeColor: currentConfig?.envelopeColor || '#0e261d',
     sealColor: currentConfig?.sealColor || '#d4af37',
