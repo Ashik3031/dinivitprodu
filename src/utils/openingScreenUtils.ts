@@ -69,7 +69,9 @@ export function createOpenInvitationButtonElement(
       buttonShape: 'pill'
     },
     animation: {
-      type: 'none'
+      type: 'none',
+      duration: 0,
+      delay: 0
     }
   };
 }

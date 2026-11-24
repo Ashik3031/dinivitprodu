@@ -506,7 +506,7 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
             type: 'container',
             name: 'Event Details Card',
             style: { x: 20, y: 30, width: 350, height: 260, backgroundColor: '#ffffff', borderRadius: 16, borderWidth: 1, borderColor: '#e2e8f0' },
-            content: { containerShape: 'rectangle' }
+            content: { containerShape: 'rectangle' } as any
           },
           {
             id: `el-title-${timestamp}`,
@@ -520,14 +520,14 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
             type: 'event-date',
             name: 'Ceremony Date',
             style: { x: 45, y: 110, width: 300, height: 45 },
-            content: { date: 'Saturday, December 12, 2026', title: 'The Date' }
+            content: { date: 'Saturday, December 12, 2026', title: 'The Date' } as any
           },
           {
             id: `el-venue-${timestamp}`,
             type: 'venue',
             name: 'Venue Info',
             style: { x: 45, y: 170, width: 300, height: 50 },
-            content: { venueName: 'The Grand St. Regis Palace', address: '123 Grand Ballroom Ave, New York' }
+            content: { venueName: 'The Grand St. Regis Palace', address: '123 Grand Ballroom Ave, New York' } as any
           }
         ];
       } else if (blockForm.presetType === 'rsvp') {
@@ -537,7 +537,7 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
             type: 'container',
             name: 'RSVP Card',
             style: { x: 20, y: 30, width: 350, height: 220, backgroundColor: '#0f172a', borderRadius: 16 },
-            content: { containerShape: 'rectangle' }
+            content: { containerShape: 'rectangle' } as any
           },
           {
             id: `el-hdr-${timestamp}`,
@@ -548,10 +548,10 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
           },
           {
             id: `el-rsvp-${timestamp}`,
-            type: 'rsvp',
+            type: 'form' as any,
             name: 'RSVP Form',
             style: { x: 45, y: 110, width: 300, height: 80 },
-            content: { title: 'RSVP Form', buttonText: 'Confirm Attendance' }
+            content: { title: 'RSVP Form', buttonText: 'Confirm Attendance' } as any
           }
         ];
       } else if (blockForm.presetType === 'dress-code') {
@@ -563,9 +563,9 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
             style: { x: 25, y: 30, width: 340, height: 200 },
             content: {
               title: 'Attire & Dress Code',
-              dressCodeType: 'Black Tie Optional',
+              dressCodeType: 'Formal',
               description: 'We kindly request formal evening attire. Tuxedos and dark suits, floor-length gowns and elegant cocktail dresses are welcomed.'
-            }
+            } as any
           }
         ];
       } else {
@@ -576,7 +576,7 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
             type: 'container',
             name: blockForm.name,
             style: { x: 20, y: 30, width: 350, height: blockForm.suggestedHeight, backgroundColor: '#f8fafc', borderRadius: 16, borderWidth: 1, borderColor: '#cbd5e1' },
-            content: { containerShape: 'rectangle' }
+            content: { containerShape: 'rectangle' } as any
           }
         ];
       }
@@ -683,8 +683,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
           <div
             onClick={() => setAdminSection('pending')}
             className={`p-3.5 rounded-xl cursor-pointer transition-all border ${pendingCount > 0
-                ? 'bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20'
-                : 'bg-slate-950/40 border-slate-800/60'
+              ? 'bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20'
+              : 'bg-slate-950/40 border-slate-800/60'
               }`}
           >
             <span className="text-xs text-amber-400 block font-medium flex items-center gap-1">
@@ -710,8 +710,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
           type="button"
           onClick={() => setAdminSection('templates')}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${adminSection === 'templates'
-              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-              : 'text-slate-400 hover:text-white'
+            ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+            : 'text-slate-400 hover:text-white'
             }`}
         >
           <Sparkles className="w-4 h-4" />
@@ -722,8 +722,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
           type="button"
           onClick={() => setAdminSection('pending')}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${adminSection === 'pending'
-              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-              : 'text-slate-400 hover:text-white'
+            ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+            : 'text-slate-400 hover:text-white'
             }`}
         >
           <ShieldCheck className="w-4 h-4" />
@@ -739,8 +739,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
           type="button"
           onClick={() => setAdminSection('blocks')}
           className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${adminSection === 'blocks'
-              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-              : 'text-slate-400 hover:text-white'
+            ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+            : 'text-slate-400 hover:text-white'
             }`}
         >
           <Box className="w-4 h-4" />
@@ -766,8 +766,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
                   type="button"
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${isSelected
-                      ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                      : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                    : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
                     }`}
                 >
                   <span>{cat.label}</span>
@@ -877,8 +877,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
                   <div
                     key={tmpl.id}
                     className={`bg-slate-900 border rounded-2xl overflow-hidden transition-all flex flex-col group shadow-lg ${isPending
-                        ? 'border-amber-500/60 shadow-amber-500/10'
-                        : 'border-slate-800 hover:border-slate-700/80'
+                      ? 'border-amber-500/60 shadow-amber-500/10'
+                      : 'border-slate-800 hover:border-slate-700/80'
                       }`}
                   >
                     {/* Cover Image & Badges */}
@@ -979,8 +979,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
                           type="button"
                           onClick={() => handleTogglePublish(tmpl)}
                           className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${isPublic
-                              ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                            ? 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
                             }`}
                           title={isPublic ? 'Click to unpublish' : 'Click to publish to template library'}
                         >
@@ -1187,8 +1187,8 @@ export const AdminTemplateManager: React.FC<AdminTemplateManagerProps> = ({ onEd
                   type="button"
                   onClick={() => setCreateMode('from-invitation')}
                   className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer ${createMode === 'from-invitation'
-                      ? 'bg-amber-500 text-slate-950'
-                      : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-slate-950'
+                    : 'text-slate-400 hover:text-white'
                     }`}
                 >
                   Convert Existing Invitation

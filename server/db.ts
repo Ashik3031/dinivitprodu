@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient, Db } from 'mongodb';
-import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset, PrebuiltBlock } from '../src/types';
+import { User, Invitation, InvitationPage, RSVPResponse, GuestbookMessage, InvitationTemplate, MediaAsset, PrebuiltBlock, BackgroundCollection } from '../src/types';
 import { DEFAULT_PUBLIC_ASSETS } from '../src/data/stockFramesAndStickers';
 import { STOCK_ASSETS } from '../src/data/stockAssets';
 
@@ -34,6 +34,7 @@ interface DatabaseSchema {
   rsvps: RSVPResponse[];
   guestbook: GuestbookMessage[];
   media: MediaAsset[];
+  backgroundCollections: BackgroundCollection[];
 }
 
 const DATA_DIR = path.join(process.cwd(), '.data');
@@ -51,7 +52,8 @@ let db: DatabaseSchema = {
   blocks: [],
   rsvps: [],
   guestbook: [],
-  media: []
+  media: [],
+  backgroundCollections: []
 };
 
 // Initial clean database state (no seeded invitations, blocks, templates, rsvps, or guestbook)
@@ -107,7 +109,8 @@ function createEmptyDatabase(): DatabaseSchema {
     blocks: [],
     rsvps: [],
     guestbook: [],
-    media: []
+    media: [],
+    backgroundCollections: []
   };
 }
 
@@ -180,6 +183,104 @@ export function loadDatabase(): DatabaseSchema {
         }
       }
 
+      // Ensure Background Collections list exists and sanitize each entry
+      if (!db.backgroundCollections) {
+        db.backgroundCollections = [];
+      }
+
+      // Filter out any completely corrupt entries that have no id or name
+      db.backgroundCollections = db.backgroundCollections.filter(c => c && c.id);
+      for (const col of db.backgroundCollections) {
+        if (!col.name) col.name = 'Custom Collection';
+        if (!col.slug) col.slug = col.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        if (!Array.isArray(col.backgroundAssetIds)) col.backgroundAssetIds = [];
+        if (typeof col.isPublished !== 'boolean') col.isPublished = true;
+      }
+
+      if (db.backgroundCollections.length === 0) {
+        const bgAssets = db.media.filter(m =>
+          m.type === 'background' ||
+          (m.category || '').toLowerCase().includes('background') ||
+          (m.tags || []).some(t => t.toLowerCase().includes('background'))
+        );
+
+        const findAssetIds = (keywords: string[]) => {
+          return bgAssets
+            .filter(a => {
+              const text = `${a.title} ${a.name} ${a.category} ${(a.tags || []).join(' ')}`.toLowerCase();
+              return keywords.some(k => text.includes(k.toLowerCase()));
+            })
+            .map(a => a.id);
+        };
+
+        const royalIds = findAssetIds(['gold', 'silk', 'luxury', 'bokeh', 'navy']);
+        const pastelIds = findAssetIds(['pastel', 'rose', 'blush', 'pink']);
+        const floralIds = findAssetIds(['botanical', 'sage', 'floral', 'watercolor']);
+        const minimalIds = findAssetIds(['stone', 'arch', 'minimalist', 'silk', 'ivory']);
+
+        const now = new Date().toISOString();
+        const initialCollections: BackgroundCollection[] = [
+          {
+            id: 'bgc-royal-luxury',
+            name: 'Royal Luxury',
+            slug: 'royal-luxury',
+            description: 'Opulent gold foil, silk drapes, warm bokeh, and imperial textures for majestic wedding stationery.',
+            coverAssetId: royalIds[0] || bgAssets[0]?.id,
+            coverAssetUrl: bgAssets.find(a => a.id === (royalIds[0] || bgAssets[0]?.id))?.url || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',
+            backgroundAssetIds: royalIds.length > 0 ? royalIds : bgAssets.slice(0, 4).map(a => a.id),
+            isPublished: true,
+            displayOrder: 1,
+            createdBy: 'admin',
+            createdAt: now,
+            updatedAt: now
+          },
+          {
+            id: 'bgc-pastel-romance',
+            name: 'Pastel Romance',
+            slug: 'pastel-romance',
+            description: 'Delicate blush pinks, gentle rose gold shimmers, and dreamy ethereal washes for romantic celebrations.',
+            coverAssetId: pastelIds[0] || bgAssets[1]?.id,
+            coverAssetUrl: bgAssets.find(a => a.id === (pastelIds[0] || bgAssets[1]?.id))?.url || 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=800&q=80',
+            backgroundAssetIds: pastelIds.length > 0 ? pastelIds : bgAssets.slice(1, 5).map(a => a.id),
+            isPublished: true,
+            displayOrder: 2,
+            createdBy: 'admin',
+            createdAt: now,
+            updatedAt: now
+          },
+          {
+            id: 'bgc-floral-elegance',
+            name: 'Floral Elegance',
+            slug: 'floral-elegance',
+            description: 'Hand-painted watercolor greenery, sage botanical motifs, and organic garden warmth.',
+            coverAssetId: floralIds[0] || bgAssets[2]?.id,
+            coverAssetUrl: bgAssets.find(a => a.id === (floralIds[0] || bgAssets[2]?.id))?.url || 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
+            backgroundAssetIds: floralIds.length > 0 ? floralIds : bgAssets.slice(2, 6).map(a => a.id),
+            isPublished: true,
+            displayOrder: 3,
+            createdBy: 'admin',
+            createdAt: now,
+            updatedAt: now
+          },
+          {
+            id: 'bgc-minimal-luxury',
+            name: 'Minimal Luxury',
+            slug: 'minimal-luxury',
+            description: 'Understated sandstone arches, architectural backdrops, and modern organic aesthetics.',
+            coverAssetId: minimalIds[0] || bgAssets[3]?.id,
+            coverAssetUrl: bgAssets.find(a => a.id === (minimalIds[0] || bgAssets[3]?.id))?.url || 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80',
+            backgroundAssetIds: minimalIds.length > 0 ? minimalIds : bgAssets.slice(0, 3).map(a => a.id),
+            isPublished: true,
+            displayOrder: 4,
+            createdBy: 'admin',
+            createdAt: now,
+            updatedAt: now
+          }
+        ];
+
+        db.backgroundCollections = initialCollections;
+      }
+
       return db;
     }
   } catch (err) {
@@ -198,7 +299,7 @@ let isMongoConnected = false;
 async function persistToMongo(): Promise<void> {
   if (!mongoDb || !isMongoConnected) return;
   try {
-    const collections: (keyof DatabaseSchema)[] = ['users', 'invitations', 'templates', 'blocks', 'rsvps', 'guestbook', 'media'];
+    const collections: (keyof DatabaseSchema)[] = ['users', 'invitations', 'templates', 'blocks', 'rsvps', 'guestbook', 'media', 'backgroundCollections'];
     for (const name of collections) {
       const col = mongoDb.collection(name);
       const items = db[name];
@@ -251,6 +352,11 @@ export async function initMongo(): Promise<boolean> {
       if (rsvps.length > 0) db.rsvps = rsvps.map(({ _id, ...r }) => r as any);
       if (guestbook.length > 0) db.guestbook = guestbook.map(({ _id, ...g }) => g as any);
       if (media.length > 0) db.media = media.map(({ _id, ...m }) => m as any);
+
+      if (names.includes('backgroundCollections')) {
+        const backgroundCollections = await mongoDb.collection('backgroundCollections').find({}).toArray();
+        if (backgroundCollections.length > 0) db.backgroundCollections = backgroundCollections.map(({ _id, ...c }) => c as any);
+      }
 
       saveDatabase();
       console.log(`[MongoDB] Loaded data from Atlas: ${db.users.length} users, ${db.invitations.length} invitations.`);
@@ -1191,5 +1297,204 @@ export const dbService = {
       audioCount,
       totalBytes
     };
+  },
+
+  // Background Collections
+  getBackgroundCollections: (params: { isPublished?: boolean; search?: string } = {}) => {
+    loadDatabase();
+    let list = db.backgroundCollections || [];
+
+    if (params.isPublished !== undefined) {
+      list = list.filter(c => c.isPublished === params.isPublished);
+    }
+
+    if (params.search && params.search.trim()) {
+      const q = params.search.toLowerCase().trim();
+      list = list.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        (c.description && c.description.toLowerCase().includes(q))
+      );
+    }
+
+    // Sort by displayOrder ascending, then updatedAt descending
+    const sorted = [...list].sort((a, b) => {
+      const orderDiff = (a.displayOrder ?? 0) - (b.displayOrder ?? 0);
+      if (orderDiff !== 0) return orderDiff;
+      return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
+    });
+
+    // Populate assetsCount and ensure coverAssetUrl is present
+    return sorted.map(col => {
+      let coverUrl = col.coverAssetUrl;
+      if (!coverUrl && col.coverAssetId) {
+        const coverMedia = db.media?.find(m => m.id === col.coverAssetId);
+        if (coverMedia) coverUrl = coverMedia.thumbnailUrl || coverMedia.url;
+      }
+      if (!coverUrl && col.backgroundAssetIds && col.backgroundAssetIds.length > 0) {
+        const firstMedia = db.media?.find(m => m.id === col.backgroundAssetIds[0]);
+        if (firstMedia) coverUrl = firstMedia.thumbnailUrl || firstMedia.url;
+      }
+
+      return {
+        ...col,
+        coverAssetUrl: coverUrl,
+        assetsCount: col.backgroundAssetIds?.length || 0
+      };
+    });
+  },
+
+  getBackgroundCollectionById: (idOrSlug: string, populateAssets: boolean = true) => {
+    loadDatabase();
+    const col = (db.backgroundCollections || []).find(c => c.id === idOrSlug || c.slug === idOrSlug);
+    if (!col) return null;
+
+    let coverUrl = col.coverAssetUrl;
+    let backgroundAssets: MediaAsset[] = [];
+
+    if (col.backgroundAssetIds && col.backgroundAssetIds.length > 0) {
+      const mediaMap = new Map((db.media || []).map(m => [m.id, m]));
+      backgroundAssets = col.backgroundAssetIds
+        .map(id => mediaMap.get(id))
+        .filter((m): m is MediaAsset => Boolean(m));
+    }
+
+    if (!coverUrl && col.coverAssetId) {
+      const coverMedia = db.media?.find(m => m.id === col.coverAssetId);
+      if (coverMedia) coverUrl = coverMedia.thumbnailUrl || coverMedia.url;
+    }
+    if (!coverUrl && backgroundAssets.length > 0) {
+      coverUrl = backgroundAssets[0].thumbnailUrl || backgroundAssets[0].url;
+    }
+
+    return {
+      ...col,
+      coverAssetUrl: coverUrl,
+      assetsCount: col.backgroundAssetIds?.length || 0,
+      backgroundAssets: populateAssets ? backgroundAssets : undefined
+    };
+  },
+
+  createBackgroundCollection: (data: {
+    name: string;
+    slug?: string;
+    description?: string;
+    coverAssetId?: string;
+    coverAssetUrl?: string;
+    backgroundAssetIds?: string[];
+    isPublished?: boolean;
+    displayOrder?: number;
+    createdBy?: string;
+  }) => {
+    loadDatabase();
+    if (!db.backgroundCollections) db.backgroundCollections = [];
+
+    const now = new Date().toISOString();
+    const baseSlug = (data.slug || data.name)
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9_-]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || `collection-${Date.now()}`;
+
+    // Ensure unique slug
+    let slug = baseSlug;
+    let counter = 1;
+    while (db.backgroundCollections.some(c => c.slug === slug)) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    const newCollection: BackgroundCollection = {
+      id: `bgc-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      name: data.name.trim(),
+      slug,
+      description: data.description ? data.description.trim() : '',
+      coverAssetId: data.coverAssetId || undefined,
+      coverAssetUrl: data.coverAssetUrl || undefined,
+      backgroundAssetIds: Array.isArray(data.backgroundAssetIds) ? data.backgroundAssetIds : [],
+      isPublished: data.isPublished !== undefined ? Boolean(data.isPublished) : true,
+      displayOrder: typeof data.displayOrder === 'number' ? data.displayOrder : db.backgroundCollections.length + 1,
+      createdBy: data.createdBy || 'admin',
+      createdAt: now,
+      updatedAt: now
+    };
+
+    db.backgroundCollections.push(newCollection);
+    saveDatabase();
+    return newCollection;
+  },
+
+  updateBackgroundCollection: (id: string, updates: Partial<BackgroundCollection>) => {
+    loadDatabase();
+    if (!db.backgroundCollections) db.backgroundCollections = [];
+    const index = db.backgroundCollections.findIndex(c => c.id === id);
+    if (index === -1) throw new Error('Background collection not found');
+
+    const current = db.backgroundCollections[index];
+
+    // Filter out undefined values to prevent wiping existing data
+    const cleanUpdates: Partial<BackgroundCollection> = {};
+    for (const [key, value] of Object.entries(updates)) {
+      if (value !== undefined) {
+        (cleanUpdates as any)[key] = value;
+      }
+    }
+
+    const updated: BackgroundCollection = {
+      ...current,
+      ...cleanUpdates,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Ensure backgroundAssetIds is preserved as an array
+    if (!Array.isArray(updated.backgroundAssetIds)) {
+      updated.backgroundAssetIds = Array.isArray(current.backgroundAssetIds) ? current.backgroundAssetIds : [];
+    }
+
+    // Ensure isPublished is preserved as boolean
+    if (typeof updated.isPublished !== 'boolean') {
+      updated.isPublished = typeof current.isPublished === 'boolean' ? current.isPublished : false;
+    }
+
+    // Ensure name is preserved
+    if (!updated.name) {
+      updated.name = current.name || 'Untitled Collection';
+    }
+
+    if (cleanUpdates.name && !cleanUpdates.slug) {
+      updated.slug = cleanUpdates.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9_-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
+    db.backgroundCollections[index] = updated;
+    saveDatabase();
+    return updated;
+  },
+
+  deleteBackgroundCollection: (id: string) => {
+    loadDatabase();
+    if (!db.backgroundCollections) db.backgroundCollections = [];
+    const beforeCount = db.backgroundCollections.length;
+    db.backgroundCollections = db.backgroundCollections.filter(c => c.id !== id);
+    if (db.backgroundCollections.length === beforeCount) {
+      throw new Error('Background collection not found');
+    }
+    saveDatabase();
+    return { success: true };
+  },
+
+  reorderBackgroundCollectionAssets: (id: string, assetIds: string[]) => {
+    loadDatabase();
+    if (!db.backgroundCollections) db.backgroundCollections = [];
+    const index = db.backgroundCollections.findIndex(c => c.id === id);
+    if (index === -1) throw new Error('Background collection not found');
+
+    db.backgroundCollections[index].backgroundAssetIds = assetIds;
+    db.backgroundCollections[index].updatedAt = new Date().toISOString();
+    saveDatabase();
+    return db.backgroundCollections[index];
   }
 };

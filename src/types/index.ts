@@ -724,6 +724,27 @@ export interface MediaAsset {
   isPublic?: boolean;
   isSuperAdmin?: boolean;
   authorRole?: string;
+  publicId?: string;
+  resourceType?: 'image' | 'video' | 'raw' | 'auto' | string;
+  mimeType?: string;
   createdAt: string;
   updatedAt?: string;
+}
+
+export interface BackgroundCollection {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  coverAssetId?: string;
+  coverAssetUrl?: string;
+  backgroundAssetIds: string[];
+  isPublished: boolean;
+  displayOrder: number;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Populated fields for client convenience
+  assetsCount?: number;
+  backgroundAssets?: MediaAsset[];
 }

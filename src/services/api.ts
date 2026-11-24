@@ -1,4 +1,4 @@
-import { User, Invitation, RSVPResponse, GuestbookMessage, InvitationTemplate, AdminStats, MediaAsset, PrebuiltBlock } from '../types';
+import { User, Invitation, RSVPResponse, GuestbookMessage, InvitationTemplate, AdminStats, MediaAsset, PrebuiltBlock, BackgroundCollection } from '../types';
 
 function getAuthHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
@@ -513,6 +513,36 @@ export const api = {
     return parseJsonResponse(res, 'Failed to delete block');
   },
 
+  // Cloudinary Direct Signed Upload Helpers
+  getCloudinaryConfig: async (): Promise<{ success: boolean; cloudName: string; apiKey: string; isConfigured: boolean }> => {
+    const res = await fetch('/api/media/cloudinary-config', {
+      headers: getAuthHeaders()
+    });
+    return parseJsonResponse(res, 'Failed to fetch Cloudinary configuration');
+  },
+
+  getMediaUploadSignature: async (params: {
+    category?: string;
+    resourceType?: 'image' | 'video' | 'raw' | 'auto';
+    isPublic?: boolean;
+    businessId?: string;
+  }): Promise<{
+    success: boolean;
+    signature: string;
+    timestamp: number;
+    apiKey: string;
+    cloudName: string;
+    folder: string;
+    resourceType: 'image' | 'video' | 'raw' | 'auto';
+  }> => {
+    const res = await fetch('/api/media/signature', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(params)
+    });
+    return parseJsonResponse(res, 'Failed to obtain upload signature');
+  },
+
   // Media Library
   getMedia: async (params?: { businessId?: string; invitationId?: string; type?: string; search?: string; category?: string; isPublic?: boolean; scope?: string }): Promise<{ success: boolean; media: MediaAsset[] }> => {
     const searchParams = new URLSearchParams();
@@ -577,5 +607,63 @@ export const api = {
       headers: getAuthHeaders()
     });
     return parseJsonResponse(res, 'Failed to fetch media stats');
+  },
+
+  // Background Collections
+  getBackgroundCollections: async (params?: { search?: string; all?: boolean }): Promise<{ success: boolean; collections: BackgroundCollection[] }> => {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.all) searchParams.append('all', 'true');
+
+    const qs = searchParams.toString();
+    const url = `/api/media/collections${qs ? `?${qs}` : ''}`;
+    return fetchWithDeduplication<{ success: boolean; collections: BackgroundCollection[] }>(url, {
+      headers: getAuthHeaders()
+    }, 3000);
+  },
+
+  getBackgroundCollectionById: async (id: string): Promise<{ success: boolean; collection: BackgroundCollection }> => {
+    return fetchWithDeduplication<{ success: boolean; collection: BackgroundCollection }>(`/api/media/collections/${id}`, {
+      headers: getAuthHeaders()
+    }, 2000);
+  },
+
+  createBackgroundCollection: async (payload: Partial<BackgroundCollection>): Promise<{ success: boolean; collection: BackgroundCollection; message: string }> => {
+    invalidateApiCache('/api/media/collections');
+    const res = await fetch('/api/media/collections', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload)
+    });
+    return parseJsonResponse(res, 'Failed to create background collection');
+  },
+
+  updateBackgroundCollection: async (id: string, updates: Partial<BackgroundCollection>): Promise<{ success: boolean; collection: BackgroundCollection; message: string }> => {
+    invalidateApiCache('/api/media/collections');
+    const res = await fetch(`/api/media/collections/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(updates)
+    });
+    return parseJsonResponse(res, 'Failed to update background collection');
+  },
+
+  reorderBackgroundCollectionAssets: async (id: string, assetIds: string[]): Promise<{ success: boolean; collection: BackgroundCollection; message: string }> => {
+    invalidateApiCache('/api/media/collections');
+    const res = await fetch(`/api/media/collections/${id}/reorder`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ assetIds })
+    });
+    return parseJsonResponse(res, 'Failed to reorder collection assets');
+  },
+
+  deleteBackgroundCollection: async (id: string): Promise<{ success: boolean; message: string }> => {
+    invalidateApiCache('/api/media/collections');
+    const res = await fetch(`/api/media/collections/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return parseJsonResponse(res, 'Failed to delete background collection');
   }
 };

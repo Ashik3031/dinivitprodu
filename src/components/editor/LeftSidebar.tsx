@@ -76,6 +76,7 @@ interface LeftSidebarProps {
   businessId?: string;
   onUpdateElement?: (id: string, updates: Partial<CanvasElement>) => void;
   onSetAsBackground?: (url: string, type: 'image' | 'video') => void;
+  onApplyBackgroundToAllPages?: (url: string, type: 'image' | 'video') => void;
   onSetAsMusic?: (audioUrl: string, title: string) => void;
   openingScreen?: any;
   onSelectOpeningScreen?: () => void;
@@ -111,6 +112,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   businessId,
   onUpdateElement,
   onSetAsBackground,
+  onApplyBackgroundToAllPages,
   onSetAsMusic,
   openingScreen,
   onSelectOpeningScreen,
@@ -956,6 +958,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               selectedElement={selectedElement}
               onUpdateElement={onUpdateElement}
               onSetAsBackground={onSetAsBackground}
+              onApplyBackgroundToAllPages={onApplyBackgroundToAllPages}
               onSetAsMusic={onSetAsMusic}
               initialCategory={mediaCategory}
               currentMusicUrl={currentMusicUrl}

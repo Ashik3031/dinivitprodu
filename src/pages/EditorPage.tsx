@@ -1496,6 +1496,30 @@ export const EditorPage: React.FC<EditorPageProps> = ({
             });
             toast.success('Background applied successfully.');
           }}
+          onApplyBackgroundToAllPages={(url, type) => {
+            if (!invitation) return;
+            const currentBg = activePage?.background;
+            const bgConfig = {
+              ...currentBg,
+              type: type === 'video' ? 'video' : 'image',
+              ...(type === 'video' ? { videoUrl: url } : { imageUrl: url }),
+              size: currentBg?.size || 'cover',
+              position: currentBg?.position || 'center',
+              repeat: currentBg?.repeat || 'no-repeat'
+            };
+            const updatedPages = invitation.pages.map((p) => ({
+              ...p,
+              background: {
+                ...p.background,
+                ...bgConfig
+              }
+            }));
+            updateInvitationState({
+              ...invitation,
+              pages: updatedPages
+            });
+            toast.success('Background applied to all invitation pages!');
+          }}
           onSetAsMusic={(audioUrl, title) => updateInvitationState({
             ...invitation,
             music: {

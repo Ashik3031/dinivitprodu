@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { MediaAsset, MediaAssetType } from '../../types';
 import { api } from '../../services/api';
+import { uploadMediaAsset } from '../../services/mediaUploadService';
 import { useToast } from '../../context/ToastContext';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { AdminBackgroundCollectionsManager } from './AdminBackgroundCollectionsManager';
 import {
   Upload,
   Image as ImageIcon,
@@ -204,6 +206,7 @@ export const AdminAssetManager: React.FC = () => {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [adminTab, setAdminTab] = useState<'assets' | 'collections'>('assets');
   const [assets, setAssets] = useState<MediaAsset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedType, setSelectedType] = useState('all');
@@ -218,6 +221,9 @@ export const AdminAssetManager: React.FC = () => {
   const [uploadTab, setUploadTab] = useState<'file' | 'url'>('file');
   const [uploadForm, setUploadForm] = useState(INITIAL_UPLOAD_FORM);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatusText, setUploadStatusText] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   // Flags to preserve user manual customizations
@@ -289,6 +295,9 @@ export const AdminAssetManager: React.FC = () => {
   const handleOpenUploadModal = () => {
     setUploadForm(INITIAL_UPLOAD_FORM);
     setFilePreview(null);
+    setSelectedFile(null);
+    setUploadProgress(0);
+    setUploadStatusText('');
     setIsCategoryManuallyEdited(false);
     setIsTagsManuallyEdited(false);
     setIsTitleManuallyEdited(false);
@@ -301,6 +310,9 @@ export const AdminAssetManager: React.FC = () => {
   const handleCloseUploadModal = () => {
     setIsUploadModalOpen(false);
     setFilePreview(null);
+    setSelectedFile(null);
+    setUploadProgress(0);
+    setUploadStatusText('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -324,6 +336,10 @@ export const AdminAssetManager: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setSelectedFile(file);
+    setUploadProgress(0);
+    setUploadStatusText('');
 
     // Check size limit (15MB)
     if (file.size > 15 * 1024 * 1024) {
@@ -464,7 +480,7 @@ export const AdminAssetManager: React.FC = () => {
     e.preventDefault();
     const finalUrl = uploadTab === 'file' ? filePreview : uploadForm.url;
 
-    if (!finalUrl) {
+    if (!finalUrl && !selectedFile) {
       toast.error('Please select a file or enter a valid asset URL');
       return;
     }
@@ -480,25 +496,44 @@ export const AdminAssetManager: React.FC = () => {
         .map((t) => t.trim())
         .filter(Boolean);
 
-      const res = await api.uploadMedia({
-        businessId: 'admin',
-        title: uploadForm.title.trim(),
-        name: uploadForm.title.trim().toLowerCase().replace(/\s+/g, '-'),
-        url: finalUrl,
-        thumbnailUrl: finalUrl,
-        type: uploadForm.type,
-        format: uploadForm.format,
-        dimensions: {
-          width: Number(uploadForm.width) || 800,
-          height: Number(uploadForm.height) || 800
-        },
-        category: uploadForm.category.trim() || getDefaultCategoryForType(uploadForm.type),
-        tags: tagsArray,
-        isPublic: true,
-        isSuperAdmin: true
-      });
+      let savedAsset: MediaAsset;
 
-      setAssets((prev) => [res.media, ...prev]);
+      if (uploadTab === 'file' && selectedFile) {
+        setUploadStatusText('Initiating direct upload to Cloudinary...');
+        savedAsset = await uploadMediaAsset(selectedFile, {
+          title: uploadForm.title.trim(),
+          category: uploadForm.category.trim() || getDefaultCategoryForType(uploadForm.type),
+          tags: tagsArray,
+          type: uploadForm.type,
+          isPublic: uploadForm.isPublic,
+          businessId: 'admin',
+          onProgress: (p) => {
+            setUploadProgress(p.percentage);
+            setUploadStatusText(p.statusText);
+          }
+        });
+      } else {
+        const res = await api.uploadMedia({
+          businessId: 'admin',
+          title: uploadForm.title.trim(),
+          name: uploadForm.title.trim().toLowerCase().replace(/\s+/g, '-'),
+          url: finalUrl,
+          thumbnailUrl: finalUrl,
+          type: uploadForm.type,
+          format: uploadForm.format,
+          dimensions: {
+            width: Number(uploadForm.width) || 800,
+            height: Number(uploadForm.height) || 800
+          },
+          category: uploadForm.category.trim() || getDefaultCategoryForType(uploadForm.type),
+          tags: tagsArray,
+          isPublic: uploadForm.isPublic,
+          isSuperAdmin: uploadForm.isPublic
+        });
+        savedAsset = res.media;
+      }
+
+      setAssets((prev) => [savedAsset, ...prev]);
       toast.success(`Asset "${uploadForm.title}" uploaded and published to public library!`);
 
       handleCloseUploadModal();
@@ -590,305 +625,347 @@ export const AdminAssetManager: React.FC = () => {
   const stickersCount = assets.filter((a) => a.type === 'sticker' || a.type === 'decoration').length;
   const audioCount = assets.filter((a) => a.type === 'audio').length;
 
+  const backgroundAssets = useMemo(() => {
+    return assets.filter(
+      (a) =>
+        a.type === 'background' ||
+        (a.category || '').toLowerCase().includes('background') ||
+        (a.tags || []).some((t) => t.toLowerCase().includes('background'))
+    );
+  }, [assets]);
+
   return (
     <div className="space-y-6">
-      {/* Header & Stats Banner */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                <Layers className="w-5 h-5" />
-              </span>
-              <h2 className="text-xl font-bold text-white tracking-wide">
-                Public Assets & Elements Library
-              </h2>
-            </div>
-            <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              Upload and manage public stock photos, vectors, decorative frames, stickers, video loops, and background audio for all studio users.
-            </p>
-          </div>
+      {/* Top Primary View Switcher: Media Assets vs Background Collections */}
+      <div className="flex items-center gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl w-fit">
+        <button
+          type="button"
+          onClick={() => setAdminTab('assets')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${adminTab === 'assets'
+              ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-white'
+            }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Media Assets ({assets.length})</span>
+        </button>
 
-          <button
-            type="button"
-            onClick={handleOpenUploadModal}
-            className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold rounded-xl text-sm transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
-          >
-            <Upload className="w-4 h-4" /> Upload Public Asset
-          </button>
-        </div>
-
-        {/* KPI Counts */}
-        <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mt-6 pt-6 border-t border-slate-800/80">
-          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-slate-400 block font-medium">Total Assets</span>
-            <span className="text-2xl font-bold text-white mt-1 block">{totalAssets}</span>
-          </div>
-          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-blue-400 block font-medium flex items-center gap-1">
-              <ImageIcon className="w-3.5 h-3.5" /> Photos & Graphics
-            </span>
-            <span className="text-2xl font-bold text-blue-300 mt-1 block">{imagesCount}</span>
-          </div>
-          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-amber-400 block font-medium flex items-center gap-1">
-              <Crop className="w-3.5 h-3.5" /> Frames & Borders
-            </span>
-            <span className="text-2xl font-bold text-amber-300 mt-1 block">{framesCount}</span>
-          </div>
-          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-emerald-400 block font-medium flex items-center gap-1">
-              <ImageIcon className="w-3.5 h-3.5" /> Backgrounds
-            </span>
-            <span className="text-2xl font-bold text-emerald-300 mt-1 block">{backgroundsCount}</span>
-          </div>
-          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
-            <span className="text-xs text-purple-400 block font-medium flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" /> Stickers & Seals
-            </span>
-            <span className="text-2xl font-bold text-purple-300 mt-1 block">{stickersCount}</span>
-          </div>
-          <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl col-span-2 sm:col-span-1">
-            <span className="text-xs text-rose-400 block font-medium flex items-center gap-1">
-              <Music className="w-3.5 h-3.5" /> Audio Tracks
-            </span>
-            <span className="text-2xl font-bold text-rose-300 mt-1 block">{audioCount}</span>
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setAdminTab('collections')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${adminTab === 'collections'
+              ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
+              : 'text-slate-400 hover:text-white'
+            }`}
+        >
+          <FolderOpen className="w-4 h-4" />
+          <span>Background Collections</span>
+        </button>
       </div>
 
-      {/* Filter Tabs & Search */}
-      <div className="space-y-4">
-        {/* Type Filter Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {ASSET_TYPE_FILTERS.map((tab) => {
-            const Icon = tab.icon;
-            const isSelected = selectedType === tab.id;
-            const count =
-              tab.id === 'all'
-                ? assets.length
-                : assets.filter((a) => a.type === tab.id).length;
-
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedType(tab.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${isSelected
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
-                  : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
-                  }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-700 text-slate-300'
-                    }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Search Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:w-96">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search assets, photos, vectors, frames, tags..."
-              className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/60"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">
-              Showing <strong className="text-white">{filteredAssets.length}</strong> public assets
-            </span>
-            <button
-              type="button"
-              onClick={fetchAssets}
-              className="p-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs transition-colors ml-2"
-              title="Refresh Assets"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Asset Grid */}
-      {isLoading ? (
-        <div className="py-20 text-center text-slate-400">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-amber-500" />
-          <p className="text-sm">Loading asset library...</p>
-        </div>
-      ) : filteredAssets.length === 0 ? (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-12 text-center">
-          <Layers className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-lg font-semibold text-slate-300">No assets found</h3>
-          <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
-            {searchQuery || selectedType !== 'all'
-              ? 'No assets matched the current search or type filter.'
-              : 'Upload your first public stock photo, graphic, frame, or sticker asset for studio users.'}
-          </p>
-          <button
-            type="button"
-            onClick={handleOpenUploadModal}
-            className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-xl text-sm transition-colors inline-flex items-center gap-2"
-          >
-            <Upload className="w-4 h-4" /> Upload First Asset
-          </button>
-        </div>
+      {adminTab === 'collections' ? (
+        <AdminBackgroundCollectionsManager availableBackgroundAssets={backgroundAssets} />
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {filteredAssets.map((asset) => {
-            const isAudio = asset.type === 'audio';
-            const isVideo = asset.type === 'video';
-            const isGif = asset.type === 'gif';
-            const isFrame = asset.type === 'frame';
-            const isSticker = asset.type === 'sticker' || asset.type === 'decoration';
-
-            return (
-              <div
-                key={asset.id}
-                className="bg-slate-900 border border-slate-800 hover:border-slate-700/80 rounded-xl overflow-hidden transition-all flex flex-col group shadow-md shadow-black/20"
-              >
-                {/* Visual Canvas Box */}
-                <div
-                  className={`relative aspect-square flex items-center justify-center p-3 overflow-hidden ${isFrame || isSticker
-                    ? 'bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:12px_12px] bg-slate-950'
-                    : 'bg-slate-950'
-                    }`}
-                >
-                  {isAudio ? (
-                    <div className="flex flex-col items-center justify-center text-center p-2 text-slate-400">
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-2">
-                        <Music className="w-6 h-6" />
-                      </div>
-                      <span className="text-[11px] font-medium text-slate-300 line-clamp-1">
-                        {asset.title}
-                      </span>
-                    </div>
-                  ) : isVideo ? (
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded">
-                      <img
-                        src={asset.thumbnailUrl || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=300&q=80'}
-                        alt={asset.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-amber-500/90 text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                          <Play className="w-5 h-5 fill-current ml-0.5" />
-                        </div>
-                      </div>
-                      {asset.duration && (
-                        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white">
-                          {Math.floor(asset.duration)}s
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <img
-                      src={asset.url}
-                      alt={asset.title}
-                      className={`max-w-full max-h-full transition-transform duration-300 group-hover:scale-105 ${isFrame || isSticker ? 'object-contain' : 'object-cover w-full h-full'
-                        }`}
-                      loading="lazy"
-                    />
-                  )}
-
-                  {/* Type Badge */}
-                  <div className="absolute top-2 left-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm ${isGif
-                      ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
-                      : isVideo
-                        ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
-                        : isAudio
-                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
-                          : isFrame
-                            ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
-                            : asset.type === 'background'
-                              ? 'bg-teal-950/80 text-teal-300 border border-teal-500/30'
-                              : 'bg-slate-900/90 text-slate-300 border border-slate-700/60'
-                      }`}>
-                      {isGif ? 'GIF' : isVideo ? 'VIDEO' : isAudio ? 'AUDIO' : asset.type === 'background' ? 'BACKGROUND' : asset.type}
-                    </span>
-                  </div>
-
-                  {/* Quick Action Overlay on hover */}
-                  <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2 backdrop-blur-xs">
-                    <button
-                      type="button"
-                      onClick={() => setPreviewAsset(asset)}
-                      className="p-2 bg-slate-800/90 hover:bg-slate-700 text-white rounded-lg transition-colors shadow"
-                      title="Preview Full Size"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditModal(asset)}
-                      className="p-2 bg-slate-800/90 hover:bg-amber-500 hover:text-slate-950 text-white rounded-lg transition-colors shadow"
-                      title="Edit Asset Classification"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyUrl(asset)}
-                      className="p-2 bg-slate-800/90 hover:bg-amber-500 hover:text-slate-950 text-white rounded-lg transition-colors shadow"
-                      title="Copy URL"
-                    >
-                      {copiedId === asset.id ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteTarget(asset)}
-                      className="p-2 bg-slate-800/90 hover:bg-red-500 hover:text-white text-white rounded-lg transition-colors shadow"
-                      title="Delete Asset"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+        <>
+          {/* Header & Stats Banner */}
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 relative overflow-hidden backdrop-blur-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                    <Layers className="w-5 h-5" />
+                  </span>
+                  <h2 className="text-xl font-bold text-white tracking-wide">
+                    Public Assets & Elements Library
+                  </h2>
                 </div>
-
-                {/* Details Footer */}
-                <div className="p-3 flex-1 flex flex-col justify-between space-y-1 bg-slate-900/90">
-                  <h4 className="text-xs font-semibold text-white truncate" title={asset.title}>
-                    {asset.title}
-                  </h4>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="truncate max-w-[80px]">{asset.category || 'Public'}</span>
-                    <span>
-                      {asset.dimensions
-                        ? `${asset.dimensions.width}×${asset.dimensions.height}`
-                        : asset.format?.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
+                <p className="text-sm text-slate-400 mt-1 max-w-2xl">
+                  Upload and manage public stock photos, vectors, decorative frames, stickers, video loops, and background audio for all studio users.
+                </p>
               </div>
-            );
-          })}
-        </div>
+
+              <button
+                type="button"
+                onClick={handleOpenUploadModal}
+                className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold rounded-xl text-sm transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+              >
+                <Upload className="w-4 h-4" /> Upload Public Asset
+              </button>
+            </div>
+
+            {/* KPI Counts */}
+            <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mt-6 pt-6 border-t border-slate-800/80">
+              <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
+                <span className="text-xs text-slate-400 block font-medium">Total Assets</span>
+                <span className="text-2xl font-bold text-white mt-1 block">{totalAssets}</span>
+              </div>
+              <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
+                <span className="text-xs text-blue-400 block font-medium flex items-center gap-1">
+                  <ImageIcon className="w-3.5 h-3.5" /> Photos & Graphics
+                </span>
+                <span className="text-2xl font-bold text-blue-300 mt-1 block">{imagesCount}</span>
+              </div>
+              <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
+                <span className="text-xs text-amber-400 block font-medium flex items-center gap-1">
+                  <Crop className="w-3.5 h-3.5" /> Frames & Borders
+                </span>
+                <span className="text-2xl font-bold text-amber-300 mt-1 block">{framesCount}</span>
+              </div>
+              <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
+                <span className="text-xs text-emerald-400 block font-medium flex items-center gap-1">
+                  <ImageIcon className="w-3.5 h-3.5" /> Backgrounds
+                </span>
+                <span className="text-2xl font-bold text-emerald-300 mt-1 block">{backgroundsCount}</span>
+              </div>
+              <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl">
+                <span className="text-xs text-purple-400 block font-medium flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" /> Stickers & Seals
+                </span>
+                <span className="text-2xl font-bold text-purple-300 mt-1 block">{stickersCount}</span>
+              </div>
+              <div className="bg-slate-950/40 border border-slate-800/60 p-3 rounded-xl col-span-2 sm:col-span-1">
+                <span className="text-xs text-rose-400 block font-medium flex items-center gap-1">
+                  <Music className="w-3.5 h-3.5" /> Audio Tracks
+                </span>
+                <span className="text-2xl font-bold text-rose-300 mt-1 block">{audioCount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Tabs & Search */}
+          <div className="space-y-4">
+            {/* Type Filter Tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+              {ASSET_TYPE_FILTERS.map((tab) => {
+                const Icon = tab.icon;
+                const isSelected = selectedType === tab.id;
+                const count =
+                  tab.id === 'all'
+                    ? assets.length
+                    : assets.filter((a) => a.type === tab.id).length;
+
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedType(tab.id)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex items-center gap-2 ${isSelected
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20'
+                      : 'bg-slate-800/70 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700/60'
+                      }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{tab.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-950/20 text-slate-950' : 'bg-slate-700 text-slate-300'
+                        }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative w-full sm:w-96">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search assets, photos, vectors, frames, tags..."
+                  className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/60"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400">
+                  Showing <strong className="text-white">{filteredAssets.length}</strong> public assets
+                </span>
+                <button
+                  type="button"
+                  onClick={fetchAssets}
+                  className="p-2 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs transition-colors ml-2"
+                  title="Refresh Assets"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Asset Grid */}
+          {isLoading ? (
+            <div className="py-20 text-center text-slate-400">
+              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-amber-500" />
+              <p className="text-sm">Loading asset library...</p>
+            </div>
+          ) : filteredAssets.length === 0 ? (
+            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-12 text-center">
+              <Layers className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-slate-300">No assets found</h3>
+              <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
+                {searchQuery || selectedType !== 'all'
+                  ? 'No assets matched the current search or type filter.'
+                  : 'Upload your first public stock photo, graphic, frame, or sticker asset for studio users.'}
+              </p>
+              <button
+                type="button"
+                onClick={handleOpenUploadModal}
+                className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-xl text-sm transition-colors inline-flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" /> Upload First Asset
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {filteredAssets.map((asset) => {
+                const isAudio = asset.type === 'audio';
+                const isVideo = asset.type === 'video';
+                const isGif = asset.type === 'gif';
+                const isFrame = asset.type === 'frame';
+                const isSticker = asset.type === 'sticker' || asset.type === 'decoration';
+
+                return (
+                  <div
+                    key={asset.id}
+                    className="bg-slate-900 border border-slate-800 hover:border-slate-700/80 rounded-xl overflow-hidden transition-all flex flex-col group shadow-md shadow-black/20"
+                  >
+                    {/* Visual Canvas Box */}
+                    <div
+                      className={`relative aspect-square flex items-center justify-center p-3 overflow-hidden ${isFrame || isSticker
+                        ? 'bg-[radial-gradient(#334155_1px,transparent_1px)] [background-size:12px_12px] bg-slate-950'
+                        : 'bg-slate-950'
+                        }`}
+                    >
+                      {isAudio ? (
+                        <div className="flex flex-col items-center justify-center text-center p-2 text-slate-400">
+                          <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-2">
+                            <Music className="w-6 h-6" />
+                          </div>
+                          <span className="text-[11px] font-medium text-slate-300 line-clamp-1">
+                            {asset.title}
+                          </span>
+                        </div>
+                      ) : isVideo ? (
+                        <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded">
+                          <img
+                            src={asset.thumbnailUrl || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=300&q=80'}
+                            alt={asset.title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-amber-500/90 text-slate-950 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                              <Play className="w-5 h-5 fill-current ml-0.5" />
+                            </div>
+                          </div>
+                          {asset.duration && (
+                            <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white">
+                              {Math.floor(asset.duration)}s
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <img
+                          src={asset.url}
+                          alt={asset.title}
+                          className={`max-w-full max-h-full transition-transform duration-300 group-hover:scale-105 ${isFrame || isSticker ? 'object-contain' : 'object-cover w-full h-full'
+                            }`}
+                          loading="lazy"
+                        />
+                      )}
+
+                      {/* Type Badge */}
+                      <div className="absolute top-2 left-2">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm ${isGif
+                          ? 'bg-purple-950/80 text-purple-300 border border-purple-500/40'
+                          : isVideo
+                            ? 'bg-sky-950/80 text-sky-300 border border-sky-500/40'
+                            : isAudio
+                              ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                              : isFrame
+                                ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
+                                : asset.type === 'background'
+                                  ? 'bg-teal-950/80 text-teal-300 border border-teal-500/30'
+                                  : 'bg-slate-900/90 text-slate-300 border border-slate-700/60'
+                          }`}>
+                          {isGif ? 'GIF' : isVideo ? 'VIDEO' : isAudio ? 'AUDIO' : asset.type === 'background' ? 'BACKGROUND' : asset.type}
+                        </span>
+                      </div>
+
+                      {/* Quick Action Overlay on hover */}
+                      <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2 backdrop-blur-xs">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewAsset(asset)}
+                          className="p-2 bg-slate-800/90 hover:bg-slate-700 text-white rounded-lg transition-colors shadow"
+                          title="Preview Full Size"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditModal(asset)}
+                          className="p-2 bg-slate-800/90 hover:bg-amber-500 hover:text-slate-950 text-white rounded-lg transition-colors shadow"
+                          title="Edit Asset Classification"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyUrl(asset)}
+                          className="p-2 bg-slate-800/90 hover:bg-amber-500 hover:text-slate-950 text-white rounded-lg transition-colors shadow"
+                          title="Copy URL"
+                        >
+                          {copiedId === asset.id ? (
+                            <Check className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTarget(asset)}
+                          className="p-2 bg-slate-800/90 hover:bg-red-500 hover:text-white text-white rounded-lg transition-colors shadow"
+                          title="Delete Asset"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Details Footer */}
+                    <div className="p-3 flex-1 flex flex-col justify-between space-y-1 bg-slate-900/90">
+                      <h4 className="text-xs font-semibold text-white truncate" title={asset.title}>
+                        {asset.title}
+                      </h4>
+                      <div className="flex items-center justify-between text-[10px] text-slate-400">
+                        <span className="truncate max-w-[80px]">{asset.category || 'Public'}</span>
+                        <span>
+                          {asset.dimensions
+                            ? `${asset.dimensions.width}×${asset.dimensions.height}`
+                            : asset.format?.toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
 
       {/* UPLOAD MODAL */}
@@ -1137,6 +1214,22 @@ export const AdminAssetManager: React.FC = () => {
                   </span>
                 </label>
               </div>
+
+              {/* Progress Indicator */}
+              {isUploading && (
+                <div className="pt-2 space-y-1.5 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span className="font-medium text-amber-400">{uploadStatusText || 'Uploading to Cloudinary...'}</span>
+                    <span className="font-mono text-slate-400 font-semibold">{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-200"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="pt-4 flex items-center justify-end gap-3">

@@ -48,6 +48,7 @@ async function startServer() {
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
+    console.log('[Server] Initializing Vite dev server in middleware mode...');
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -55,6 +56,7 @@ async function startServer() {
       configFile: path.resolve(process.cwd(), 'vite.config.ts')
     });
     app.use(vite.middlewares);
+    console.log('[Server] Vite dev server attached.');
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));

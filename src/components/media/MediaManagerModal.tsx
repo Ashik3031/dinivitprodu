@@ -13,6 +13,7 @@ interface MediaManagerModalProps {
   onAddElement: (type: ElementType, customProps?: Partial<CanvasElement>, parentId?: string | null) => void;
   onUpdateElement?: (id: string, updates: Partial<CanvasElement>) => void;
   onSetAsBackground?: (url: string, type: 'image' | 'video') => void;
+  onApplyBackgroundToAllPages?: (url: string, type: 'image' | 'video') => void;
   onSetAsMusic?: (audioUrl: string, title: string) => void;
   onSelectMedia?: (asset: MediaAsset) => void;
 }
@@ -27,6 +28,7 @@ export const MediaManagerModal: React.FC<MediaManagerModalProps> = ({
   onAddElement,
   onUpdateElement,
   onSetAsBackground,
+  onApplyBackgroundToAllPages,
   onSetAsMusic,
   onSelectMedia
 }) => {
@@ -69,6 +71,7 @@ export const MediaManagerModal: React.FC<MediaManagerModalProps> = ({
             selectedElement={selectedElement}
             onUpdateElement={onUpdateElement}
             onSetAsBackground={onSetAsBackground}
+            onApplyBackgroundToAllPages={onApplyBackgroundToAllPages}
             onSetAsMusic={onSetAsMusic}
             isModalView={true}
             onSelectMedia={(asset) => {

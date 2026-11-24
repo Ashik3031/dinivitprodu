@@ -38,7 +38,7 @@ export function getPageBgStyle(
       }
 
       // Sizing calculation: if custom zoom is specified and not 100%, represent via background-size percentage
-      let backgroundSize = bg.size || (bg.type === 'pattern' ? 'auto' : 'cover');
+      let backgroundSize: any = bg.size || (bg.type === 'pattern' ? 'auto' : 'cover');
       if (bg.zoom && bg.zoom !== 100) {
         backgroundSize = `${bg.zoom}% auto`;
       }

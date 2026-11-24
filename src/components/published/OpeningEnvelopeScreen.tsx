@@ -620,7 +620,7 @@ export const OpeningEnvelopeScreen: React.FC<OpeningEnvelopeScreenProps> = ({
           }}
         >
           {topLevelElements.map((el) => {
-            const { style: resolvedStyle } = resolveElementForViewport(el, activeViewport);
+            const { style: resolvedStyle } = resolveElementForViewport(el, (activeViewport as any) || 'mobile');
             const rotationTransform = resolvedStyle.rotation ? `rotate(${resolvedStyle.rotation}deg)` : '';
 
             const isOpenInvitationButton =

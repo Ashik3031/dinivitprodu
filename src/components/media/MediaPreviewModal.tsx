@@ -15,7 +15,8 @@ import {
   Sparkles,
   Maximize2,
   Clock,
-  HardDrive
+  HardDrive,
+  Globe
 } from 'lucide-react';
 import { MediaAsset, CanvasElement, ElementType } from '../../types';
 import { formatBytes, formatDuration } from '../../utils/mediaOptimizer';
@@ -28,6 +29,7 @@ interface MediaPreviewModalProps {
   onInsertAsElement?: (type: ElementType, customProps?: Partial<CanvasElement>) => void;
   onApplyToSelected?: (asset: MediaAsset) => void;
   onSetAsBackground?: (url: string, type: 'image' | 'video') => void;
+  onApplyBackgroundToAllPages?: (url: string, type: 'image' | 'video') => void;
   onSetAsMusic?: (audioUrl: string, title: string) => void;
   selectedElement?: CanvasElement | null;
   currentInvitationId?: string;
@@ -42,6 +44,7 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
   onInsertAsElement,
   onApplyToSelected,
   onSetAsBackground,
+  onApplyBackgroundToAllPages,
   onSetAsMusic,
   selectedElement,
   currentInvitationId,
@@ -110,7 +113,7 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row border border-slate-200">
-        
+
         {/* Left / Top: Media Preview Canvas */}
         <div className="flex-1 bg-slate-950 flex flex-col items-center justify-center p-6 relative min-h-[320px] md:min-h-[480px]">
           {/* Close button on top-left of media area */}
@@ -307,6 +310,21 @@ export const MediaPreviewModal: React.FC<MediaPreviewModalProps> = ({
                 >
                   <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
                   <span>Set as Page Background</span>
+                </button>
+              )}
+
+              {/* Apply to All Pages Background */}
+              {(asset.type === 'image' || asset.type === 'video') && onApplyBackgroundToAllPages && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onApplyBackgroundToAllPages(asset.url, asset.type as 'image' | 'video');
+                    onClose();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 border border-amber-200 bg-amber-50/60 hover:bg-amber-100/80 text-amber-900 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Globe className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Apply to All Pages</span>
                 </button>
               )}
 

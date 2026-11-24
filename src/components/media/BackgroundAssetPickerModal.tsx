@@ -7,6 +7,7 @@ interface BackgroundAssetPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (assetUrl: string, asset: MediaAsset) => void;
+  onApplyToAllPages?: (assetUrl: string, asset: MediaAsset) => void;
   mode?: 'image' | 'video';
   currentInvitationId?: string;
   businessId?: string;
@@ -17,6 +18,7 @@ export const BackgroundAssetPickerModal: React.FC<BackgroundAssetPickerModalProp
   isOpen,
   onClose,
   onSelect,
+  onApplyToAllPages,
   mode = 'image',
   currentInvitationId,
   businessId = 'usr-biz-royal',
@@ -99,6 +101,10 @@ export const BackgroundAssetPickerModal: React.FC<BackgroundAssetPickerModalProp
               onSelect(url, { url, type } as any);
               onClose();
             }}
+            onApplyBackgroundToAllPages={onApplyToAllPages ? (url, type) => {
+              onApplyToAllPages(url, { url, type } as any);
+              onClose();
+            } : undefined}
             onAddElement={onAddElement}
           />
         </div>
