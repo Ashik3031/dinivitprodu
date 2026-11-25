@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 jobs:
@@ -22,9 +21,21 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            set -e
+            set -Eeuo pipefail
+
             cd /var/www/invite/dinivitprodu
-            git pull origin main
+
+            echo "Fetching latest code..."
+            git fetch origin main
+            git reset --hard origin/main
+
+            echo "Installing dependencies..."
             npm ci
+
+            echo "Building application..."
             npm run build
+
+            echo "Restarting application..."
             pm2 restart dinivitprod
+
+            echo "Deployment successful!"

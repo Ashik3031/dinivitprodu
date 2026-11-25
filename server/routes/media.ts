@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { dbService } from '../db';
 import { authMiddleware, optionalAuthMiddleware, AuthRequest } from '../middleware/auth';
+import { BackgroundCollection } from '../../src/types';
 import {
   isCloudinaryConfigured,
   getCloudinaryPublicConfig,
@@ -144,7 +145,7 @@ router.post('/collections', authMiddleware, (req: AuthRequest, res: Response) =>
 // PUT /api/media/collections/:id - Update collection (Admin only)
 router.put('/collections/:id', authMiddleware, (req: AuthRequest, res: Response) => {
   try {
-    if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
+    if (req.user?.role !== 'admin') {
       return res.status(403).json({ success: false, error: 'Forbidden: Admin access required' });
     }
 
