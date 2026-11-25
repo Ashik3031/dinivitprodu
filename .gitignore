@@ -6,3 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Runtime database
+.data/db.json
+.data/db.json.backup
+
+# Runtime data
+.data/
