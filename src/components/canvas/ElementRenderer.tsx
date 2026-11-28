@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { CanvasElement, AnimationConfig, ElementStyle, ViewportMode } from '../../types';
 import { getElementMotionProps } from '../../utils/animationUtils';
-import { resolveElementForViewport } from '../../utils/responsiveUtils';
+import { resolveElementForCanvas } from '../../utils/responsiveUtils';
 import { ShapeMask } from './ShapeMask';
 import { ShapeElement } from './elements/ShapeElement';
 import { IconElement } from './elements/IconElement';
@@ -71,7 +71,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
 }) => {
   const { type, content, animation } = element;
   const currentViewport: ViewportMode = (viewportMode as ViewportMode) || 'mobile';
-  const { style, isHidden } = resolveElementForViewport(element, currentViewport);
+  const { style, isHidden } = resolveElementForCanvas(element, currentViewport);
 
   // If hidden on current device and not in editor mode, don't render
   if (isHidden && !isEditor) {
@@ -936,7 +936,7 @@ export const ElementRenderer: React.FC<ElementRendererProps> = ({
 
               {childElements.map(child => {
                 const isChildSelected = selectedElementId === child.id;
-                const { style: childStyle, isHidden: isChildHidden } = resolveElementForViewport(child, currentViewport);
+                const { style: childStyle, isHidden: isChildHidden } = resolveElementForCanvas(child, currentViewport);
                 if (isChildHidden && !isEditor) return null;
 
                 return (

@@ -16,7 +16,8 @@ import {
   ListOrdered,
   Image as ImageIcon,
   MessageSquare,
-  HeartHandshake
+  HeartHandshake,
+  ArrowDownCircle
 } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -156,9 +157,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('features')}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'features' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
-            }`}
+            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'features' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+              }`}
           >
             <Sliders className="w-4 h-4 text-amber-600" />
             <span>Interactive Features</span>
@@ -166,9 +166,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('opening')}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'opening' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
-            }`}
+            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'opening' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+              }`}
           >
             <Mail className="w-4 h-4" />
             <span>Opening Screen</span>
@@ -176,9 +175,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('music')}
-            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'music' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
-            }`}
+            className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'music' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+              }`}
           >
             <Music className="w-4 h-4" />
             <span>Audio & Music</span>
@@ -198,11 +196,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 return (
                   <div
                     key={feat.id}
-                    className={`flex items-start justify-between p-3.5 rounded-2xl border transition-all ${
-                      feat.checked
+                    className={`flex items-start justify-between p-3.5 rounded-2xl border transition-all ${feat.checked
                         ? 'bg-slate-50 border-slate-200'
                         : 'bg-slate-100/60 border-slate-200 opacity-60'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-3 min-w-0 pr-3">
                       <div className={`p-2 rounded-xl border ${feat.color} flex-shrink-0 mt-0.5`}>
@@ -212,11 +209,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs font-bold text-slate-900">{feat.title}</h4>
                           <span
-                            className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                              feat.checked
+                            className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${feat.checked
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-slate-200 text-slate-600'
-                            }`}
+                              }`}
                           >
                             {feat.checked ? 'Enabled' : 'Disabled'}
                           </span>
@@ -239,6 +235,97 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                 );
               })}
+            </div>
+
+            {/* Automatic Scrolling Experience */}
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3 mt-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-xl border text-emerald-700 bg-emerald-50 border-emerald-200 flex-shrink-0 mt-0.5">
+                    <ArrowDownCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-slate-900">Automatic Scrolling</h4>
+                      <span
+                        className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${settings.enableAutoScroll
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-200 text-slate-600'
+                          }`}
+                      >
+                        {settings.enableAutoScroll ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                      Smoothly glides guests through multi-page invitations after opening. Pauses automatically if the visitor scrolls manually.
+                    </p>
+                  </div>
+                </div>
+
+                <label className="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-1">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(settings.enableAutoScroll)}
+                    onChange={(e) => handleToggleFeature('enableAutoScroll', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                </label>
+              </div>
+
+              {settings.enableAutoScroll && (
+                <div className="pt-2 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600">
+                      <span className="font-medium">Scroll Speed</span>
+                      <span className="font-mono font-semibold text-slate-900">
+                        {settings.autoScrollSpeed || 30} px/s
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="15"
+                      max="100"
+                      step="5"
+                      value={settings.autoScrollSpeed || 30}
+                      onChange={(e) =>
+                        onUpdate({
+                          settings: {
+                            ...settings,
+                            autoScrollSpeed: Number(e.target.value)
+                          }
+                        })
+                      }
+                      className="w-full accent-slate-900 cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600">
+                      <span className="font-medium">Initial Delay</span>
+                      <span className="font-mono font-semibold text-slate-900">
+                        {settings.autoScrollDelay ?? 2}s
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="8"
+                      step="0.5"
+                      value={settings.autoScrollDelay ?? 2}
+                      onChange={(e) =>
+                        onUpdate({
+                          settings: {
+                            ...settings,
+                            autoScrollDelay: Number(e.target.value)
+                          }
+                        })
+                      }
+                      className="w-full accent-slate-900 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -382,11 +469,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onClick={() => onUpdate({
                         music: { ...music, audioUrl: track.url, title: track.name }
                       })}
-                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                        music.audioUrl === track.url
+                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${music.audioUrl === track.url
                           ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-sm'
                           : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <Volume2 className="w-4 h-4" />

@@ -439,6 +439,7 @@ export interface InvitationPage {
   transition?: {
     type?: PageTransitionType;
     duration?: number;
+    easing?: AnimationEasing;
   };
 }
 
@@ -628,6 +629,7 @@ export interface Invitation {
   settings: {
     enableAutoScroll?: boolean;
     autoScrollSpeed?: number;
+    autoScrollDelay?: number;
     showPageNavDots?: boolean;
     allowGuestComments?: boolean;
     allowRSVP?: boolean;

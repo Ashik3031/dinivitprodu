@@ -148,7 +148,7 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
 
       {/* Day Grid */}
       <div
-        className="grid grid-cols-7 auto-rows-fr gap-1 text-center text-[11px] sm:text-[13px] relative z-10 flex-1"
+        className="grid grid-cols-7 auto-rows-fr gap-1 text-center text-[11px] relative z-10 flex-1"
         style={{ fontFamily: style.fontFamily }}
       >
         {daysArray.map((day, idx) => {
@@ -163,8 +163,8 @@ export const CalendarElement: React.FC<CalendarElementProps> = ({
             <div
               key={`day-${day}`}
               className={`w-full h-full flex items-center justify-center transition-all relative ${isTarget
-                  ? 'font-bold scale-125 z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]'
-                  : 'hover:bg-white/10 rounded-lg cursor-default'
+                ? 'font-bold scale-125 z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]'
+                : 'hover:bg-white/10 rounded-lg cursor-default'
                 }`}
               style={{
                 color: isTarget ? '#ffffff' : (isWeekend ? labelColor : numberColor)

@@ -1576,6 +1576,7 @@ export const EditorPage: React.FC<EditorPageProps> = ({
             viewportMode={viewportMode}
             zoomLevel={zoomLevel}
             showGrid={showGrid}
+            isOpeningScreen={isOpeningScreenSelected}
             previewAnimationElementId={previewAnimationElementId}
             previewAnimationKey={previewAnimationKey}
             onPreviewAnimation={handlePreviewAnimation}
@@ -1642,7 +1643,6 @@ export const EditorPage: React.FC<EditorPageProps> = ({
           onPreviewAnimation={handlePreviewAnimation}
           onPreviewPageAnimations={handlePreviewPageAnimations}
           viewportMode={viewportMode}
-          onChangeViewport={setViewportMode}
           activeSpecialInspector={activeSpecialInspector}
           onCloseSpecialInspector={() => setActiveSpecialInspector(null)}
         />

@@ -22,13 +22,12 @@ export const CANVAS_BREAKPOINTS: Record<ViewportMode, { width: number; height: n
 };
 
 /**
- * Resolves the active style and visibility of a canvas element for a given viewport mode.
+ * Resolves whether an element is hidden for a given viewport device mode.
  */
-export function resolveElementForViewport(
+export function resolveElementVisibility(
   element: CanvasElement,
   mode: ViewportMode = 'mobile'
-): { style: ElementStyle; isHidden: boolean } {
-  const baseStyle = element.style || { x: 0, y: 0, width: 200, height: 50 };
+): boolean {
   const override = element.responsive?.[mode];
   const vis = element.responsiveVisibility;
 
@@ -44,24 +43,30 @@ export function resolveElementForViewport(
     isHidden = override.isHidden;
   }
 
-  // Calculate default horizontal center offset for tablet/desktop when no explicit x override is provided.
-  // Base canvas design is 390px (mobile-first). On wider viewports (tablet and desktop at 768px),
-  // top-level content automatically centers by default: (targetWidth - 390) / 2.
-  const targetWidth = CANVAS_BREAKPOINTS[mode]?.width || 390;
-  const defaultHorizontalOffset =
-    !element.parentContainerId && targetWidth > 390
-      ? Math.round((targetWidth - 390) / 2)
-      : 0;
+  return isHidden;
+}
+
+/**
+ * Resolves the active style and visibility of a canvas element for a given viewport mode.
+ * Coordinates remain relative to the logical canvas (no arbitrary horizontal viewport offset).
+ */
+export function resolveElementForViewport(
+  element: CanvasElement,
+  mode: ViewportMode = 'mobile'
+): { style: ElementStyle; isHidden: boolean } {
+  const baseStyle = element.style || { x: 0, y: 0, width: 200, height: 50 };
+  const override = element.responsive?.[mode];
+  const isHidden = resolveElementVisibility(element, mode);
 
   const rawX = baseStyle.x ?? 0;
   const rawY = baseStyle.y ?? 0;
   const rawWidth = baseStyle.width ?? 200;
   const rawHeight = baseStyle.height ?? 50;
 
-  // Merge override properties into base style
+  // Merge override properties into base style without shifting coordinates
   const mergedStyle: ElementStyle = {
     ...baseStyle,
-    x: override?.x !== undefined ? override.x : rawX + defaultHorizontalOffset,
+    x: override?.x !== undefined ? override.x : rawX,
     y: override?.y !== undefined ? override.y : rawY,
     width: override?.width !== undefined ? override.width : rawWidth,
     height: override?.height !== undefined ? override.height : rawHeight,
@@ -76,6 +81,21 @@ export function resolveElementForViewport(
     style: mergedStyle,
     isHidden
   };
+}
+
+/**
+ * Resolves an element for the unified mobile-first logical canvas.
+ * Geometry always stays in the mobile-first authoring coordinate space so the entire
+ * canvas scales proportionally across devices without shifting or clipping elements.
+ * Visibility respects device-specific responsiveVisibility flags.
+ */
+export function resolveElementForCanvas(
+  element: CanvasElement,
+  deviceMode: ViewportMode = 'mobile'
+): { style: ElementStyle; isHidden: boolean } {
+  const { style } = resolveElementForViewport(element, 'mobile');
+  const isHidden = resolveElementVisibility(element, deviceMode);
+  return { style, isHidden };
 }
 
 /**
@@ -204,40 +224,22 @@ export function getPageTransitionVariants(
 }
 
 /**
- * Unified calculation of page height across Editor Canvas and Published/Preview View.
- * Guarantees 100% pixel-perfect height parity so background images, relative spacing,
- * and element alignments match exactly between editing canvas and preview.
+ * Unified calculation of logical page height across Editor Canvas and Published/Preview View.
+ * Preserves the logical design aspect ratio regardless of the visitor's monitor height.
  */
 export function getPageCalculatedHeight(
   page?: InvitationPage | null,
   mode: ViewportMode = 'mobile',
-  currentWindowHeight?: number
+  _currentWindowHeight?: number,
+  defaultHeight: number = 844
 ): number {
-  if (!page) return 844;
-  const winHeight =
-    currentWindowHeight !== undefined
-      ? currentWindowHeight
-      : typeof window !== 'undefined'
-        ? window.innerHeight
-        : 844;
+  if (!page) return defaultHeight;
 
-  // 1. Explicit Viewport Mode (or isFullHeight flag when not custom/auto)
-  if (
-    page.heightMode === 'viewport' ||
-    (page.isFullHeight && page.heightMode !== 'custom' && page.heightMode !== 'auto')
-  ) {
-    // In viewport mode, ensure the canvas is at least page.height (or standard 844px),
-    // so elements placed towards the bottom (e.g. CTA / Open buttons at y: 560-620)
-    // are never clipped off by the canvas boundary in the editor.
-    const minHeight = page.height || 844;
-    return Math.max(minHeight, winHeight > 0 ? winHeight : 844);
-  }
-
-  // 2. Auto Height Mode (fits content bounds snugly with breathing room)
+  // Auto Height Mode (fits content bounds snugly with breathing room)
   if (page.heightMode === 'auto') {
     const maxBottom = (page.elements || []).reduce((max, el) => {
-      if (el.parentContainerId || el.isHidden) return max;
-      const { style: s, isHidden } = resolveElementForViewport(el, mode);
+      if (el.parentContainerId || el.parentId || el.isHidden) return max;
+      const { style: s, isHidden } = resolveElementForCanvas(el, mode);
       if (isHidden) return max;
       return Math.max(max, (s.y || 0) + (s.height || 40));
     }, 0);
@@ -245,6 +247,25 @@ export function getPageCalculatedHeight(
     return Math.max(480, maxBottom + 60);
   }
 
-  // 3. Custom Height Mode
-  return page.height || 844;
+  // Viewport and Custom modes use the fixed logical design height so aspect ratio
+  // and background image composition remain identical across all screen sizes.
+  return page.height && page.height > 0 ? page.height : defaultHeight;
+}
+
+/**
+ * Returns the canonical logical design dimensions (width x height) for an invitation page
+ * or opening screen page.
+ */
+export function getPageLogicalDimensions(
+  page?: InvitationPage | null,
+  options?: { isOpeningScreen?: boolean; deviceMode?: ViewportMode }
+): { width: number; height: number } {
+  const isOpening = Boolean(options?.isOpeningScreen);
+  const defaultWidth = isOpening ? 520 : CANVAS_BREAKPOINTS.mobile.width;
+  const defaultHeight = isOpening ? 400 : CANVAS_BREAKPOINTS.mobile.height;
+
+  const width = page?.width && page.width > 0 ? page.width : defaultWidth;
+  const height = getPageCalculatedHeight(page, options?.deviceMode || 'mobile', undefined, defaultHeight);
+
+  return { width, height };
 }

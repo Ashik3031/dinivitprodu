@@ -16,27 +16,27 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
   const images = content.galleryImages && content.galleryImages.length > 0
     ? content.galleryImages
     : [
-        {
-          url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
-          caption: 'Our First Encounter'
-        },
-        {
-          url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
-          caption: 'The Engagement Proposal'
-        },
-        {
-          url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80',
-          caption: 'Forever & Always Together'
-        },
-        {
-          url: 'https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80',
-          caption: 'Celebration of Love'
-        },
-        {
-          url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80',
-          caption: 'Sacred Vows & Joy'
-        }
-      ];
+      {
+        url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80',
+        caption: 'Our First Encounter'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80',
+        caption: 'The Engagement Proposal'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80',
+        caption: 'Forever & Always Together'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1519225429780-e37d8001712a?auto=format&fit=crop&w=800&q=80',
+        caption: 'Celebration of Love'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80',
+        caption: 'Sacred Vows & Joy'
+      }
+    ];
 
   const layout = content.galleryLayout || 'coverflow';
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -258,17 +258,17 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous photo"
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 md:w-9 md:h-9 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-md shadow-xl border border-white/20 transition-all active:scale-90 hover:scale-105 cursor-pointer z-40"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-md shadow-xl border border-white/20 transition-all active:scale-90 hover:scale-105 cursor-pointer z-40"
               >
-                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={handleNext}
                 aria-label="Next photo"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 md:w-9 md:h-9 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-md shadow-xl border border-white/20 transition-all active:scale-90 hover:scale-105 cursor-pointer z-40"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center backdrop-blur-md shadow-xl border border-white/20 transition-all active:scale-90 hover:scale-105 cursor-pointer z-40"
               >
-                <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </>
           )}
@@ -284,11 +284,10 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
                     e.stopPropagation();
                     setCurrentIndex(i);
                   }}
-                  className={`h-1.5 transition-all duration-300 cursor-pointer rounded-full ${
-                    currentIndex === i
+                  className={`h-1.5 transition-all duration-300 cursor-pointer rounded-full ${currentIndex === i
                       ? 'w-5 bg-neutral-800 dark:bg-stone-200'
                       : 'w-1.5 bg-neutral-400/60 dark:bg-stone-500/60 hover:bg-neutral-600'
-                  }`}
+                    }`}
                   aria-label={`Go to photo ${i + 1}`}
                 />
               ))}
@@ -344,9 +343,8 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
                   onClick={(e) => {
                     if (isTop) openLightbox(i, e);
                   }}
-                  className={`absolute w-[68%] max-w-[310px] h-[88%] max-h-[420px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ease-out cursor-pointer bg-slate-900 border border-white/20 ${
-                    isTop ? 'hover:scale-[1.02]' : 'pointer-events-none'
-                  }`}
+                  className={`absolute w-[68%] max-w-[310px] h-[88%] max-h-[420px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ease-out cursor-pointer bg-slate-900 border border-white/20 ${isTop ? 'hover:scale-[1.02]' : 'pointer-events-none'
+                    }`}
                   style={{
                     transform,
                     zIndex,
@@ -449,9 +447,8 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
                       setCurrentIndex(i);
                     }
                   }}
-                  className={`absolute left-1/2 top-1/2 w-[52%] max-w-[260px] h-[88%] max-h-[380px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 ease-out cursor-pointer bg-slate-900 border border-white/20 ${
-                    isCenter ? 'z-30' : 'z-10'
-                  }`}
+                  className={`absolute left-1/2 top-1/2 w-[52%] max-w-[260px] h-[88%] max-h-[380px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 ease-out cursor-pointer bg-slate-900 border border-white/20 ${isCenter ? 'z-30' : 'z-10'
+                    }`}
                   style={{
                     transform: `translateX(-50%) translateY(-50%) rotateY(${angle}deg) translateZ(${radius}px) scale(${isCenter ? 1 : 0.85})`,
                     opacity: Math.abs(diff) > 2 ? 0 : isCenter ? 1 : 0.75,
@@ -510,11 +507,10 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
                   e.stopPropagation();
                   setCurrentIndex(i);
                 }}
-                className={`h-1.5 transition-all duration-300 cursor-pointer rounded-full ${
-                  currentIndex === i
+                className={`h-1.5 transition-all duration-300 cursor-pointer rounded-full ${currentIndex === i
                     ? 'w-5 bg-neutral-800 dark:bg-stone-200'
                     : 'w-1.5 bg-neutral-400/60 dark:bg-stone-500/60 hover:bg-neutral-600'
-                }`}
+                  }`}
               />
             ))}
           </div>
@@ -569,9 +565,8 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
                       e.stopPropagation();
                       setCurrentIndex(i);
                     }}
-                    className={`h-2 rounded-full transition-all cursor-pointer ${
-                      currentIndex === i ? 'bg-amber-400 w-5' : 'bg-white/50 w-2 hover:bg-white/80'
-                    }`}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${currentIndex === i ? 'bg-amber-400 w-5' : 'bg-white/50 w-2 hover:bg-white/80'
+                      }`}
                   />
                 ))}
               </div>
@@ -698,9 +693,8 @@ export const GalleryElement: React.FC<GalleryElementProps> = ({
             <img
               src={images[lightboxIndex]?.url}
               alt={images[lightboxIndex]?.caption || 'Enlarged photo'}
-              className={`max-w-full max-h-[78vh] object-contain rounded-xl shadow-2xl transition-all duration-300 ${
-                isZoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in'
-              }`}
+              className={`max-w-full max-h-[78vh] object-contain rounded-xl shadow-2xl transition-all duration-300 ${isZoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in'
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsZoomed(!isZoomed);

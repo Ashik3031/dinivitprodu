@@ -1,9 +1,6 @@
 import React from 'react';
 import {
   ArrowLeft,
-  Smartphone,
-  Tablet,
-  Monitor,
   Undo2,
   Redo2,
   Eye,
@@ -12,7 +9,6 @@ import {
   Grid,
   Globe,
   Settings,
-  EyeOff,
   Check
 } from 'lucide-react';
 import { Invitation } from '../../types';
@@ -153,51 +149,8 @@ export const EditorTopNav: React.FC<EditorTopNavProps> = ({
           </button>
         </div>
 
-        {/* Viewport controls: [ Desktop ] [ Tablet ] [ Mobile ] */}
-        <div className="flex items-center bg-slate-200/80 p-0.5 rounded-lg text-xs font-semibold">
-          <button
-            type="button"
-            title="Desktop Mode (768px)"
-            onClick={() => onChangeViewport('desktop')}
-            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-md transition-all cursor-pointer ${
-              viewportMode === 'desktop'
-                ? 'bg-white shadow-xs text-slate-900 font-bold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Desktop</span>
-          </button>
-          <button
-            type="button"
-            title="Tablet Mode (768px)"
-            onClick={() => onChangeViewport('tablet')}
-            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-md transition-all cursor-pointer ${
-              viewportMode === 'tablet'
-                ? 'bg-white shadow-xs text-slate-900 font-bold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Tablet className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Tablet</span>
-          </button>
-          <button
-            type="button"
-            title="Mobile Mode (390px - Mobile First)"
-            onClick={() => onChangeViewport('mobile')}
-            className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-md transition-all cursor-pointer ${
-              viewportMode === 'mobile'
-                ? 'bg-white shadow-xs text-slate-900 font-bold'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="hidden md:inline">Mobile</span>
-          </button>
-        </div>
-
         {/* Zoom selector */}
-        <div className="hidden lg:block border-l border-slate-200 pl-1.5 ml-1">
+        <div className="hidden lg:block">
           <select
             value={zoomLevel}
             onChange={(e) => onChangeZoom(Number(e.target.value))}

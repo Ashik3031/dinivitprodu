@@ -90,7 +90,7 @@ export const CountdownElement: React.FC<CountdownElementProps> = ({
           padding: style.padding ? `${style.padding}px` : '8px'
         }}
       >
-        <div className="flex items-center justify-center gap-2 sm:gap-4">
+        <div className="flex items-center justify-center gap-2.5">
           {units.map((unit, idx) => (
             <React.Fragment key={idx}>
               <div className="flex flex-col items-center">

@@ -88,6 +88,35 @@ export function getBackgroundOverlayStyle(
 }
 
 /**
+ * Shared Video Background Style Resolver
+ * Keeps objectFit, objectPosition, and zoom consistent across Editor and Public View.
+ */
+export function getVideoBackgroundStyle(bg?: BackgroundConfig): React.CSSProperties {
+  if (!bg) return { objectFit: 'cover', objectPosition: 'center' };
+
+  const objectFit: React.CSSProperties['objectFit'] =
+    bg.size === 'contain' ? 'contain' : bg.size === 'auto' ? 'none' : 'cover';
+
+  let objectPosition = bg.position || 'center';
+  if (
+    bg.customPosition &&
+    typeof bg.customPosition.x === 'number' &&
+    typeof bg.customPosition.y === 'number'
+  ) {
+    objectPosition = `${bg.customPosition.x}% ${bg.customPosition.y}%`;
+  }
+
+  const zoom = bg.zoom && bg.zoom !== 100 ? bg.zoom / 100 : 1;
+
+  return {
+    objectFit,
+    objectPosition,
+    transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+    transformOrigin: objectPosition
+  };
+}
+
+/**
  * Default clean adjustments to apply or restore when resetting image adjustments
  */
 export const DEFAULT_BACKGROUND_ADJUSTMENTS: Partial<BackgroundConfig> = {

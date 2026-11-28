@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { InvitationTemplate, ViewportMode } from '../../types';
-import { ElementRenderer } from '../canvas/ElementRenderer';
+import { InvitationPageRenderer } from '../canvas/InvitationPageRenderer';
 import { OpeningEnvelopeScreen } from '../published/OpeningEnvelopeScreen';
+import { getPageLogicalDimensions } from '../../utils/responsiveUtils';
+import { calculatePageScale } from '../../utils/canvasScaleUtils';
 import {
   X,
   Smartphone,
@@ -191,7 +193,10 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                   defaultTitle={template.title}
                   onOpen={() => setIsOpeningScreenOpen(false)}
                   onOpenComplete={() => setIsOpeningScreenOpen(false)}
+                  isContained={true}
                   activeViewport={viewportMode}
+                  availableWidth={getCanvasWidth()}
+                  availableHeight={580}
                 />
               </div>
               <button
@@ -216,39 +221,26 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               )}
 
               {/* Active Page Canvas */}
-              {activePage ? (
-                <div
-                  style={{
-                    width: getCanvasWidth(),
-                    maxWidth: '100%',
-                    minHeight: activePage.height || 844,
-                    backgroundColor: activePage.background?.color || '#ffffff'
-                  }}
-                  className="relative rounded-2xl shadow-2xl border border-slate-700/80 overflow-hidden transition-all duration-300"
-                >
-                  {/* Background Image / Texture if present */}
-                  {activePage.background?.imageUrl && (
-                    <div
-                      className="absolute inset-0 pointer-events-none bg-cover bg-center"
-                      style={{
-                        backgroundImage: `url(${activePage.background.imageUrl})`,
-                        opacity: 1 - (activePage.background.overlayOpacity || 0)
-                      }}
+              {activePage ? (() => {
+                const { width: dW, height: dH } = getPageLogicalDimensions(activePage, {
+                  deviceMode: viewportMode
+                });
+                const metrics = calculatePageScale({
+                  designWidth: dW,
+                  designHeight: dH,
+                  containerWidth: getCanvasWidth()
+                });
+                return (
+                  <div className="relative rounded-2xl shadow-2xl border border-slate-700/80 overflow-hidden transition-all duration-300">
+                    <InvitationPageRenderer
+                      page={activePage}
+                      scale={metrics.scale}
+                      deviceMode={viewportMode}
+                      fallbackBgColor={template.theme?.backgroundColor || '#ffffff'}
                     />
-                  )}
-
-                  {/* Canvas Elements */}
-                  {activePage.elements.map((el) => (
-                    <ElementRenderer
-                      key={el.id}
-                      element={el}
-                      isEditor={false}
-                      viewportMode={viewportMode}
-                      allElements={activePage.elements}
-                    />
-                  ))}
-                </div>
-              ) : (
+                  </div>
+                );
+              })() : (
                 <div className="text-slate-400 text-sm py-20">No pages found in this template.</div>
               )}
             </div>

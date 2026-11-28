@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { CanvasElement, InvitationPage, ViewportMode, OuterDropEffectType } from '../../types';
 import { ElementRenderer } from './ElementRenderer';
-import { resolveElementForViewport, setElementResponsiveOverride, getPageCalculatedHeight } from '../../utils/responsiveUtils';
+import {
+  resolveElementForCanvas,
+  setElementResponsiveOverride,
+  getPageLogicalDimensions
+} from '../../utils/responsiveUtils';
 import { OuterDropParticles } from './OuterDropParticles';
-import { getPageBgStyle, getBackgroundOverlayStyle } from '../../utils/backgroundStyles';
+import { PageBackgroundLayer } from './InvitationPageRenderer';
 import {
   Lock,
   Unlock,
@@ -54,6 +58,7 @@ interface VisualCanvasProps {
   viewportMode: 'mobile' | 'tablet' | 'desktop';
   zoomLevel: number;
   showGrid?: boolean;
+  isOpeningScreen?: boolean;
   previewAnimationElementId?: string | null;
   previewAnimationKey?: number;
   onPreviewAnimation?: (elementId: string) => void;
@@ -87,6 +92,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   viewportMode,
   zoomLevel,
   showGrid = false,
+  isOpeningScreen = false,
   previewAnimationElementId,
   previewAnimationKey,
   onPreviewAnimation,
@@ -119,34 +125,13 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   const isSingleSelection = selectedElements.length === 1;
   const singleElement = isSingleSelection ? selectedElements[0] : null;
 
-  const [windowHeight, setWindowHeight] = useState<number>(() =>
-    typeof window !== 'undefined' ? window.innerHeight : 844
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Viewport dimensions
-  const getCanvasWidth = () => {
-    switch (viewportMode) {
-      case 'mobile':
-        return 390;
-      case 'tablet':
-        return 768;
-      case 'desktop':
-        return 768; // Desktop width matches tablet (768px)
-      default:
-        return 390;
-    }
-  };
-
-  const canvasWidth = page?.width || getCanvasWidth();
-  const canvasHeight = page ? getPageCalculatedHeight(page, viewportMode, windowHeight) : 844;
+  const { width: canvasWidth, height: canvasHeight } = getPageLogicalDimensions(page, {
+    isOpeningScreen,
+    deviceMode: viewportMode
+  });
+  const editorScale = Math.max(0.25, (zoomLevel || 100) / 100);
+  const scaledCanvasWidth = Math.round(canvasWidth * editorScale);
+  const scaledCanvasHeight = Math.round(canvasHeight * editorScale);
 
   // Keyboard Nudge & Short keys (Up/Down/Left/Right nudging)
   useEffect(() => {
@@ -218,7 +203,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     const startMap: Record<string, { x: number; y: number; width: number; height: number; rotation: number }> = {};
 
     activeElements.forEach(el => {
-      const { style: resolved } = resolveElementForViewport(el, viewportMode);
+      const { style: resolved } = resolveElementForCanvas(el, viewportMode);
       startMap[el.id] = {
         x: resolved.x,
         y: resolved.y,
@@ -259,7 +244,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     e.stopPropagation();
     setIsResizing(handle);
     setDragStart({ x: e.clientX, y: e.clientY });
-    const { style: resolved } = resolveElementForViewport(singleElement, viewportMode);
+    const { style: resolved } = resolveElementForCanvas(singleElement, viewportMode);
     setElementsStartPositions({
       [singleElement.id]: {
         x: resolved.x,
@@ -277,7 +262,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     e.stopPropagation();
     setIsRotating(true);
     setDragStart({ x: e.clientX, y: e.clientY });
-    const { style: resolved } = resolveElementForViewport(singleElement, viewportMode);
+    const { style: resolved } = resolveElementForCanvas(singleElement, viewportMode);
     setElementsStartPositions({
       [singleElement.id]: {
         x: resolved.x,
@@ -312,7 +297,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
         const topElements = pageElements.filter(el => !el.parentContainerId && !el.isHidden);
         const intersectingIds = topElements
           .filter(el => {
-            const { style: resolved } = resolveElementForViewport(el, viewportMode);
+            const { style: resolved } = resolveElementForCanvas(el, viewportMode);
             const elRight = resolved.x + resolved.width;
             const elBottom = resolved.y + resolved.height;
             const boxRight = currentBox.x + currentBox.width;
@@ -478,7 +463,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
   // Calculate collective multi-selection bounding box
   const multiSelectionBounds = (() => {
     if (selectedElements.length <= 1) return null;
-    const resolvedBoxes = selectedElements.map(e => resolveElementForViewport(e, viewportMode).style);
+    const resolvedBoxes = selectedElements.map(e => resolveElementForCanvas(e, viewportMode).style);
     const minX = Math.min(...resolvedBoxes.map(s => s.x));
     const minY = Math.min(...resolvedBoxes.map(s => s.y));
     const maxX = Math.max(...resolvedBoxes.map(s => s.x + s.width));
@@ -512,476 +497,451 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
         />
       )}
 
-      {/* Design Canvas Board */}
+      {/* Design Canvas Board (Sized outer wrapper prevents zoom layout clipping) */}
       <div
-        ref={canvasRef}
-        onMouseDown={handleCanvasMouseDown}
-        className="canvas-background relative m-auto bg-white border border-slate-200 shadow-2xl rounded-2xl transition-all duration-150 origin-top overflow-hidden shrink-0"
+        className="m-auto shrink-0 shadow-2xl rounded-2xl border border-slate-200 overflow-hidden bg-white"
         style={{
-          width: `${canvasWidth}px`,
-          height: `${canvasHeight}px`,
-          transform: `scale(${zoomLevel / 100})`,
-          ...getPageBgStyle(page.background)
+          width: `${scaledCanvasWidth}px`,
+          height: `${scaledCanvasHeight}px`
         }}
       >
-        {/* Optional Snap Grid */}
-        {showGrid && (
-          <div
-            className="absolute inset-0 pointer-events-none z-0 opacity-20"
-            style={{
-              backgroundImage:
-                'linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)',
-              backgroundSize: '24px 24px'
-            }}
-          />
-        )}
-
-        {/* Video Background */}
-        {page.background?.type === 'video' && page.background.videoUrl && (
-          <video
-            key={page.background.videoUrl}
-            src={page.background.videoUrl}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            ref={(el) => {
-              if (el) {
-                el.defaultMuted = true;
-                el.muted = true;
-                el.play().catch(() => { });
-              }
-            }}
-            onLoadedMetadata={(e) => {
-              const v = e.currentTarget;
-              v.defaultMuted = true;
-              v.muted = true;
-              v.play().catch(() => { });
-            }}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-          />
-        )}
-
-        {/* Background Overlay if specified */}
-        {getBackgroundOverlayStyle(page.background) && (
-          <div
-            className="absolute inset-0 pointer-events-none z-0"
-            style={getBackgroundOverlayStyle(page.background)!}
-          />
-        )}
-
-        {/* Elements Stack */}
-        {topLevelElements.map(element => {
-          const isSelected = selectedElementIds.includes(element.id);
-          const isSoleSelection = isSelected && selectedElementIds.length === 1;
-          const { style: resolvedStyle, isHidden: isResolvedHidden } = resolveElementForViewport(element, viewportMode);
-
-          return (
+        <div
+          ref={canvasRef}
+          onMouseDown={handleCanvasMouseDown}
+          className="canvas-background relative bg-white origin-top-left overflow-hidden"
+          style={{
+            width: `${canvasWidth}px`,
+            height: `${canvasHeight}px`,
+            transform: editorScale !== 1 ? `scale(${editorScale})` : undefined
+          }}
+        >
+          {/* Optional Snap Grid */}
+          {showGrid && (
             <div
-              key={element.id}
-              id={`canvas-elem-${element.id}`}
-              className={`absolute cursor-move group transition-shadow ${isSelected ? 'z-50' : 'hover:outline hover:outline-1 hover:outline-slate-400/50'
-                } ${isResolvedHidden ? 'opacity-40 ring-1 ring-rose-400/50 ring-dashed' : ''}`}
+              className="absolute inset-0 pointer-events-none z-[1] opacity-20"
               style={{
-                left: `${resolvedStyle.x}px`,
-                top: `${resolvedStyle.y}px`,
-                width: `${resolvedStyle.width}px`,
-                height: `${resolvedStyle.height}px`,
-                transform: resolvedStyle.rotation ? `rotate(${resolvedStyle.rotation}deg)` : undefined,
-                zIndex: isSelected ? 999 : resolvedStyle.zIndex || 1
+                backgroundImage:
+                  'linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
               }}
-              onMouseDown={e => handleElementMouseDown(e, element)}
-              onClick={e => {
-                e.stopPropagation();
-                if (e.shiftKey || e.metaKey || e.ctrlKey) {
-                  onSelectElement(element.id, true);
-                } else {
-                  onSelectElement(element.id, false);
-                }
-              }}
-            >
-              {/* Responsive Hidden Indicator Badge in Editor */}
-              {isResolvedHidden && (
-                <div className="absolute -top-4 right-0 px-1 py-0.2 bg-rose-600 text-[9px] text-white font-semibold rounded pointer-events-none z-50">
-                  Hidden on {viewportMode}
-                </div>
-              )}
+            />
+          )}
 
-              {/* Element Visual Content */}
-              <ElementRenderer
-                element={element}
-                isEditor={true}
-                viewportMode={viewportMode}
-                allElements={pageElements}
-                onSelectElement={(id) => onSelectElement(id, false)}
-                selectedElementId={selectedElementIds[0] || null}
-                previewKey={
-                  previewAnimationKey && (previewAnimationElementId === element.id || previewAnimationElementId === 'ALL')
-                    ? previewAnimationKey
-                    : undefined
-                }
-                forceAnimate={
-                  Boolean(previewAnimationKey && (previewAnimationElementId === element.id || previewAnimationElementId === 'ALL'))
-                }
-              />
+          {/* Unified Background & Overlay Layer */}
+          <PageBackgroundLayer background={page.background} />
 
-              {/* Selection Border for Multi-Select items */}
-              {isSelected && selectedElementIds.length > 1 && (
-                <div className="absolute inset-0 border-2 border-slate-900 pointer-events-none rounded-[2px]" />
-              )}
+          {/* Elements Stack */}
+          {topLevelElements.map(element => {
+            const isSelected = selectedElementIds.includes(element.id);
+            const isSoleSelection = isSelected && selectedElementIds.length === 1;
+            const { style: resolvedStyle, isHidden: isResolvedHidden } = resolveElementForCanvas(element, viewportMode);
 
-              {/* Single Selection Bounding Box & 8-point Transform Handles */}
-              {isSoleSelection && (
-                <div className="absolute inset-0 border-2 border-slate-900 pointer-events-none rounded-[2px] shadow-sm">
-                  {/* Floating Action Toolbar */}
-                  <div className="absolute -top-11 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-1 shadow-lg pointer-events-auto z-50 whitespace-nowrap">
-                    {/* Quick Color & Font Size for text and invitation elements */}
-                    {['heading', 'text', 'paragraph', 'button', 'whatsapp-button', 'directions-button', 'contact-button', 'event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code'].includes(element.type) && (
-                      <div className="flex items-center gap-1 pr-1 border-r border-slate-200">
-                        {/* Color Picker */}
-                        <div className="relative flex items-center" title="Quick Color">
-                          <input
-                            type="color"
-                            value={element.style?.color || '#d4af37'}
-                            onChange={e => {
+            return (
+              <div
+                key={element.id}
+                id={`canvas-elem-${element.id}`}
+                className={`absolute cursor-move group transition-shadow ${isSelected ? 'z-50' : 'hover:outline hover:outline-1 hover:outline-slate-400/50'
+                  } ${isResolvedHidden ? 'opacity-40 ring-1 ring-rose-400/50 ring-dashed' : ''}`}
+                style={{
+                  left: `${resolvedStyle.x}px`,
+                  top: `${resolvedStyle.y}px`,
+                  width: `${resolvedStyle.width}px`,
+                  height: `${resolvedStyle.height}px`,
+                  transform: resolvedStyle.rotation ? `rotate(${resolvedStyle.rotation}deg)` : undefined,
+                  zIndex: isSelected ? 999 : resolvedStyle.zIndex || 1
+                }}
+                onMouseDown={e => handleElementMouseDown(e, element)}
+                onClick={e => {
+                  e.stopPropagation();
+                  if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                    onSelectElement(element.id, true);
+                  } else {
+                    onSelectElement(element.id, false);
+                  }
+                }}
+              >
+                {/* Responsive Hidden Indicator Badge in Editor */}
+                {isResolvedHidden && (
+                  <div className="absolute -top-4 right-0 px-1 py-0.2 bg-rose-600 text-[9px] text-white font-semibold rounded pointer-events-none z-50">
+                    Hidden on {viewportMode}
+                  </div>
+                )}
+
+                {/* Element Visual Content */}
+                <ElementRenderer
+                  element={element}
+                  isEditor={true}
+                  viewportMode={viewportMode}
+                  allElements={pageElements}
+                  onSelectElement={(id) => onSelectElement(id, false)}
+                  selectedElementId={selectedElementIds[0] || null}
+                  previewKey={
+                    previewAnimationKey && (previewAnimationElementId === element.id || previewAnimationElementId === 'ALL')
+                      ? previewAnimationKey
+                      : undefined
+                  }
+                  forceAnimate={
+                    Boolean(previewAnimationKey && (previewAnimationElementId === element.id || previewAnimationElementId === 'ALL'))
+                  }
+                />
+
+                {/* Selection Border for Multi-Select items */}
+                {isSelected && selectedElementIds.length > 1 && (
+                  <div className="absolute inset-0 border-2 border-slate-900 pointer-events-none rounded-[2px]" />
+                )}
+
+                {/* Single Selection Bounding Box & 8-point Transform Handles */}
+                {isSoleSelection && (
+                  <div className="absolute inset-0 border-2 border-slate-900 pointer-events-none rounded-[2px] shadow-sm">
+                    {/* Floating Action Toolbar */}
+                    <div className="absolute -top-11 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-1 shadow-lg pointer-events-auto z-50 whitespace-nowrap">
+                      {/* Quick Color & Font Size for text and invitation elements */}
+                      {['heading', 'text', 'paragraph', 'button', 'whatsapp-button', 'directions-button', 'contact-button', 'event-date', 'event-time', 'countdown', 'calendar', 'venue', 'google-maps', 'timeline', 'photo-gallery', 'qr-code', 'rsvp-form', 'guestbook', 'couple-names', 'dress-code'].includes(element.type) && (
+                        <div className="flex items-center gap-1 pr-1 border-r border-slate-200">
+                          {/* Color Picker */}
+                          <div className="relative flex items-center" title="Quick Color">
+                            <input
+                              type="color"
+                              value={element.style?.color || '#d4af37'}
+                              onChange={e => {
+                                e.stopPropagation();
+                                onUpdateElement(element.id, {
+                                  style: { ...element.style, color: e.target.value }
+                                });
+                              }}
+                              className="w-4 h-4 rounded-full border border-slate-300 cursor-pointer p-0 bg-transparent shrink-0"
+                            />
+                          </div>
+                          {/* Font size down */}
+                          <button
+                            type="button"
+                            title="Decrease Font Size"
+                            onClick={e => {
                               e.stopPropagation();
                               onUpdateElement(element.id, {
-                                style: { ...element.style, color: e.target.value }
+                                style: { ...element.style, fontSize: Math.max(8, (Number(element.style?.fontSize) || 16) - 2) }
                               });
                             }}
-                            className="w-4 h-4 rounded-full border border-slate-300 cursor-pointer p-0 bg-transparent shrink-0"
-                          />
+                            className="px-1 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                          >
+                            A-
+                          </button>
+                          {/* Font size up */}
+                          <button
+                            type="button"
+                            title="Increase Font Size"
+                            onClick={e => {
+                              e.stopPropagation();
+                              onUpdateElement(element.id, {
+                                style: { ...element.style, fontSize: (Number(element.style?.fontSize) || 16) + 2 }
+                              });
+                            }}
+                            className="px-1 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                          >
+                            A+
+                          </button>
                         </div>
-                        {/* Font size down */}
+                      )}
+
+                      {/* Quick Test Animation Trigger if element has animation */}
+                      {element.animation && element.animation.type !== 'none' && onPreviewAnimation && (
                         <button
                           type="button"
-                          title="Decrease Font Size"
+                          title={`Test ${element.animation.type} Animation`}
                           onClick={e => {
                             e.stopPropagation();
-                            onUpdateElement(element.id, {
-                              style: { ...element.style, fontSize: Math.max(8, (Number(element.style?.fontSize) || 16) - 2) }
-                            });
+                            onPreviewAnimation(element.id);
                           }}
-                          className="px-1 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                          className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-amber-300"
                         >
-                          A-
+                          <Play className="w-3 h-3 text-amber-600 fill-amber-500" />
+                          <span>Animate</span>
                         </button>
-                        {/* Font size up */}
+                      )}
+
+                      {/* Ungroup button if it's a container / group */}
+                      {element.type === 'container' && onUngroup && (
                         <button
                           type="button"
-                          title="Increase Font Size"
+                          title="Ungroup Container (Ctrl+Shift+G)"
                           onClick={e => {
                             e.stopPropagation();
-                            onUpdateElement(element.id, {
-                              style: { ...element.style, fontSize: (Number(element.style?.fontSize) || 16) + 2 }
-                            });
+                            onUngroup(element.id);
                           }}
-                          className="px-1 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                          className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
                         >
-                          A+
+                          <Ungroup className="w-3.5 h-3.5" />
                         </button>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Quick Test Animation Trigger if element has animation */}
-                    {element.animation && element.animation.type !== 'none' && onPreviewAnimation && (
                       <button
                         type="button"
-                        title={`Test ${element.animation.type} Animation`}
+                        title="Duplicate (Ctrl+D)"
                         onClick={e => {
                           e.stopPropagation();
-                          onPreviewAnimation(element.id);
-                        }}
-                        className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 rounded-full text-xs font-semibold transition-colors cursor-pointer border border-amber-300"
-                      >
-                        <Play className="w-3 h-3 text-amber-600 fill-amber-500" />
-                        <span>Animate</span>
-                      </button>
-                    )}
-
-                    {/* Ungroup button if it's a container / group */}
-                    {element.type === 'container' && onUngroup && (
-                      <button
-                        type="button"
-                        title="Ungroup Container (Ctrl+Shift+G)"
-                        onClick={e => {
-                          e.stopPropagation();
-                          onUngroup(element.id);
+                          onDuplicateElement(element.id);
                         }}
                         className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
                       >
-                        <Ungroup className="w-3.5 h-3.5" />
+                        <Copy className="w-3.5 h-3.5" />
                       </button>
+
+                      <button
+                        type="button"
+                        title="Bring to Front (Ctrl+Shift+])"
+                        onClick={e => {
+                          e.stopPropagation();
+                          onBringToFront(element.id);
+                        }}
+                        className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        <ArrowUpToLine className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Bring Forward (Ctrl+])"
+                        onClick={e => {
+                          e.stopPropagation();
+                          onBringForward(element.id);
+                        }}
+                        className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Send Backward (Ctrl+[)"
+                        onClick={e => {
+                          e.stopPropagation();
+                          onSendBackward(element.id);
+                        }}
+                        className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Send to Back (Ctrl+Shift+[)"
+                        onClick={e => {
+                          e.stopPropagation();
+                          onSendToBack(element.id);
+                        }}
+                        className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        <ArrowDownToLine className="w-3.5 h-3.5" />
+                      </button>
+
+                      <button
+                        type="button"
+                        title={element.isLocked ? 'Unlock Element' : 'Lock Element'}
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (onToggleLockElement) {
+                            onToggleLockElement(element.id);
+                          } else {
+                            onUpdateElement(element.id, { isLocked: !element.isLocked });
+                          }
+                        }}
+                        className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      >
+                        {element.isLocked ? (
+                          <Unlock className="w-3.5 h-3.5 text-amber-600" />
+                        ) : (
+                          <Lock className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        title="Delete (Delete / Backspace)"
+                        onClick={e => {
+                          e.stopPropagation();
+                          onDeleteElement(element.id);
+                        }}
+                        className="p-1 hover:bg-rose-50 rounded-full text-slate-600 hover:text-rose-600 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Rotation Handle */}
+                    {!element.isLocked && (
+                      <>
+                        <div
+                          className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900 border-2 border-white rounded-full cursor-grab pointer-events-auto flex items-center justify-center hover:scale-125 transition-transform shadow"
+                          onMouseDown={handleRotateStart}
+                          title="Rotate Element"
+                        >
+                          <RotateCw className="w-2.5 h-2.5 text-white" />
+                        </div>
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-slate-900" />
+
+                        {/* 8-Point Resize Knobs */}
+                        {/* NW */}
+                        <div
+                          className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nwse-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'nw')}
+                        />
+                        {/* N */}
+                        <div
+                          className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ns-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'n')}
+                        />
+                        {/* NE */}
+                        <div
+                          className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nesw-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'ne')}
+                        />
+                        {/* E */}
+                        <div
+                          className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ew-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'e')}
+                        />
+                        {/* SE */}
+                        <div
+                          className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nwse-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'se')}
+                        />
+                        {/* S */}
+                        <div
+                          className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ns-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 's')}
+                        />
+                        {/* SW */}
+                        <div
+                          className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nesw-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'sw')}
+                        />
+                        {/* W */}
+                        <div
+                          className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ew-resize pointer-events-auto hover:scale-125 transition-transform"
+                          onMouseDown={e => handleResizeStart(e, 'w')}
+                        />
+                      </>
                     )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
+          {/* Collective Multi-Selection Outer Bounding Box & Toolbar */}
+          {multiSelectionBounds && (
+            <div
+              className="absolute border border-dashed border-slate-900 pointer-events-none z-50"
+              style={{
+                left: `${multiSelectionBounds.x - 4}px`,
+                top: `${multiSelectionBounds.y - 4}px`,
+                width: `${multiSelectionBounds.width + 8}px`,
+                height: `${multiSelectionBounds.height + 8}px`
+              }}
+            >
+              {/* Floating Multi-Selection Actions Bar */}
+              <div className="absolute -top-11 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900 text-white rounded-full px-3 py-1 shadow-2xl pointer-events-auto whitespace-nowrap">
+                <span className="text-[11px] font-medium pr-1 border-r border-slate-700 text-slate-300">
+                  {selectedElements.length} items
+                </span>
+
+                {/* Group */}
+                {onGroup && (
+                  <button
+                    type="button"
+                    title="Group Selection (Ctrl+G)"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onGroup();
+                    }}
+                    className="flex items-center gap-1 px-2 py-0.5 hover:bg-slate-800 rounded-full text-xs text-white transition-colors"
+                  >
+                    <Group className="w-3.5 h-3.5" />
+                    <span>Group</span>
+                  </button>
+                )}
+
+                {/* Alignment shortcuts */}
+                {onAlign && (
+                  <div className="flex items-center gap-0.5 border-l border-r border-slate-700 px-1">
                     <button
                       type="button"
-                      title="Duplicate (Ctrl+D)"
+                      title="Align Left"
                       onClick={e => {
                         e.stopPropagation();
-                        onDuplicateElement(element.id);
+                        onAlign('left');
                       }}
-                      className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
                     >
-                      <Copy className="w-3.5 h-3.5" />
+                      <AlignLeft className="w-3.5 h-3.5" />
                     </button>
-
                     <button
                       type="button"
-                      title="Bring to Front (Ctrl+Shift+])"
+                      title="Align Center"
                       onClick={e => {
                         e.stopPropagation();
-                        onBringToFront(element.id);
+                        onAlign('center');
                       }}
-                      className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
                     >
-                      <ArrowUpToLine className="w-3.5 h-3.5" />
+                      <AlignCenter className="w-3.5 h-3.5" />
                     </button>
-
                     <button
                       type="button"
-                      title="Bring Forward (Ctrl+])"
+                      title="Align Right"
                       onClick={e => {
                         e.stopPropagation();
-                        onBringForward(element.id);
+                        onAlign('right');
                       }}
-                      className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+                      className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
                     >
-                      <ArrowUp className="w-3.5 h-3.5" />
-                    </button>
-
-                    <button
-                      type="button"
-                      title="Send Backward (Ctrl+[)"
-                      onClick={e => {
-                        e.stopPropagation();
-                        onSendBackward(element.id);
-                      }}
-                      className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
-                    >
-                      <ArrowDown className="w-3.5 h-3.5" />
-                    </button>
-
-                    <button
-                      type="button"
-                      title="Send to Back (Ctrl+Shift+[)"
-                      onClick={e => {
-                        e.stopPropagation();
-                        onSendToBack(element.id);
-                      }}
-                      className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
-                    >
-                      <ArrowDownToLine className="w-3.5 h-3.5" />
-                    </button>
-
-                    <button
-                      type="button"
-                      title={element.isLocked ? 'Unlock Element' : 'Lock Element'}
-                      onClick={e => {
-                        e.stopPropagation();
-                        if (onToggleLockElement) {
-                          onToggleLockElement(element.id);
-                        } else {
-                          onUpdateElement(element.id, { isLocked: !element.isLocked });
-                        }
-                      }}
-                      className="p-1 hover:bg-slate-100 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
-                    >
-                      {element.isLocked ? (
-                        <Unlock className="w-3.5 h-3.5 text-amber-600" />
-                      ) : (
-                        <Lock className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      title="Delete (Delete / Backspace)"
-                      onClick={e => {
-                        e.stopPropagation();
-                        onDeleteElement(element.id);
-                      }}
-                      className="p-1 hover:bg-rose-50 rounded-full text-slate-600 hover:text-rose-600 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <AlignRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
+                )}
 
-                  {/* Rotation Handle */}
-                  {!element.isLocked && (
-                    <>
-                      <div
-                        className="absolute -top-6 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900 border-2 border-white rounded-full cursor-grab pointer-events-auto flex items-center justify-center hover:scale-125 transition-transform shadow"
-                        onMouseDown={handleRotateStart}
-                        title="Rotate Element"
-                      >
-                        <RotateCw className="w-2.5 h-2.5 text-white" />
-                      </div>
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0.5 h-3 bg-slate-900" />
-
-                      {/* 8-Point Resize Knobs */}
-                      {/* NW */}
-                      <div
-                        className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nwse-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'nw')}
-                      />
-                      {/* N */}
-                      <div
-                        className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ns-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'n')}
-                      />
-                      {/* NE */}
-                      <div
-                        className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nesw-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'ne')}
-                      />
-                      {/* E */}
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ew-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'e')}
-                      />
-                      {/* SE */}
-                      <div
-                        className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nwse-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'se')}
-                      />
-                      {/* S */}
-                      <div
-                        className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ns-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 's')}
-                      />
-                      {/* SW */}
-                      <div
-                        className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-nesw-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'sw')}
-                      />
-                      {/* W */}
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-slate-900 border-2 border-white rounded-sm cursor-ew-resize pointer-events-auto hover:scale-125 transition-transform"
-                        onMouseDown={e => handleResizeStart(e, 'w')}
-                      />
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Collective Multi-Selection Outer Bounding Box & Toolbar */}
-        {multiSelectionBounds && (
-          <div
-            className="absolute border border-dashed border-slate-900 pointer-events-none z-50"
-            style={{
-              left: `${multiSelectionBounds.x - 4}px`,
-              top: `${multiSelectionBounds.y - 4}px`,
-              width: `${multiSelectionBounds.width + 8}px`,
-              height: `${multiSelectionBounds.height + 8}px`
-            }}
-          >
-            {/* Floating Multi-Selection Actions Bar */}
-            <div className="absolute -top-11 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-slate-900 text-white rounded-full px-3 py-1 shadow-2xl pointer-events-auto whitespace-nowrap">
-              <span className="text-[11px] font-medium pr-1 border-r border-slate-700 text-slate-300">
-                {selectedElements.length} items
-              </span>
-
-              {/* Group */}
-              {onGroup && (
+                {/* Duplicate */}
                 <button
                   type="button"
-                  title="Group Selection (Ctrl+G)"
+                  title="Duplicate All (Ctrl+D)"
                   onClick={e => {
                     e.stopPropagation();
-                    onGroup();
+                    onDuplicateElement(selectedElementIds);
                   }}
-                  className="flex items-center gap-1 px-2 py-0.5 hover:bg-slate-800 rounded-full text-xs text-white transition-colors"
+                  className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
                 >
-                  <Group className="w-3.5 h-3.5" />
-                  <span>Group</span>
+                  <Copy className="w-3.5 h-3.5" />
                 </button>
-              )}
 
-              {/* Alignment shortcuts */}
-              {onAlign && (
-                <div className="flex items-center gap-0.5 border-l border-r border-slate-700 px-1">
-                  <button
-                    type="button"
-                    title="Align Left"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onAlign('left');
-                    }}
-                    className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-                  >
-                    <AlignLeft className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Align Center"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onAlign('center');
-                    }}
-                    className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-                  >
-                    <AlignCenter className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Align Right"
-                    onClick={e => {
-                      e.stopPropagation();
-                      onAlign('right');
-                    }}
-                    className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-                  >
-                    <AlignRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
-              {/* Duplicate */}
-              <button
-                type="button"
-                title="Duplicate All (Ctrl+D)"
-                onClick={e => {
-                  e.stopPropagation();
-                  onDuplicateElement(selectedElementIds);
-                }}
-                className="p-1 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-              >
-                <Copy className="w-3.5 h-3.5" />
-              </button>
-
-              {/* Delete */}
-              <button
-                type="button"
-                title="Delete All (Delete)"
-                onClick={e => {
-                  e.stopPropagation();
-                  onDeleteElement(selectedElementIds);
-                }}
-                className="p-1 hover:bg-rose-950 rounded-full text-slate-300 hover:text-rose-400 transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+                {/* Delete */}
+                <button
+                  type="button"
+                  title="Delete All (Delete)"
+                  onClick={e => {
+                    e.stopPropagation();
+                    onDeleteElement(selectedElementIds);
+                  }}
+                  className="p-1 hover:bg-rose-950 rounded-full text-slate-300 hover:text-rose-400 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Marquee Selection Drag Box */}
-        {marqueeBox && isMarqueeActive && (
-          <div
-            className="absolute border border-slate-900 bg-slate-900/10 pointer-events-none z-50 rounded-sm"
-            style={{
-              left: `${marqueeBox.x}px`,
-              top: `${marqueeBox.y}px`,
-              width: `${marqueeBox.width}px`,
-              height: `${marqueeBox.height}px`
-            }}
-          />
-        )}
+          {/* Marquee Selection Drag Box */}
+          {marqueeBox && isMarqueeActive && (
+            <div
+              className="absolute border border-slate-900 bg-slate-900/10 pointer-events-none z-50 rounded-sm"
+              style={{
+                left: `${marqueeBox.x}px`,
+                top: `${marqueeBox.y}px`,
+                width: `${marqueeBox.width}px`,
+                height: `${marqueeBox.height}px`
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
